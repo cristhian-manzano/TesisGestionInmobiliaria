@@ -1,19 +1,19 @@
-import * as React from "react";
-import Avatar from "@mui/material/Avatar";
-import Button from "@mui/material/Button";
-import CssBaseline from "@mui/material/CssBaseline";
-import TextField from "@mui/material/TextField";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
-import Link from "@mui/material/Link";
-import Paper from "@mui/material/Paper";
-import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import Typography from "@mui/material/Typography";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { useState } from "react";
 
-// Image
+import {
+  Avatar,
+  Button,
+  TextField,
+  FormControlLabel,
+  Checkbox,
+  Link,
+  Paper,
+  Box,
+  Grid,
+  IconButton,
+  Typography,
+} from "@mui/material";
+import { Visibility, VisibilityOff, LockOutlined } from "@mui/icons-material";
 import ImageLogin from "../assets/img/HouseLogin.jpg";
 
 function Copyright(props) {
@@ -25,8 +25,11 @@ function Copyright(props) {
       {...props}
     >
       {"Copyright © "}
-      <Link color="inherit" href="https://mui.com/">
-        Your Website
+      <Link
+        color="inherit"
+        href="https://github.com/Cmanzano-dev/TesisGestionInmobiliaria"
+      >
+        Tésis - gestión inmobiliaria
       </Link>{" "}
       {new Date().getFullYear()}
       {"."}
@@ -34,13 +37,16 @@ function Copyright(props) {
   );
 }
 
-const theme = createTheme();
-
 export default function Login() {
+  const [showPassword, setShowPassoword] = useState(false);
+
+  const handleClickShowPassword = () => {
+    setShowPassoword((previous) => !previous);
+  };
+
   const handleSubmit = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    // eslint-disable-next-line no-console
     console.log({
       email: data.get("email"),
       password: data.get("password"),
@@ -48,9 +54,8 @@ export default function Login() {
   };
 
   return (
-    <ThemeProvider theme={theme}>
+    <>
       <Grid container component="main" sx={{ height: "100vh" }}>
-        <CssBaseline />
         <Grid
           item
           xs={false}
@@ -78,7 +83,7 @@ export default function Login() {
             }}
           >
             <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
-              <LockOutlinedIcon />
+              <LockOutlined />
             </Avatar>
             <Typography component="h1" variant="h5">
               Login
@@ -105,9 +110,20 @@ export default function Login() {
                 fullWidth
                 name="password"
                 label="Contraseña"
-                type="password"
                 id="password"
                 autoComplete="current-password"
+                type={showPassword ? "text" : "password"}
+                InputProps={{
+                  endAdornment: (
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={handleClickShowPassword}
+                      position="end"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  ),
+                }}
               />
               <FormControlLabel
                 control={<Checkbox value="remember" color="primary" />}
@@ -138,6 +154,6 @@ export default function Login() {
           </Box>
         </Grid>
       </Grid>
-    </ThemeProvider>
+    </>
   );
 }
