@@ -7,17 +7,21 @@ import '@fontsource/roboto/700.css';
 // Libraries
 import { BrowserRouter as Router } from 'react-router-dom';
 // import Login from "./pages/Login";
-import { DashboardLayout } from './components/DashboarLayout';
+// import { DashboardLayout } from './components/DashboarLayout';
 import { ThemeConfig } from './theme';
+
+import { Register } from './pages/Register';
 
 const App = () => {
   return (
     <ThemeConfig>
       <Router>
         {/* <Login /> */}
-        <DashboardLayout>
+        {/* <DashboardLayout>
           <div>Hola mundo</div>
-        </DashboardLayout>
+        </DashboardLayout> */}
+
+        <Register />
       </Router>
     </ThemeConfig>
   );
