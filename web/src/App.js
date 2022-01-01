@@ -6,7 +6,8 @@ import "@fontsource/roboto/700.css";
 
 // Libraries
 import { BrowserRouter as Router } from "react-router-dom";
-import Login from "./pages/Login";
+// import Login from "./pages/Login";
+import { DashboardLayout } from "./components/DashboarLayout";
 import { ThemeConfig } from "./theme";
 
 function App() {
@@ -14,7 +15,10 @@ function App() {
     <>
       <ThemeConfig>
         <Router>
-          <Login />
+          {/* <Login /> */}
+          <DashboardLayout>
+            <div>Hola mundo</div>
+          </DashboardLayout>
         </Router>
       </ThemeConfig>
     </>
