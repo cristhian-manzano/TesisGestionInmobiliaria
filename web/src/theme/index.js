@@ -1,13 +1,9 @@
-import { CssBaseline } from "@mui/material";
-import {
-  ThemeProvider,
-  createTheme,
-  StyledEngineProvider,
-} from "@mui/material/styles";
+import { CssBaseline } from '@mui/material';
+import PropTypes from 'prop-types';
+import { ThemeProvider, createTheme, StyledEngineProvider } from '@mui/material/styles';
+import { theme } from './theme';
 
-import { theme } from "./theme";
-
-export function ThemeConfig({ children }) {
+export const ThemeConfig = ({ children }) => {
   const themeApp = createTheme(theme);
 
   return (
@@ -18,4 +14,8 @@ export function ThemeConfig({ children }) {
       </ThemeProvider>
     </StyledEngineProvider>
   );
-}
+};
+
+ThemeConfig.propTypes = {
+  children: PropTypes.node.isRequired
+};

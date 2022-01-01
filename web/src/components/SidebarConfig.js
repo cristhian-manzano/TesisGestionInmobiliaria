@@ -1,51 +1,44 @@
-import {
-  OpenInNew,
-  AcUnitSharp,
-  AccountBalance,
-  AccessAlarm,
-  AccountCircle,
-  SelectAllOutlined,
-} from "@mui/icons-material";
+import { AcUnitSharp, AccountBalance, AccessAlarm, AccountCircle } from '@mui/icons-material';
 
 export const sidebarConfig = [
   {
-    href: "/",
+    href: '/',
     icon: <AcUnitSharp fontSize="small" />,
-    title: "Dashboard",
+    title: 'Dashboard'
   },
   {
-    href: "/customers",
+    href: '/customers',
     icon: <AccountBalance fontSize="small" />,
-    title: "Customers",
+    title: 'Customers'
   },
   {
-    href: "/products",
+    href: '/products',
     icon: <AccessAlarm fontSize="small" />,
-    title: "Products",
+    title: 'Products'
   },
   {
-    href: "/account",
+    href: '/account',
     icon: <AccountBalance fontSize="small" />,
-    title: "Account",
+    title: 'Account'
   },
   {
-    href: "/settings",
+    href: '/settings',
     icon: <AccessAlarm fontSize="small" />,
-    title: "Settings",
+    title: 'Settings'
   },
   {
-    href: "/login",
+    href: '/login',
     icon: <AccessAlarm fontSize="small" />,
-    title: "Login",
+    title: 'Login'
   },
   {
-    href: "/register",
+    href: '/register',
     icon: <AccountCircle fontSize="small" />,
-    title: "Register",
+    title: 'Register'
   },
   {
-    href: "/404",
+    href: '/404',
     icon: <AccountBalance fontSize="small" />,
-    title: "Error",
-  },
+    title: 'Error'
+  }
 ];
