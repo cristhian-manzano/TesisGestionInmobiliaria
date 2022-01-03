@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Box, Divider, Drawer, Typography, useMediaQuery, Link } from '@mui/material';
-import { AccountCircle, SelectAllOutlined } from '@mui/icons-material';
 import { useLocation } from 'react-router-dom';
 import { NavItem } from './NavItem';
 import { sidebarConfig } from './SidebarConfig';
+import LogoImage from '../assets/img/logo.png';
 
 export const DashboardSidebar = ({ open, onClose }) => {
   const { pathname } = useLocation();
@@ -32,14 +32,15 @@ export const DashboardSidebar = ({ open, onClose }) => {
         height: '100%'
       }}>
       <div>
-        <Box sx={{ p: 3 }}>
+        <Box
+          sx={{
+            p: 3,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
           <Link href="/">
-            <AccountCircle
-              sx={{
-                height: 42,
-                width: 42
-              }}
-            />
+            <img src={LogoImage} alt="logo" height={40} width={40} />
           </Link>
         </Box>
         <Box sx={{ px: 2 }}>
@@ -56,19 +57,12 @@ export const DashboardSidebar = ({ open, onClose }) => {
             }}>
             <div>
               <Typography color="inherit" variant="subtitle1">
-                Acme Inc
+                Cristhian Manzano
               </Typography>
               <Typography color="neutral.400" variant="body2">
-                Your tier : Premium
+                Administrador
               </Typography>
             </div>
-            <SelectAllOutlined
-              sx={{
-                color: 'neutral.500',
-                width: 14,
-                height: 14
-              }}
-            />
           </Box>
         </Box>
       </div>
@@ -90,10 +84,10 @@ export const DashboardSidebar = ({ open, onClose }) => {
           py: 3
         }}>
         <Typography color="neutral.100" variant="subtitle2">
-          Need more features?
+          Proyecto inmobiliario
         </Typography>
         <Typography color="neutral.500" variant="body2">
-          Check out our Pro solution template.
+          Tésis - Universidad de Guayaquil
         </Typography>
       </Box>
     </Box>

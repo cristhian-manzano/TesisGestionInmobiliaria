@@ -1,44 +1,24 @@
-import { AcUnitSharp, AccountBalance, AccessAlarm, AccountCircle } from '@mui/icons-material';
+import { Dashboard, Group, RateReview, HomeWork } from '@mui/icons-material';
 
 export const sidebarConfig = [
   {
     href: '/',
-    icon: <AcUnitSharp fontSize="small" />,
-    title: 'Dashboard'
+    icon: <Dashboard fontSize="small" />,
+    title: 'Inicio'
   },
   {
-    href: '/customers',
-    icon: <AccountBalance fontSize="small" />,
-    title: 'Customers'
+    href: '/inquilinos',
+    icon: <Group fontSize="small" />,
+    title: 'Inquilinos'
   },
   {
-    href: '/products',
-    icon: <AccessAlarm fontSize="small" />,
-    title: 'Products'
+    href: '/inmuebles',
+    icon: <HomeWork fontSize="small" />,
+    title: 'Inmuebles'
   },
   {
-    href: '/account',
-    icon: <AccountBalance fontSize="small" />,
-    title: 'Account'
-  },
-  {
-    href: '/settings',
-    icon: <AccessAlarm fontSize="small" />,
-    title: 'Settings'
-  },
-  {
-    href: '/login',
-    icon: <AccessAlarm fontSize="small" />,
-    title: 'Login'
-  },
-  {
-    href: '/register',
-    icon: <AccountCircle fontSize="small" />,
-    title: 'Register'
-  },
-  {
-    href: '/404',
-    icon: <AccountBalance fontSize="small" />,
-    title: 'Error'
+    href: '/observaciones',
+    icon: <RateReview fontSize="small" />,
+    title: 'Observaciones'
   }
 ];

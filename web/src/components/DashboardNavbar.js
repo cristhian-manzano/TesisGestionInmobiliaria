@@ -1,7 +1,10 @@
 import PropTypes from 'prop-types';
 import styled from '@emotion/styled';
-import { AppBar, Avatar, Badge, Box, IconButton, Toolbar, Tooltip } from '@mui/material';
-import { Search, Menu, AccountCircle } from '@mui/icons-material';
+import { AppBar, Box, IconButton, Toolbar } from '@mui/material';
+import { Menu } from '@mui/icons-material';
+
+import AccountMenu from './AccountMenu';
+import NotificationMenu from './NotificationMenu';
 
 const DashboardNavbarRoot = styled(AppBar)(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
@@ -36,33 +39,11 @@ export const DashboardNavbar = ({ onSidebarOpen }) => {
           }}>
           <Menu fontSize="small" />
         </IconButton>
-        <Tooltip title="Search">
-          <IconButton sx={{ ml: 1 }}>
-            <Search fontSize="small" />
-          </IconButton>
-        </Tooltip>
+
         <Box sx={{ flexGrow: 1 }} />
-        <Tooltip title="Contacts">
-          <IconButton sx={{ ml: 1 }}>
-            <Menu fontSize="small" />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Notifications">
-          <IconButton sx={{ ml: 1 }}>
-            <Badge badgeContent={4} color="primary" variant="dot">
-              <Menu fontSize="small" />
-            </Badge>
-          </IconButton>
-        </Tooltip>
-        <Avatar
-          sx={{
-            height: 40,
-            width: 40,
-            ml: 1
-          }}
-          src="/static/images/avatars/avatar_1.png">
-          <AccountCircle fontSize="small" />
-        </Avatar>
+
+        <NotificationMenu />
+        <AccountMenu />
       </Toolbar>
     </DashboardNavbarRoot>
   );
