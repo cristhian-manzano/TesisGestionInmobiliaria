@@ -1,0 +1,17 @@
+# npm
+node_modules
+package-lock.json
+*.log
+*.gz
+
+
+#Logs folder
+logs
+
+
+
+#Enviroment files
+.env
+
+
+
