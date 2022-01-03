@@ -26,7 +26,8 @@ export const DashboardLayout = ({ children }) => {
             display: 'flex',
             flex: '1 1 auto',
             flexDirection: 'column',
-            width: '100%'
+            width: '100%',
+            p: 5
           }}>
           {children}
         </Box>
