@@ -13,7 +13,7 @@ import {
 import { useState } from 'react';
 // import PropTypes from 'prop-types';
 
-const AccountMenu = () => {
+export const AccountMenu = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
@@ -120,5 +120,3 @@ const AccountMenu = () => {
 };
 
 AccountMenu.propTypes = {};
-
-export default AccountMenu;

@@ -1,28 +1,15 @@
-import { useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Box, Divider, Drawer, Typography, useMediaQuery, Link } from '@mui/material';
-import { useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { Box, Divider, Drawer, Typography, useMediaQuery } from '@mui/material';
 import { NavItem } from './NavItem';
 import { sidebarConfig } from './SidebarConfig';
 import LogoImage from '../assets/img/logo.png';
 
 export const DashboardSidebar = ({ open, onClose }) => {
-  const { pathname } = useLocation();
-
   const lgUp = useMediaQuery((theme) => theme.breakpoints.up('lg'), {
     defaultMatches: true,
     noSsr: false
   });
-
-  useEffect(
-    () => {
-      if (open) {
-        onClose?.();
-      }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [pathname]
-  );
 
   const content = (
     <Box
@@ -39,9 +26,9 @@ export const DashboardSidebar = ({ open, onClose }) => {
             alignItems: 'center',
             justifyContent: 'center'
           }}>
-          <Link href="/">
+          <Box component={Link} to="/dashboard">
             <img src={LogoImage} alt="logo" height={40} width={40} />
-          </Link>
+          </Box>
         </Box>
         <Box sx={{ px: 2 }}>
           <Box

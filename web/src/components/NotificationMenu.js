@@ -12,7 +12,7 @@ import {
 import { useState } from 'react';
 // import PropTypes from 'prop-types';
 
-const NotificationMenu = () => {
+export const NotificationMenu = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
@@ -88,5 +88,3 @@ const NotificationMenu = () => {
 };
 
 NotificationMenu.propTypes = {};
-
-export default NotificationMenu;

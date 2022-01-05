@@ -1,6 +1,6 @@
 import { useState } from 'react';
+import { Outlet } from 'react-router-dom';
 import { Box } from '@mui/material';
-import PropTypes from 'prop-types';
 import { styled } from '@mui/material/styles';
 import { DashboardNavbar } from './DashboardNavbar';
 import { DashboardSidebar } from './DashboardSidebar';
@@ -15,8 +15,8 @@ const DashboardLayoutRoot = styled('div')(({ theme }) => ({
   }
 }));
 
-export const DashboardLayout = ({ children }) => {
-  const [isSidebarOpen, setSidebarOpen] = useState(true);
+export const DashboardLayout = () => {
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <>
@@ -29,15 +29,11 @@ export const DashboardLayout = ({ children }) => {
             width: '100%',
             p: 5
           }}>
-          {children}
+          <Outlet />
         </Box>
       </DashboardLayoutRoot>
       <DashboardNavbar onSidebarOpen={() => setSidebarOpen(true)} />
       <DashboardSidebar onClose={() => setSidebarOpen(false)} open={isSidebarOpen} />
     </>
   );
-};
-
-DashboardLayout.propTypes = {
-  children: PropTypes.node.isRequired
 };

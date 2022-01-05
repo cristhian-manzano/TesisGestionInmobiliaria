@@ -2,22 +2,22 @@ import { Dashboard, Group, RateReview, HomeWork } from '@mui/icons-material';
 
 export const sidebarConfig = [
   {
-    href: '/',
+    href: '/dashboard',
     icon: <Dashboard fontSize="small" />,
     title: 'Inicio'
   },
   {
-    href: '/inquilinos',
+    href: '/dashboard/tenant',
     icon: <Group fontSize="small" />,
     title: 'Inquilinos'
   },
   {
-    href: '/inmuebles',
+    href: '/dashboard/property',
     icon: <HomeWork fontSize="small" />,
     title: 'Inmuebles'
   },
   {
-    href: '/observaciones',
+    href: '/dashboard/observation',
     icon: <RateReview fontSize="small" />,
     title: 'Observaciones'
   }

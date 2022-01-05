@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import { Box, Button, ListItem } from '@mui/material';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 
 export const NavItem = ({ href, icon, title }) => {
   const location = useLocation();
@@ -15,10 +15,9 @@ export const NavItem = ({ href, icon, title }) => {
         py: 0,
         px: 2
       }}>
-      {/* <Link> */}
-      {/* PONER ROUTER LINK */}
       <Button
-        component="a"
+        component={Link}
+        to={href}
         startIcon={icon}
         disableRipple
         sx={{
@@ -40,7 +39,6 @@ export const NavItem = ({ href, icon, title }) => {
         }}>
         <Box sx={{ flexGrow: 1 }}>{title}</Box>
       </Button>
-      {/* </Link> */}
     </ListItem>
   );
 };

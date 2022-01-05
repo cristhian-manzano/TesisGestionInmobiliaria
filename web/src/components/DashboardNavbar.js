@@ -3,7 +3,7 @@ import styled from '@emotion/styled';
 import { AppBar, Box, IconButton, Toolbar } from '@mui/material';
 import { Menu } from '@mui/icons-material';
 
-import AccountMenu from './AccountMenu';
+import { AccountMenu } from './AccountMenu';
 // import NotificationMenu from './NotificationMenu';
 
 const DashboardNavbarRoot = styled(AppBar)(({ theme }) => ({
