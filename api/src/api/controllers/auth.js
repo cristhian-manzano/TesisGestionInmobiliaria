@@ -60,7 +60,7 @@ const signUp = async (req, res) => {
   try {
     const user = await User.findOne({
       where: {
-        [Op.or]: [{ email: value.email, idCard: value.idCard }]
+        [Op.or]: [{ email: value.email }, { idCard: value.idCard }]
       }
     });
 

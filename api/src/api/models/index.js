@@ -10,6 +10,7 @@ const sequelize = new Sequelize(db.database, db.username, db.password, {
   define: {
     freezeTableName: true
   }
+  // logging: false
 });
 
 module.exports = sequelize;

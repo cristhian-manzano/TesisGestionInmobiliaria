@@ -27,5 +27,5 @@ db.authenticate()
     });
   })
   .catch((e) => {
-    Logger.error(e.message);
+    Logger.error(e.toString());
   });
