@@ -1,4 +1,6 @@
-const winston = require('winston');
+const { addColors, createLogger, format, transports } = require('winston');
+
+const { combine, colorize, printf, timestamp } = format;
 
 // Define your severity levels.
 const levels = {
@@ -18,34 +20,34 @@ const colors = {
   debug: 'white'
 };
 
-//Link the colors defined to the severity levels.
-winston.addColors(colors);
+// Link the colors defined to the severity levels.
+addColors(colors);
 
-// Define which transports the logger must use to print out messages.
-const transports = [
-  new winston.transports.Console(),
-  new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
-  new winston.transports.File({ filename: 'logs/all.log' })
-];
-
-//production: show only warn and error messages. Development: show all the log levels
+// production: show only warn and error messages. Development: show all the log levels
 const level = () => {
   const env = process.env.NODE_ENV || 'development';
   const isDevelopment = env === 'development';
   return isDevelopment ? 'debug' : 'warn';
 };
 
-const format = winston.format.combine(
-  winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss:ms' }),
-  winston.format.colorize({ all: true }),
-  winston.format.printf((info) => `${info.timestamp} ${info.level}: ${info.message}`)
+const customFormat = combine(
+  timestamp({ format: 'YYYY-MM-DD HH:mm:ss:ms' }),
+  printf((info) => `${info.timestamp} ${info.level}:  ${info.message} `)
 );
 
-const Logger = winston.createLogger({
+const Logger = createLogger({
   level: level(),
   levels,
-  format,
-  transports
+  transports: [
+    new transports.Console({ format: combine(customFormat, colorize({ all: true })) }),
+    new transports.File({ filename: 'logs/all.log', format: combine(customFormat) }),
+
+    new transports.File({
+      filename: 'logs/error.log',
+      level: 'error',
+      format: combine(customFormat)
+    })
+  ]
 });
 
 module.exports = Logger;

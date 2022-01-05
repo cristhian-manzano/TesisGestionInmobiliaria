@@ -4,6 +4,8 @@ const helmet = require('helmet');
 const cors = require('cors');
 const morganMiddleware = require('./config/morgan');
 const appRoutes = require('./api/routes');
+const db = require('./api/models/index');
+const Logger = require('./config/logger');
 
 const app = express();
 
@@ -18,6 +20,12 @@ app.use('/', appRoutes);
 
 const port = process.env.PORT || 5000;
 
-app.listen(port, () => {
-  console.log(`Running app in port ${port}`);
-});
+db.authenticate()
+  .then(() => {
+    app.listen(port, () => {
+      Logger.debug(`Running app in port ${port}`);
+    });
+  })
+  .catch((e) => {
+    Logger.error(e.message);
+  });

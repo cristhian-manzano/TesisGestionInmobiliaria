@@ -11,8 +11,4 @@ const auth = require('./auth');
 
 router.use('/auth', auth);
 
-// All routes:
-// user
-// etc
-
 module.exports = router;
