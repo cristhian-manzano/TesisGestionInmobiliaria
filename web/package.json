@@ -6,6 +6,7 @@
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
     "@fontsource/roboto": "^4.5.1",
+    "@hookform/resolvers": "^2.8.5",
     "@mui/icons-material": "^5.2.5",
     "@mui/material": "^5.2.6",
     "@testing-library/jest-dom": "^5.16.1",
@@ -21,7 +22,8 @@
     "react-scripts": "5.0.0",
     "simplebar-react": "^2.3.6",
     "uuid": "^8.3.2",
-    "web-vitals": "^2.1.2"
+    "web-vitals": "^2.1.2",
+    "yup": "^0.32.11"
   },
   "scripts": {
     "start": "react-scripts start",
