@@ -18,15 +18,8 @@ import { Visibility, VisibilityOff, LockOutlined } from '@mui/icons-material';
 import { Link as RouterLink } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
 import ImageLogin from '../assets/img/HouseLogin.jpg';
-
-const schema = yup
-  .object({
-    email: yup.string().email().required(),
-    password: yup.string().required()
-  })
-  .required();
+import { loginSchema } from '../schemas/auth';
 
 export const Login = () => {
   const [showPassword, setShowPassoword] = useState(false);
@@ -36,7 +29,7 @@ export const Login = () => {
     handleSubmit,
     formState: { errors }
   } = useForm({
-    resolver: yupResolver(schema)
+    resolver: yupResolver(loginSchema)
   });
 
   const onSubmit = (data) => {

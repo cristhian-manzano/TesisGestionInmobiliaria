@@ -7,7 +7,7 @@ import '@fontsource/roboto/700.css';
 // Libraries
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ThemeConfig } from './theme';
-import { DashboardLayout } from './components/DashboarLayout';
+import { DashboardLayout } from './layouts/dashboard/Layout';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { Home } from './pages/dashboard/Home';

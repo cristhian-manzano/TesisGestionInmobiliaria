@@ -1,9 +1,9 @@
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { Box, Divider, Drawer, Typography, useMediaQuery } from '@mui/material';
-import { NavItem } from './NavItem';
+import { NavItem } from '../../components/dashboard/NavItem';
 import { sidebarConfig } from './SidebarConfig';
-import LogoImage from '../assets/img/logo.png';
+import LogoImage from '../../assets/img/logo.png';
 
 export const DashboardSidebar = ({ open, onClose }) => {
   const lgUp = useMediaQuery((theme) => theme.breakpoints.up('lg'), {

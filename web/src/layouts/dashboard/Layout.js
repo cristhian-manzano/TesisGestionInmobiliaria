@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Box } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import { DashboardNavbar } from './DashboardNavbar';
-import { DashboardSidebar } from './DashboardSidebar';
+import { DashboardNavbar } from './Navbar';
+import { DashboardSidebar } from './Sidebar';
 
 const DashboardLayoutRoot = styled('div')(({ theme }) => ({
   display: 'flex',
