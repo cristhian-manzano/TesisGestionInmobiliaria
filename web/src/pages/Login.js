@@ -6,7 +6,7 @@ import {
   TextField,
   FormControlLabel,
   Checkbox,
-  Link,
+  Link as MaterialLink,
   Paper,
   Box,
   Grid,
@@ -14,15 +14,19 @@ import {
   Typography
 } from '@mui/material';
 import { Visibility, VisibilityOff, LockOutlined } from '@mui/icons-material';
+import { Link as RouterLink } from 'react-router-dom';
 import ImageLogin from '../assets/img/HouseLogin.jpg';
 
 const Copyright = () => {
   return (
     <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 5 }}>
       {'Copyright © '}
-      <Link color="inherit" href="https://github.com/Cmanzano-dev/TesisGestionInmobiliaria">
+      <MaterialLink
+        color="inherit"
+        target="_blank"
+        href="https://github.com/Cmanzano-dev/TesisGestionInmobiliaria">
         Tésis - gestión inmobiliaria
-      </Link>{' '}
+      </MaterialLink>{' '}
       {new Date().getFullYear()}.
     </Typography>
   );
@@ -115,14 +119,14 @@ export const Login = () => {
             </Button>
             <Grid container>
               <Grid item xs>
-                <Link href="###" variant="body2">
+                <MaterialLink component={RouterLink} to="/" variant="body2">
                   ¿Olvidó la contraseña?
-                </Link>
+                </MaterialLink>
               </Grid>
               <Grid item>
-                <Link href="###" variant="body2">
+                <MaterialLink component={RouterLink} to="/register" variant="body2">
                   Registrarse
-                </Link>
+                </MaterialLink>
               </Grid>
             </Grid>
             <Copyright />
