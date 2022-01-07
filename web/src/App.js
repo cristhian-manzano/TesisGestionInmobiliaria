@@ -17,24 +17,31 @@ import { Tenant } from './pages/dashboard/Tenant';
 import { NotFound } from './pages/NotFound';
 import { HomePage } from './pages/HomePage';
 
+import SnackbarGlobal from './store/context/SnackbarGlobal';
+import LoadingGlobal from './store/context/LoadingGlobal';
+
 const App = () => {
   return (
     <ThemeConfig>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="*" element={<NotFound />} />
-          <Route path="/dashboard" element={<DashboardLayout />}>
-            <Route index element={<Home />} />
-            <Route path="observation" element={<Observation />} />
-            <Route path="property" element={<Property />} />
-            <Route path="tenant" element={<Tenant />} />
-            <Route path="*" element={<h1>Página no encontrada</h1>} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+      <SnackbarGlobal>
+        <LoadingGlobal>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="*" element={<NotFound />} />
+              <Route path="/dashboard" element={<DashboardLayout />}>
+                <Route index element={<Home />} />
+                <Route path="observation" element={<Observation />} />
+                <Route path="property" element={<Property />} />
+                <Route path="tenant" element={<Tenant />} />
+                <Route path="*" element={<h1>Página no encontrada</h1>} />
+              </Route>
+            </Routes>
+          </BrowserRouter>
+        </LoadingGlobal>
+      </SnackbarGlobal>
     </ThemeConfig>
   );
 };
