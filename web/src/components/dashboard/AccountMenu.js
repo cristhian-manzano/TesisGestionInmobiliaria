@@ -10,18 +10,32 @@ import {
   Typography,
   ListItemIcon
 } from '@mui/material';
-import { useState } from 'react';
 // import PropTypes from 'prop-types';
+import { useState, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../../store/context/authContext';
+import { logout } from '../../store/actions/authActions';
 
 export const AccountMenu = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+
+  // Navigation
+  const navigate = useNavigate();
+
+  // User context
+  const { userSession, dispatch } = useContext(AuthContext);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    logout(dispatch);
+    navigate('/');
   };
 
   return (
@@ -91,7 +105,7 @@ export const AccountMenu = () => {
               textOverflow: 'ellipsis'
             }}>
             <Typography noWrap variant="body1">
-              Cristhian Manzano
+              {`${userSession.user.firstName} ${userSession.user.lastName}`}
             </Typography>
             <Typography noWrap variant="body2">
               Administrador
@@ -108,7 +122,7 @@ export const AccountMenu = () => {
           Perfil
         </MenuItem>
 
-        <MenuItem onClick={handleClose}>
+        <MenuItem onClick={handleLogout}>
           <ListItemIcon>
             <Logout fontSize="small" />
           </ListItemIcon>

@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
+
 import {
   Avatar,
   Button,
@@ -14,15 +15,24 @@ import {
   FormHelperText,
   FormControl
 } from '@mui/material';
+
 import { Visibility, VisibilityOff, LockOutlined } from '@mui/icons-material';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import ImageLogin from '../assets/img/HouseLogin.jpg';
 import { loginSchema } from '../schemas/auth';
+import { login } from '../store/actions/authActions';
+import { AuthContext } from '../store/context/authContext';
+import { LoadingContext } from '../store/context/LoadingGlobal';
+import { SnackbarContext } from '../store/context/SnackbarGlobal';
+import ImageLogin from '../assets/img/HouseLogin.jpg';
 
 export const Login = () => {
+  const navigate = useNavigate();
   const [showPassword, setShowPassoword] = useState(false);
+  const { userSession, dispatch } = useContext(AuthContext);
+  const { handleLoading } = useContext(LoadingContext);
+  const { handleOpenSnackbar } = useContext(SnackbarContext);
 
   const {
     register,
@@ -32,14 +42,23 @@ export const Login = () => {
     resolver: yupResolver(loginSchema)
   });
 
-  const onSubmit = (data) => {
-    // ready for submit
-    console.log(data);
+  useEffect(() => {
+    handleLoading(userSession.loading);
+
+    if (userSession.errorMessage) {
+      handleOpenSnackbar('error', userSession.errorMessage);
+    }
+  }, [userSession]);
+
+  const onSubmit = async (data) => {
+    // Send request
+    const response = await login(dispatch, data);
+
+    // Redirect to dashboard page
+    if (response.data.data) navigate('/dashboard/');
   };
 
-  const handleClickShowPassword = () => {
-    setShowPassoword((previous) => !previous);
-  };
+  const handleClickShowPassword = () => setShowPassoword((previous) => !previous);
 
   return (
     <Grid container component="main" sx={{ height: '100vh' }}>

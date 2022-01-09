@@ -1,11 +1,4 @@
-const responseFormat = ({ error = false, message = '', data = {}, redirect = '' }) => {
-  return {
-    message,
-    error,
-    data,
-    redirect
-  };
-};
+import { responsesFormat } from './constants';
 
 export const sendRequest = async ({
   urlPath = '',
@@ -35,17 +28,22 @@ export const sendRequest = async ({
 
     if (!response.ok && [401, 403].includes(response.status) && token) {
       localStorage.removeItem('sesion');
-      return responseFormat({
-        error: false,
+      return responsesFormat({
+        error: true,
         message: 'Usuario no autorizado.',
         data: dataResponse,
         redirect: '/login'
       });
     }
 
-    return responseFormat({ error: false, message: 'Solicitud exitosa.', data: dataResponse });
+    if (dataResponse.error)
+      return responsesFormat({
+        error: true,
+        message: 'Error solicitud.'
+      });
+
+    return responsesFormat({ error: false, message: 'Solicitud exitosa.', data: dataResponse });
   } catch (error) {
-    console.log(error);
-    return responseFormat({ error: true, message: 'Error de conexión.' });
+    return responsesFormat({ error: true, message: 'Error de conexión.' });
   }
 };

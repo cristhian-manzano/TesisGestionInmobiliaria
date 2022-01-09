@@ -1,19 +1,16 @@
 import { useContext } from 'react';
-import { LoadingContext } from '../../store/context/LoadingGlobal';
+import { AuthContext } from '../../store/context/authContext';
 
 export const Home = () => {
-  const { handleLoadingOpen } = useContext(LoadingContext);
-
-  const handleClick = () => {
-    handleLoadingOpen();
-  };
+  const { userSession } = useContext(AuthContext);
 
   return (
     <div>
       <h1>Home</h1>
-      <button type="button" onClick={handleClick}>
-        Hello
-      </button>
+
+      <h3>
+        {userSession.user.email}: {userSession.token}
+      </h3>
     </div>
   );
 };

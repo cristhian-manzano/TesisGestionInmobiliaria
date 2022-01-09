@@ -4,24 +4,22 @@ import PropTypes from 'prop-types';
 
 export const LoadingContext = createContext();
 
-const LoadingGlobal = ({ children }) => {
+export const LoadingGlobal = ({ children }) => {
   const [open, setOpen] = useState(false);
 
-  const handleLoadingClose = () => {
-    setOpen(false);
-  };
-  const handleLoadingOpen = () => {
-    setOpen(!open);
+  const handleLoading = (newState) => {
+    setOpen(newState);
   };
 
-  const values = useMemo(() => ({ handleLoadingOpen, handleLoadingClose }), []);
+  const values = useMemo(() => ({ handleLoading }), []);
 
   return (
     <LoadingContext.Provider value={values}>
       <Backdrop
         sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
         open={open}
-        onClick={handleLoadingClose}>
+        // onClick={() => handleLoading(false)}
+      >
         <CircularProgress color="inherit" />
       </Backdrop>
       {children}
@@ -32,5 +30,3 @@ const LoadingGlobal = ({ children }) => {
 LoadingGlobal.propTypes = {
   children: PropTypes.node.isRequired
 };
-
-export default LoadingGlobal;

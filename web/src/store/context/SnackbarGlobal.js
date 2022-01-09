@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 
 export const SnackbarContext = createContext('Cristhian manzano');
 
-const SnackbarGlobal = ({ children }) => {
+export const SnackbarGlobal = ({ children }) => {
   const [openSnackbar, setOpenSnackbar] = useState({ open: false });
 
   const handleOpenSnackbar = (severity, message) => {
@@ -50,5 +50,3 @@ const SnackbarGlobal = ({ children }) => {
 SnackbarGlobal.propTypes = {
   children: PropTypes.node.isRequired
 };
-
-export default SnackbarGlobal;
