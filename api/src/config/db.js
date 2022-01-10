@@ -2,10 +2,10 @@ require('dotenv').config();
 
 module.exports = {
   development: {
-    username: 'postgres',
-    password: '123456',
+    username: 'tesis-dev',
+    password: 'postgres123',
     database: 'postgres',
-    host: '127.0.0.1',
+    host: '143.198.230.162',
     port: 5432,
     dialect: 'postgres'
   },
