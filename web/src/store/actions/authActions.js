@@ -1,5 +1,4 @@
-import { setSession, removeSession } from '../../helpers/session';
-import { sendRequest } from '../../helpers/utils';
+import { setLocalstorage, sendRequest } from '../../helpers/utils';
 
 export const login = async (dispatch, loginPayload) => {
   dispatch({ type: 'REQUEST_LOGIN' });
@@ -14,7 +13,7 @@ export const login = async (dispatch, loginPayload) => {
     dispatch({ type: 'LOGIN_ERROR', error: response.message });
   } else {
     dispatch({ type: 'LOGIN_SUCCESS', payload: response.data.data });
-    setSession(response.data.data);
+    setLocalstorage('session', response.data.data);
   }
 
   return response;
@@ -22,5 +21,5 @@ export const login = async (dispatch, loginPayload) => {
 
 export const logout = (dispatch) => {
   dispatch({ type: 'LOGOUT' });
-  removeSession();
+  localStorage.removeItem('session');
 };

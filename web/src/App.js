@@ -20,6 +20,9 @@ import { SnackbarGlobal } from './store/context/SnackbarGlobal';
 import { LoadingGlobal } from './store/context/LoadingGlobal';
 import { AuthContextProvider } from './store/context/authContext';
 
+// Testing
+import { ProtectedRoutes } from './ProtectedRoutes';
+
 const App = () => {
   return (
     <ThemeConfig>
@@ -32,12 +35,15 @@ const App = () => {
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="*" element={<NotFound />} />
-                <Route path="/dashboard" element={<DashboardLayout />}>
-                  <Route index element={<Home />} />
-                  <Route path="observation" element={<Observation />} />
-                  <Route path="property" element={<Property />} />
-                  <Route path="tenant" element={<Tenant />} />
-                  <Route path="*" element={<h1>Página no encontrada</h1>} />
+
+                <Route path="/dashboard" element={<ProtectedRoutes />}>
+                  <Route path="" element={<DashboardLayout />}>
+                    <Route index element={<Home />} />
+                    <Route path="observation" element={<Observation />} />
+                    <Route path="property" element={<Property />} />
+                    <Route path="tenant" element={<Tenant />} />
+                    <Route path="*" element={<h1>Página no encontrada</h1>} />
+                  </Route>
                 </Route>
               </Routes>
             </BrowserRouter>

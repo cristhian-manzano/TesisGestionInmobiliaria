@@ -24,7 +24,7 @@ export const AccountMenu = () => {
   const navigate = useNavigate();
 
   // User context
-  const { userSession, dispatch } = useContext(AuthContext);
+  const { userAuth, dispatch } = useContext(AuthContext);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -105,7 +105,7 @@ export const AccountMenu = () => {
               textOverflow: 'ellipsis'
             }}>
             <Typography noWrap variant="body1">
-              {`${userSession.user.firstName} ${userSession.user.lastName}`}
+              {`${userAuth.user.firstName} ${userAuth.user.lastName}`}
             </Typography>
             <Typography noWrap variant="body2">
               Administrador

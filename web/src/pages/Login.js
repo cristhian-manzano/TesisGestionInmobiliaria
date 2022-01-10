@@ -1,11 +1,11 @@
 import { useContext, useEffect, useState } from 'react';
 
 import {
+  // FormControlLabel,
+  // Checkbox,
   Avatar,
   Button,
   TextField,
-  FormControlLabel,
-  Checkbox,
   Link as MaterialLink,
   Paper,
   Box,
@@ -30,7 +30,7 @@ import ImageLogin from '../assets/img/HouseLogin.jpg';
 export const Login = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassoword] = useState(false);
-  const { userSession, dispatch } = useContext(AuthContext);
+  const { userAuth, dispatch } = useContext(AuthContext);
   const { handleLoading } = useContext(LoadingContext);
   const { handleOpenSnackbar } = useContext(SnackbarContext);
 
@@ -43,12 +43,12 @@ export const Login = () => {
   });
 
   useEffect(() => {
-    handleLoading(userSession.loading);
+    handleLoading(userAuth.loading);
 
-    if (userSession.errorMessage) {
-      handleOpenSnackbar('error', userSession.errorMessage);
+    if (userAuth.errorMessage) {
+      handleOpenSnackbar('error', userAuth.errorMessage);
     }
-  }, [userSession]);
+  }, [userAuth]);
 
   const onSubmit = async (data) => {
     // Send request
@@ -132,10 +132,10 @@ export const Login = () => {
               </FormHelperText>
             </FormControl>
 
-            <FormControlLabel
+            {/* <FormControlLabel
               control={<Checkbox value="remember" color="primary" />}
               label="Recordarme"
-            />
+            /> */}
             <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
               Iniciar sesión
             </Button>

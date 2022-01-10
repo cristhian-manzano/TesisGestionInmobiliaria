@@ -47,3 +47,17 @@ export const sendRequest = async ({
     return responsesFormat({ error: true, message: 'Error de conexión.' });
   }
 };
+
+export const setLocalstorage = (key, value) => {
+  localStorage.setItem(key, typeof value === 'object' ? JSON.stringify(value) : String(value));
+};
+
+export const getLocalstorage = (key) => {
+  const value = localStorage.getItem(key);
+
+  try {
+    return JSON.parse(value);
+  } catch {
+    return value;
+  }
+};
