@@ -20,12 +20,11 @@ app.use('/', appRoutes);
 
 const port = process.env.PORT || 5000;
 
-db.authenticate()
-  .then(() => {
-    app.listen(port, () => {
-      Logger.debug(`Running app in port ${port}`);
-    });
-  })
-  .catch((e) => {
-    Logger.error(e.toString());
-  });
+// Validate if connected
+db.authenticate().catch((e) => {
+  Logger.error(e.toString());
+});
+
+app.listen(port, () => {
+  Logger.debug(`Running app in port ${port}`);
+});
