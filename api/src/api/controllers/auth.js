@@ -22,7 +22,9 @@ const Logger = require('../../config/logger');
 
 const signIn = async (req, res) => {
   const { error, value } = signInValidation(req.body);
-  if (error) return res.json(validationResponse(UNPROCESSABLE_ENTITY, error.message));
+
+  if (error)
+    return res.status(UNPROCESSABLE_ENTITY).json(validationResponse(res.statusCode, error.message));
 
   try {
     const user = await User.findOne({
@@ -31,10 +33,11 @@ const signIn = async (req, res) => {
       }
     });
 
-    if (!user) return res.json(errorResponse(BAD_REQUEST, 'Invalid credentials!'));
+    if (!user)
+      return res.status(BAD_REQUEST).json(errorResponse(res.statusCode, 'Invalid credentials!'));
 
     if (!(await verifyEncrypted(value.password, user.password)))
-      return res.json(errorResponse(BAD_REQUEST, 'Invalid credentials!'));
+      return res.status(BAD_REQUEST).json(errorResponse(res.statusCode, 'Invalid credentials!'));
 
     const token = createToken({ id: user.id, email: user.email });
 
@@ -49,13 +52,17 @@ const signIn = async (req, res) => {
     );
   } catch (e) {
     Logger.error(e.toString());
-    return res.json(errorResponse(INTERNAL_SERVER_ERROR, 'Cannot authenticate user.'));
+    return res
+      .status(INTERNAL_SERVER_ERROR)
+      .json(errorResponse(res.statusCode, 'Cannot authenticate user.'));
   }
 };
 
 const signUp = async (req, res) => {
   const { error, value } = signUpValidation(req.body);
-  if (error) return res.json(validationResponse(UNPROCESSABLE_ENTITY, error.message));
+
+  if (error)
+    return res.status(UNPROCESSABLE_ENTITY).json(validationResponse(res.statusCode, error.message));
 
   try {
     const user = await User.findOne({
@@ -64,14 +71,25 @@ const signUp = async (req, res) => {
       }
     });
 
-    if (user) return res.json(validationResponse(UNPROCESSABLE_ENTITY, 'User already exists!'));
+    if (user)
+      return res
+        .status(UNPROCESSABLE_ENTITY)
+        .json(validationResponse(res.statusCode, 'User already exists!'));
 
     value.password = await encryptData(value.password);
     const createdUser = await User.create(value);
-    return res.json(successResponse(CREATED, 'User created!', createdUser));
+    return res.status(CREATED).json(
+      successResponse(res.statusCode, 'User created!', {
+        email: createdUser.email,
+        firstName: createdUser.firstName,
+        lastName: createdUser.lastName
+      })
+    );
   } catch (e) {
     Logger.error(e.toString());
-    return res.json(errorResponse(INTERNAL_SERVER_ERROR, 'Cannot create a user.'));
+    return res
+      .status(INTERNAL_SERVER_ERROR)
+      .json(errorResponse(res.statusCode, 'Cannot create a user.'));
   }
 };
 
