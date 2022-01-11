@@ -102,9 +102,7 @@ export const Login = () => {
                 autoFocus
                 {...register('email')}
               />
-              <FormHelperText id="email" error>
-                {errors.email?.message}
-              </FormHelperText>
+              <FormHelperText error>{errors.email?.message}</FormHelperText>
             </FormControl>
             <FormControl fullWidth>
               <TextField
@@ -127,9 +125,7 @@ export const Login = () => {
                 }}
               />
 
-              <FormHelperText id="password" error>
-                {errors.password?.message}
-              </FormHelperText>
+              <FormHelperText error>{errors.password?.message}</FormHelperText>
             </FormControl>
 
             {/* <FormControlLabel
