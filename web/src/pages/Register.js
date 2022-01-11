@@ -14,23 +14,35 @@ import {
   FormHelperText
 } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { useEffect, useState } from 'react';
-
-// Temporal
+import { useEffect, useState, useContext } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { sendRequest } from '../helpers/utils';
-import { registerScheme } from '../schemas/auth';
+
+// Routing
+import { Link as RouterLink } from 'react-router-dom';
+
+// Loading and snackbar
+import { LoadingContext } from '../store/context/LoadingGlobal';
+import { SnackbarContext } from '../store/context/SnackbarGlobal';
 
 // Image
 import HomeRegister from '../assets/img/HomeRegister.jpeg';
+
+// Utilities
+
+import { sendRequest } from '../helpers/utils';
+import { registerScheme } from '../schemas/auth';
 
 export const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [roles, setRoles] = useState([]);
 
+  const { handleLoading } = useContext(LoadingContext);
+  const { handleOpenSnackbar } = useContext(SnackbarContext);
+
   // react hook forms
   const {
+    reset, // Testing reset
     register,
     handleSubmit,
     formState: { errors }
@@ -48,8 +60,16 @@ export const Register = () => {
     });
   }, []);
 
-  const onSubmit = (data) => {
-    console.log(data);
+  const onSubmit = async (data) => {
+    handleLoading(true);
+    const response = await sendRequest({ urlPath: '/auth/signup', method: 'post', data });
+    handleLoading(false);
+    if (response.error) {
+      handleOpenSnackbar('error', response.message);
+    } else {
+      reset();
+      handleOpenSnackbar('success', 'Usuario registrado exitosamente!');
+    }
   };
 
   return (
@@ -156,6 +176,16 @@ export const Register = () => {
             <Grid item xs={12} sm={12}>
               <Button variant="contained" type="submit" fullWidth>
                 Registrarse
+              </Button>
+            </Grid>
+            <Grid item xs={12} sm={12}>
+              <Button
+                component={RouterLink}
+                to="/login"
+                variant="contained"
+                color="secondary"
+                fullWidth>
+                Logearse
               </Button>
             </Grid>
           </Grid>
