@@ -105,7 +105,7 @@ export const AccountMenu = () => {
               textOverflow: 'ellipsis'
             }}>
             <Typography noWrap variant="body1">
-              {`${userAuth.user.firstName} ${userAuth.user.lastName}`}
+              {`${userAuth.user?.firstName} ${userAuth.user?.lastName}`}
             </Typography>
             <Typography noWrap variant="body2">
               Administrador

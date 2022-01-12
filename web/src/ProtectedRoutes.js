@@ -4,5 +4,6 @@ import { AuthContext } from './store/context/authContext';
 
 export const ProtectedRoutes = () => {
   const { userAuth } = useContext(AuthContext);
-  return userAuth.user ? <Outlet /> : <Navigate to="/login" />;
+  // return userAuth.user ? <Outlet /> : <Navigate to="/login" />;
+  return true ? <Outlet /> : <Navigate to="/login" />;
 };
