@@ -5,7 +5,7 @@ import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 
 // Libraries
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom';
 import { ThemeConfig } from './theme';
 import { DashboardLayout } from './layouts/dashboard/Layout';
 import { Login } from './pages/Login';
@@ -19,6 +19,9 @@ import { HomePage } from './pages/HomePage';
 import { SnackbarGlobal } from './store/context/SnackbarGlobal';
 import { LoadingGlobal } from './store/context/LoadingGlobal';
 import { AuthContextProvider } from './store/context/authContext';
+
+// new
+import { Create } from './pages/dashboard/property/Create';
 
 // Testing
 import { ProtectedRoutes } from './ProtectedRoutes';
@@ -40,7 +43,12 @@ const App = () => {
                   <Route path="" element={<DashboardLayout />}>
                     <Route index element={<Home />} />
                     <Route path="observation" element={<Observation />} />
-                    <Route path="property" element={<Property />} />
+
+                    <Route path="property" element={<Outlet />}>
+                      <Route path="" element={<Property />} />
+                      <Route path="create" element={<Create />} />
+                    </Route>
+
                     <Route path="tenant" element={<Tenant />} />
                     <Route path="*" element={<h1>Página no encontrada</h1>} />
                   </Route>

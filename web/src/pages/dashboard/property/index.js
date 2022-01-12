@@ -37,13 +37,14 @@ export const Property = () => {
 
   const rows = [
     { name: 'Edificio Norte', available: 'Si', price: '$1000' },
-    { name: 'Casa Sauces', available: 'No', price: '$400' }
+    { name: 'Casa Sauces II', available: 'No', price: '$400' },
+    { name: 'Edificio central', available: 'No', price: '$500' }
   ];
 
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', p: 2 }}>
-        <Typography variant="h4">Inquilinos</Typography>
+        <Typography variant="h4">Propiedades</Typography>
         <Button component={RouterLink} to="create" variant="contained">
           Agregar
         </Button>
@@ -61,7 +62,10 @@ export const Property = () => {
             </TableHead>
             <TableBody>
               {rows.map((row) => (
-                <TableRow key={row.name} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                <TableRow
+                  hover
+                  key={row.name}
+                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                   <TableCell>{row.name}</TableCell>
                   <TableCell>{row.available}</TableCell>
                   <TableCell>{row.price}</TableCell>
