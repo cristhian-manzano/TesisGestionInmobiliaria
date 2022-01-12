@@ -1,9 +1,9 @@
 import React from 'react';
 
-export const Tenant = () => {
+export const Observation = () => {
   return (
     <div>
-      <h1>Tenants</h1>
+      <h1>Observaciones</h1>
     </div>
   );
 };
