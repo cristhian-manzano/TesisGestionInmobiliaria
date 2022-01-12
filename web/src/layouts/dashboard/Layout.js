@@ -27,7 +27,7 @@ export const DashboardLayout = () => {
             flex: '1 1 auto',
             flexDirection: 'column',
             width: '100%',
-            p: 5
+            p: { sm: 3 }
           }}>
           <Outlet />
         </Box>

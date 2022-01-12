@@ -10,15 +10,7 @@ export const theme = createTheme({
       xl: 1920
     }
   },
-  components: {
-    MuiOutlinedInput: {
-      styleOverrides: {
-        notchedOutline: {
-          borderColor: '#E6E8F0'
-        }
-      }
-    }
-  },
+  components: {},
   palette: {
     neutral: {
       100: '#F3F4F6',
