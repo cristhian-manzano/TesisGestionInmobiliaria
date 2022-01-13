@@ -59,7 +59,7 @@ export const Property = () => {
                 <TableCell>Nombre</TableCell>
                 <TableCell>Disponible</TableCell>
                 <TableCell>Precio</TableCell>
-                <TableCell>Acciones</TableCell>
+                <TableCell />
               </TableRow>
             </TableHead>
             <TableBody>

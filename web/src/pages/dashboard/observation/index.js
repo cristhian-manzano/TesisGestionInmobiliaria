@@ -15,7 +15,6 @@ import {
 } from '@mui/material';
 
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
-
 import { TableMoreMenu } from '../../../components/TableMoreMenu';
 
 export const Observation = () => {
