@@ -29,12 +29,14 @@ export const Property = () => {
     navigate(`update/${id}`);
   };
 
+  // Este es el evento delete
   const onDelete = (id) => {
-    console.log('deleting: ', id);
+    /* eslint-disable no-console */
+    console.log('ID: ', id);
+    /* eslint-enable no-console */
   };
 
   // Temporal data
-
   const rows = [
     { name: 'Edificio Norte', available: 'Si', price: '$1000' },
     { name: 'Casa Sauces II', available: 'No', price: '$400' },
