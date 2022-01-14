@@ -97,7 +97,12 @@ export const HomePage = () => {
               <TextField fullWidth placeholder="Ingresar sector a buscar" id="fullWidth" />
             </Grid>
             <Grid item xs={12} sm={2}>
-              <Button fullWidth variant="contained" sx={{ py: 2 }}>
+              <Button
+                component={Link}
+                to="/search-property"
+                fullWidth
+                variant="contained"
+                sx={{ py: 2 }}>
                 <SearchIcon />
               </Button>
             </Grid>

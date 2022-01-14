@@ -16,6 +16,7 @@ import { Property } from './pages/dashboard/property/index';
 import { Tenant } from './pages/dashboard/tenant/index';
 import { NotFound } from './pages/NotFound';
 import { HomePage } from './pages/HomePage';
+import { SearchProperty } from './pages/SearchProperty';
 import { SnackbarGlobal } from './store/context/SnackbarGlobal';
 import { LoadingGlobal } from './store/context/LoadingGlobal';
 import { AuthContextProvider } from './store/context/authContext';
@@ -35,6 +36,7 @@ const App = () => {
             <BrowserRouter>
               <Routes>
                 <Route path="/" element={<HomePage />} />
+                <Route path="/search-property" element={<SearchProperty />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="*" element={<NotFound />} />
