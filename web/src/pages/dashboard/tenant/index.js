@@ -39,7 +39,10 @@ export const Tenant = () => {
             </TableHead>
             <TableBody>
               {rows.map((row) => (
-                <TableRow key={row.name} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                <TableRow
+                  hover
+                  key={row.name}
+                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                   <TableCell>{row.name}</TableCell>
                   <TableCell>{row.email}</TableCell>
                   <TableCell>{row.phone}</TableCell>
