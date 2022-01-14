@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 import {
   Box,
@@ -13,11 +13,13 @@ import {
   Button,
   Stack,
   Divider,
-  IconButton,
-  InputAdornment
+  IconButton
+  // InputAdornment
 } from '@mui/material';
 
-import { AddCircleOutline, Delete } from '@mui/icons-material/';
+import { AddCircleOutline, Delete, ArrowBack } from '@mui/icons-material/';
+
+import { Link as RouterLink } from 'react-router-dom';
 
 const dataPropertyType = [
   { id: 1, name: 'Casa', additionalFields: [''] },
@@ -30,17 +32,6 @@ const dataPropertyType = [
 export const Create = () => {
   const [propertyType, setPropertyType] = useState('');
   const [images, setImages] = useState({ loaded: [], uploaded: [], deleted: [] });
-
-  useEffect(() => {
-    const fetched = [
-      { id: 1, url: 'https://source.unsplash.com/random' },
-      { id: 2, url: 'https://picsum.photos/200/300' },
-      { id: 3, url: 'https://picsum.photos/200' }
-      // { id: 4, url: 'https://picsum.photos/200/300?grayscale' }
-    ];
-
-    setImages((previous) => ({ ...previous, loaded: fetched }));
-  }, []);
 
   const onChangePropertyType = (e) => setPropertyType(e.target.value);
 
@@ -80,6 +71,14 @@ export const Create = () => {
 
   return (
     <Box>
+      <Button
+        component={RouterLink}
+        to="../"
+        color="inherit"
+        sx={{ opacity: 0.7, my: 1 }}
+        aria-label="Example">
+        <ArrowBack /> regresar
+      </Button>
       <Box component="form">
         <Card sx={{ p: 4 }}>
           <Typography variant="h4" sx={{ mb: 2 }}>
@@ -127,7 +126,7 @@ export const Create = () => {
 
             {/* Caracteristicas */}
 
-            <Grid item xs={12} sm={6}>
+            {/* <Grid item xs={12} sm={6}>
               <TextField fullWidth label="Habitaciones" />
             </Grid>
 
@@ -143,16 +142,16 @@ export const Create = () => {
                   startAdornment: <InputAdornment position="start">$</InputAdornment>
                 }}
               />
-            </Grid>
+            </Grid> */}
 
             {/* CASA Y EDIFICIO */}
-            <Grid item xs={12} sm={6}>
+            {/* <Grid item xs={12} sm={6}>
               <TextField fullWidth label="Pisos" />
             </Grid>
 
             <Grid item xs={12} sm={6}>
               <TextField fullWidth label="Departamentos" />
-            </Grid>
+            </Grid> */}
 
             {/* luz(SI-NO), agua(SI-NO), estacionamiento-parqueo(SI-NO), Amoblado(SI-NO) */}
             {/* Caracteristicas */}

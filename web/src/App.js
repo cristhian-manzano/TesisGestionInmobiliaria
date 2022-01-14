@@ -22,7 +22,8 @@ import { LoadingGlobal } from './store/context/LoadingGlobal';
 import { AuthContextProvider } from './store/context/authContext';
 
 // new
-import { Create } from './pages/dashboard/property/Create';
+import { Create as CreateProperty } from './pages/dashboard/property/Create';
+import { Create as CreateObservation } from './pages/dashboard/observation/Create';
 
 // Testing
 import { ProtectedRoutes } from './ProtectedRoutes';
@@ -44,11 +45,15 @@ const App = () => {
                 <Route path="/dashboard" element={<ProtectedRoutes />}>
                   <Route path="" element={<DashboardLayout />}>
                     <Route index element={<Home />} />
-                    <Route path="observation" element={<Observation />} />
+
+                    <Route path="observation" element={<Outlet />}>
+                      <Route path="" element={<Observation />} />
+                      <Route path="create" element={<CreateObservation />} />
+                    </Route>
 
                     <Route path="property" element={<Outlet />}>
                       <Route path="" element={<Property />} />
-                      <Route path="create" element={<Create />} />
+                      <Route path="create" element={<CreateProperty />} />
                     </Route>
 
                     <Route path="tenant" element={<Tenant />} />

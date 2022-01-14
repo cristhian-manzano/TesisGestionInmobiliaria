@@ -16,7 +16,7 @@ import {
   FormControl
 } from '@mui/material';
 
-import { Visibility, VisibilityOff, LockOutlined } from '@mui/icons-material';
+import { Visibility, VisibilityOff, LockOutlined, ArrowBack } from '@mui/icons-material';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -149,7 +149,13 @@ export const Login = () => {
               </MaterialLink>
             </Grid>
           </Grid>
-          <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 5 }}>
+
+          <Button component={RouterLink} to="/" color="inherit" sx={{ mt: 6, opacity: 0.6 }}>
+            <ArrowBack />
+            Regresar a inicio
+          </Button>
+
+          {/* <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 5 }}>
             {'Copyright © '}
             <MaterialLink
               color="inherit"
@@ -158,7 +164,7 @@ export const Login = () => {
               Tésis - gestión inmobiliaria
             </MaterialLink>{' '}
             {new Date().getFullYear()}.
-          </Typography>
+          </Typography> */}
         </Box>
       </Grid>
     </Grid>

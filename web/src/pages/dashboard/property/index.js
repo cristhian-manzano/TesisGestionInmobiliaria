@@ -46,7 +46,7 @@ export const Property = () => {
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', p: 2 }}>
-        <Typography variant="h4">Propiedades</Typography>
+        <Typography variant="h4">Inmuebles</Typography>
         <Button component={RouterLink} to="create" variant="contained">
           Agregar
         </Button>

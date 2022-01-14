@@ -13,7 +13,7 @@ import {
   MenuItem,
   FormHelperText
 } from '@mui/material';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
+import { ArrowBack, Visibility, VisibilityOff } from '@mui/icons-material';
 import { useEffect, useState, useContext } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -178,17 +178,14 @@ export const Register = () => {
                 Registrarse
               </Button>
             </Grid>
-            <Grid item xs={12} sm={12}>
-              <Button
-                component={RouterLink}
-                to="/login"
-                variant="contained"
-                color="secondary"
-                fullWidth>
-                Logearse
-              </Button>
-            </Grid>
           </Grid>
+
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Button component={RouterLink} to="/login" color="inherit" sx={{ mt: 3, opacity: 0.6 }}>
+              <ArrowBack />
+              Iniciar sesión
+            </Button>
+          </Box>
         </Paper>
       </Box>
     </Box>
