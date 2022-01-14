@@ -10,11 +10,16 @@ import {
   Button,
   CardMedia,
   Stack,
-  Divider
+  Divider,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  TextField
 } from '@mui/material';
 import { Link } from 'react-router-dom';
 
-import { WhatsApp } from '@mui/icons-material/';
+import { WhatsApp, Search, FilterAlt, CompareArrows } from '@mui/icons-material/';
 
 import LogoImage from '../assets/img/logo.png';
 
@@ -152,8 +157,69 @@ export const SearchProperty = () => {
         </Toolbar>
       </AppBar>
 
-      <Box sx={{ p: 3 }}>
+      <Box sx={{ px: 4, flex: '1 1 auto' }}>
+        <Box
+          sx={{
+            mt: 2,
+            mb: 4,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
+          <Grid container sx={{ my: 2, maxWidth: '700px' }} rowSpacing={1} spacing={1}>
+            <Grid item xs={12} sm={3}>
+              <FormControl fullWidth>
+                <InputLabel id="demo-simple-select-label">Tipo</InputLabel>
+                <Select
+                  labelId="demo-simple-select-label"
+                  id="demo-simple-select"
+                  value={1}
+                  label="Age"
+                  // onChange={handleChange}
+                >
+                  <MenuItem value={1}>Casa</MenuItem>
+                  <MenuItem value={2}>Departamento</MenuItem>
+                  <MenuItem value={3}>Local comercial</MenuItem>
+                  <MenuItem value={4}>Edificio</MenuItem>
+                  <MenuItem value={5}>Terreno</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12} sm={7}>
+              <TextField fullWidth placeholder="Ingresar sector a buscar" id="fullWidth" />
+            </Grid>
+            <Grid item xs={12} sm={2}>
+              <Button fullWidth variant="contained" sx={{ py: 2 }}>
+                <Search />
+              </Button>
+            </Grid>
+          </Grid>
+        </Box>
+
         <Box>
+          <Box
+            sx={{
+              mb: 3,
+              display: 'flex',
+              alignItems: 'center',
+              flexWrap: 'wrap'
+            }}>
+            <Typography variant="h5" sx={{ mr: 2 }}>
+              Resultados encontrados {dataProperties.length}
+            </Typography>
+            <Stack direction="row" spacing={1}>
+              <Button>
+                <CompareArrows sx={{ transform: 'rotate(90deg)' }} />
+                Ordenar
+              </Button>
+              <Button>
+                <FilterAlt />
+                Filtrar
+              </Button>
+            </Stack>
+          </Box>
+
           <Grid container spacing={2}>
             {dataProperties.map((property) => (
               <Grid key={property.id} xs={12} sm={6} md={4} lg={3} item>

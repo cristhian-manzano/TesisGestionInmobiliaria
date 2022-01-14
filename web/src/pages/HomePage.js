@@ -73,7 +73,7 @@ export const HomePage = () => {
             Buscar inmuebles en alquiler
           </Typography>
 
-          <Grid container sx={{ my: 2 }} rowSpacing={1}>
+          <Grid container sx={{ my: 2 }} rowSpacing={1} spacing={1}>
             <Grid item xs={12} sm={3}>
               <FormControl fullWidth>
                 <InputLabel id="demo-simple-select-label">Tipo</InputLabel>
