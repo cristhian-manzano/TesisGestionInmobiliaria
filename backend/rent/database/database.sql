@@ -24,11 +24,13 @@ CREATE TABLE "LeaseAgreement"(
 
 CREATE TABLE "Payment"(
 	"id" BIGSERIAL NOT NULL,
+	"code" VARCHAR(75) NULL,
 	"amount" NUMERIC(8,2) NULL,
-	"date" TIMESTAMPTZ NOT NULL,
+	"paymentDate"  TIMESTAMPTZ NOT NULL,
 	"datePaid"  TIMESTAMPTZ NOT NULL,
 	"validated" BOOLEAN NOT NULL,
 	"proofOfPayment" TEXT NOT NULL,
+	"dateRegister" TIMESTAMPTZ NOT NULL,
 	"idRent" BIGINT NOT NULL,
 	CONSTRAINT "Payment_pkey" PRIMARY KEY ("id"),
 	CONSTRAINT "Payment_idRent_fkey" FOREIGN KEY ("idRent") REFERENCES "Rent"("id") ON DELETE CASCADE ON UPDATE CASCADE

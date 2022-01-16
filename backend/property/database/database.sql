@@ -1,18 +1,30 @@
+CREATE TABLE "Sector"(
+	"id" SERIAL NOT NULL,
+	"name" VARCHAR(100) NULL,
+	CONSTRAINT "Sector_pkey" PRIMARY KEY ("id")
+);
+
 CREATE TABLE "TypeProperty"(
 	"id" SERIAL NOT NULL,
 	"name" VARCHAR(100) NULL,
+	"additionalFeatures" JSONB,
 	CONSTRAINT "TypeProperty_pkey" PRIMARY KEY ("id")
 );
 
 CREATE TABLE "Property"(
 	"id" BIGSERIAL NOT NULL,
-	"address" VARCHAR(200) NULL,
+	"tagName" VARCHAR(150) NULL,
 	"description" TEXT NULL,
 	"area"  NUMERIC(8,2) NULL,
-	"monthlyPrice" NUMERIC(8,2) NULL,
+	"price" NUMERIC(8,2) NULL,
+	"address" VARCHAR(200) NULL,
+	"available" NUMERIC(8,2) NULL,
+	"additionalFeatures" JSONB,
 	"idTypeProperty" INTEGER NOT NULL,
+	"idSector" INTEGER NOT NULL,
 	"idOwner" BIGINT NOT NULL,
 	CONSTRAINT "Property_pkey" PRIMARY KEY ("id"),
+	CONSTRAINT "Property_idSector_fkey" FOREIGN KEY ("idSector") REFERENCES "Sector"("id") ON DELETE CASCADE ON UPDATE CASCADE,
 	CONSTRAINT "Property_idTypeProperty_fkey" FOREIGN KEY ("idTypeProperty") REFERENCES "TypeProperty"("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
