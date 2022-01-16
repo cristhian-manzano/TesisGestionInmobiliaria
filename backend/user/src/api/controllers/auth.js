@@ -1,5 +1,4 @@
 const { Op } = require('sequelize');
-
 const { signInValidation, signUpValidation } = require('../validations/auth');
 
 const {
@@ -15,10 +14,12 @@ const {
   errorResponse
 } = require('../helpers/responsesFormat');
 
-const { createToken, encryptData, verifyEncrypted } = require('../helpers/functions');
-
 const User = require('../models/user');
+const UserRole = require('../models/userRole');
 const Logger = require('../../config/logger');
+
+const { createToken, encryptData, verifyEncrypted } = require('../helpers/functions');
+const sequelize = require('../models');
 
 const signIn = async (req, res) => {
   const { error, value } = signInValidation(req.body);
@@ -76,13 +77,33 @@ const signUp = async (req, res) => {
         .status(UNPROCESSABLE_ENTITY)
         .json(validationResponse(res.statusCode, 'User already exists!'));
 
+    // Encrypt password before creating user
     value.password = await encryptData(value.password);
-    const createdUser = await User.create(value);
+
+    const resultUserCreated = await sequelize.transaction(async (t) => {
+      const createdUser = await User.create(value, { transaction: t });
+
+      // Create roles
+      await Promise.all(
+        value.roles.map(async (role) => {
+          await UserRole.create(
+            {
+              idUser: createdUser.id,
+              idRole: role
+            },
+            { transaction: t }
+          );
+        })
+      );
+
+      return createdUser;
+    });
+
     return res.status(CREATED).json(
       successResponse(res.statusCode, 'User created!', {
-        email: createdUser.email,
-        firstName: createdUser.firstName,
-        lastName: createdUser.lastName
+        email: resultUserCreated.email,
+        firstName: resultUserCreated.firstName,
+        lastName: resultUserCreated.lastName
       })
     );
   } catch (e) {
