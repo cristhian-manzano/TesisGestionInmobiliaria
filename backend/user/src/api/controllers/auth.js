@@ -14,9 +14,12 @@ const {
   errorResponse
 } = require('../helpers/responsesFormat');
 
+const Logger = require('../../config/logger');
+
+// Models
 const User = require('../models/user');
 const UserRole = require('../models/userRole');
-const Logger = require('../../config/logger');
+const Role = require('../models/role');
 
 const { createToken, encryptData, verifyEncrypted } = require('../helpers/functions');
 const sequelize = require('../models');
@@ -31,6 +34,10 @@ const signIn = async (req, res) => {
     const user = await User.findOne({
       where: {
         email: value.email
+      },
+      include: {
+        model: Role,
+        as: 'roles'
       }
     });
 
@@ -40,15 +47,15 @@ const signIn = async (req, res) => {
     if (!(await verifyEncrypted(value.password, user.password)))
       return res.status(BAD_REQUEST).json(errorResponse(res.statusCode, 'Invalid credentials!'));
 
-    const token = createToken({ id: user.id, email: user.email });
+    const tokenCreated = createToken({ id: user.id, email: user.email });
 
     return res.json(
       successResponse(OK, 'User authenticated!', {
-        token,
+        token: tokenCreated,
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
-        idRole: user.idRole
+        roles: user.roles?.map((role) => role.name)
       })
     );
   } catch (e) {
