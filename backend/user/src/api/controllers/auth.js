@@ -21,7 +21,7 @@ const User = require('../models/user');
 const UserRole = require('../models/userRole');
 const Role = require('../models/role');
 
-const { createToken, encryptData, verifyEncrypted } = require('../helpers/functions');
+const { createToken, verifyToken, encryptData, verifyEncrypted } = require('../helpers/functions');
 const sequelize = require('../models');
 
 const signIn = async (req, res) => {
@@ -121,4 +121,36 @@ const signUp = async (req, res) => {
   }
 };
 
-module.exports = { signIn, signUp };
+const getUserByToken = async (req, res) => {
+  const { token } = req.body;
+
+  if (!token) return res.status(BAD_REQUEST).json(errorResponse(res.statusCode, 'Token not found'));
+
+  try {
+    const userToken = verifyToken(token);
+
+    const user = await User.findByPk(userToken?.id, {
+      attributes: ['id', 'email'],
+      include: {
+        model: Role,
+        as: 'roles'
+      }
+    });
+
+    if (!user)
+      return res.status(BAD_REQUEST).json(errorResponse(res.statusCode, 'User not found!'));
+
+    return res.status(OK).json(
+      successResponse(res.statusCode, 'User obtained!', {
+        id: user.id,
+        name: user.email,
+        roles: user.roles.map((role) => role.name)
+      })
+    );
+  } catch (e) {
+    Logger.error(e.toString());
+    return res.status(BAD_REQUEST).json(errorResponse(res.statusCode, 'Token invalid!'));
+  }
+};
+
+module.exports = { signIn, signUp, getUserByToken };
