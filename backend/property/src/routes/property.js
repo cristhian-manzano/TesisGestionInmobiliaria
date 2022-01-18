@@ -5,8 +5,9 @@ const { create, get, update, destroy } = require("../controllers/property");
 const { multerMiddleware } = require("../middlewares/multerMiddleware");
 
 // Routes
-// routes.get("/", get);
 routes.post("/", multerMiddleware, create);
+routes.get("/", get);
+
 // routes.put("/:id", update);
 // routes.delete("/:id", destroy);
 

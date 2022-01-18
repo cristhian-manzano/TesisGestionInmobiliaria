@@ -7,7 +7,7 @@ CREATE TABLE "Sector"(
 CREATE TABLE "TypeProperty"(
 	"id" SERIAL NOT NULL,
 	"name" VARCHAR(100) NULL,
-	"additionalFeatures" JSONB,
+	"additionalFeatures" JSONB NULL,
 	CONSTRAINT "TypeProperty_pkey" PRIMARY KEY ("id")
 );
 
