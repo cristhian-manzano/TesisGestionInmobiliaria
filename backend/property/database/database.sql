@@ -18,7 +18,7 @@ CREATE TABLE "Property"(
 	"area"  NUMERIC(8,2) NULL,
 	"price" NUMERIC(8,2) NULL,
 	"address" VARCHAR(200) NULL,
-	"available" NUMERIC(8,2) NULL,
+	"available" BOOLEAN NULL,
 	"additionalFeatures" JSONB,
 	"idTypeProperty" INTEGER NOT NULL,
 	"idSector" INTEGER NOT NULL,
@@ -30,6 +30,7 @@ CREATE TABLE "Property"(
 
 CREATE TABLE "ImageProperty"(
 	"id" BIGSERIAL NOT NULL,
+	"key" VARCHAR(255) NOT NULL,
 	"url" TEXT NOT NULL,
 	"idProperty" BIGINT NOT NULL,
 	CONSTRAINT "Image_pkey" PRIMARY KEY ("id"),

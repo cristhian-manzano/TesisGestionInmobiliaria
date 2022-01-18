@@ -10,12 +10,12 @@ const validateProperty = (data) => {
     available: Joi.boolean().required(),
     idTypeProperty: Joi.number().required(),
     idSector: Joi.number().required(),
-    aditionalFeatures: Joi.object(),
+    additionalFeatures: Joi.object(),
     // get owner with token
   });
 
   try {
-    data.aditionalFeatures = JSON.parse(data.aditionalFeatures);
+    data.additionalFeatures = JSON.parse(data.additionalFeatures);
   } catch (e) {
     console.log("Error aditionalFeatures!");
   }

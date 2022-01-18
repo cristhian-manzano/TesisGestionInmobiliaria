@@ -1,8 +1,12 @@
 const routes = require("express").Router();
 const { create, get, update, destroy } = require("../controllers/property");
 
-// Multer
+const { validateToken } = require("../middlewares/AuthMiddleare");
+// Multer, files
 const { multerMiddleware } = require("../middlewares/multerMiddleware");
+
+// X-user
+routes.use(validateToken);
 
 // Routes
 routes.post("/", multerMiddleware, create);

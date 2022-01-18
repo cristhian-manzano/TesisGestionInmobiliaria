@@ -1,25 +1,42 @@
 const { uploadFile, uploadMultipleFiles } = require("../services/awsService");
-
 const { validateProperty } = require("../validations/property");
-
 const Property = require("../models/property");
 const ImagesProperty = require("../models/imageProperty");
+const sequelize = require("../models");
 
 const create = async (req, res) => {
   const { error, value } = validateProperty(req.body);
   if (error) return res.json({ message: error.message });
 
-  // Values body
-  console.log(value);
-
   try {
-    const result = await uploadMultipleFiles(req.files);
-    if (result.length > 0) return res.json({ uploaded: result });
-  } catch (e) {
-    console.log("Error: ", e);
-  }
+    const result = await sequelize.transaction(async (t) => {
+      value.idOwner = +req.user?.id;
+      const createdProperty = await Property.create(value, { transaction: t });
+      const imagesUploaded = (await uploadMultipleFiles(req.files)) || [];
 
-  return res.json(req.body);
+      if (imagesUploaded.length > 0) {
+        await Promise.all(
+          imagesUploaded.map(async (image) => {
+            await ImagesProperty.create(
+              {
+                url: image.Location,
+                key: image.Key || image.key,
+                idProperty: createdProperty.id,
+              },
+              { transaction: t }
+            );
+          })
+        );
+      }
+
+      return createdProperty;
+    });
+
+    return res.json({ created: result });
+  } catch (e) {
+    console.log("Error: ", e.message);
+    res.json({ error: e.message });
+  }
 };
 
 const get = async (req, res) => {

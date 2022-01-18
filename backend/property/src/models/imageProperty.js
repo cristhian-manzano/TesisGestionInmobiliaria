@@ -14,6 +14,11 @@ const ImageProperty = sequelize.define(
       allowNull: false,
     },
 
+    key: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+    },
+
     url: {
       type: DataTypes.TEXT,
       allowNull: false,
