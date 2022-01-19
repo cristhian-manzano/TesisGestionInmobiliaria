@@ -1,6 +1,6 @@
 const Joi = require("joi");
 
-const validateProperty = (data) => {
+const validateCreateProperty = (data) => {
   const schema = Joi.object({
     tagName: Joi.string().required(),
     description: Joi.string().required(),
@@ -13,9 +13,8 @@ const validateProperty = (data) => {
     additionalFeatures: Joi.object(),
     // get owner with token
   });
-
   try {
-    data.additionalFeatures = JSON.parse(data.additionalFeatures);
+    data.additionalFeatures &&= JSON.parse(data.additionalFeatures);
   } catch (e) {
     console.log("Error aditionalFeatures!");
   }
@@ -23,4 +22,26 @@ const validateProperty = (data) => {
   return schema.validate(data);
 };
 
-module.exports = { validateProperty };
+const validateUpdateProperty = (data) => {
+  const schema = Joi.object({
+    tagName: Joi.string(),
+    description: Joi.string(),
+    area: Joi.number(),
+    price: Joi.number(),
+    address: Joi.string(),
+    available: Joi.boolean(),
+    idTypeProperty: Joi.number(),
+    additionalFeatures: Joi.object(),
+    deletedImages: Joi.array().items(Joi.object()),
+  });
+
+  try {
+    data.additionalFeatures &&= JSON.parse(data.additionalFeatures);
+  } catch (e) {
+    console.log("Error aditionalFeatures!");
+  }
+
+  return schema.validate(data);
+};
+
+module.exports = { validateCreateProperty, validateUpdateProperty };
