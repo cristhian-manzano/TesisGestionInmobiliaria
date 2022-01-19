@@ -18,7 +18,7 @@ app.use(cors());
 
 app.use("/", routes);
 
-const port = process.env.APP_PORT || 5000;
+const port = process.env.APP_PORT || 3000;
 
 // Validate if connected
 db.authenticate().catch((e) => {

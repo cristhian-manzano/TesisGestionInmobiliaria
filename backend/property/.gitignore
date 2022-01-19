@@ -1,8 +1,14 @@
 
 # node --
 node_modules
-
-
+*.log
+*.gz
 
 # Enviroment Files
 .env
+
+#Logs
+logs
+
+# Postgres-data docker
+postgres-data

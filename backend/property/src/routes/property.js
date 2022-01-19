@@ -11,10 +11,8 @@ const {
 // Multer, files
 const { multerMiddleware } = require("../middlewares/multerMiddleware");
 
+// Validate by user token
 const { validateToken } = require("../middlewares/AuthMiddleare");
-
-// Global Validate token
-// routes.use(validateToken);
 
 // Routes
 routes.get("/", getAll);

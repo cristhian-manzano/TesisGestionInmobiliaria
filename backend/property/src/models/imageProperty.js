@@ -1,8 +1,5 @@
 const { DataTypes } = require("sequelize");
-
 const sequelize = require("./index");
-
-const Property = require("./property");
 
 const ImageProperty = sequelize.define(
   "ImageProperty",
@@ -35,10 +32,5 @@ const ImageProperty = sequelize.define(
   },
   { timestamps: false }
 );
-
-// ImageProperty.belongsTo(Property, {
-//   foreignKey: "idProperty",
-//   as: "ImagesProperties",
-// });
 
 module.exports = ImageProperty;
