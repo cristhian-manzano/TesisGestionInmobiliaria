@@ -15,5 +15,5 @@ RUN npm install
 # Bundle app source
 COPY . .
 
-EXPOSE ${PORT}
+EXPOSE ${APP_PORT}
 CMD [ "node", "./src/index.js" ]

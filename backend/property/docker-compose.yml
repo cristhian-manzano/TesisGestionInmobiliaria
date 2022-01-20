@@ -3,7 +3,7 @@ services:
   api:
     build: .
     ports:
-      - '${PORT}:${PORT}'
+      - '${APP_PORT}:${APP_PORT}'
     env_file:
       - .env
     environment:
