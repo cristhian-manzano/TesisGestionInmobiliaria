@@ -15,6 +15,7 @@ export const registerScheme = yup
     phone: yup.string(),
     email: yup.string().email().required(),
     password: yup.string().required(),
-    idRole: yup.number().not([0], 'Role is a required field').required()
+    roles: yup.array().min(1).required(),
+    dateOfBirth: yup.date().required()
   })
   .required();

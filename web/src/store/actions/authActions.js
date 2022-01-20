@@ -3,8 +3,9 @@ import { setLocalstorage, sendRequest } from '../../helpers/utils';
 export const login = async (dispatch, loginPayload) => {
   dispatch({ type: 'REQUEST_LOGIN' });
 
+  // Validate exceptions
   const response = await sendRequest({
-    urlPath: '/auth/signin',
+    urlPath: `${process.env.REACT_APP_USER_SERVICE_URL}/auth/signin`,
     method: 'POST',
     data: loginPayload
   });
