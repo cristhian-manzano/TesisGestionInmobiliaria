@@ -1,3 +1,4 @@
+import { useContext } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { Box, Divider, Drawer, Typography, useMediaQuery } from '@mui/material';
@@ -5,7 +6,12 @@ import { NavItem } from '../../components/dashboard/NavItem';
 import { sidebarConfig } from './SidebarConfig';
 import LogoImage from '../../assets/img/logo.png';
 
+// Context
+import { AuthContext } from '../../store/context/authContext';
+
 export const DashboardSidebar = ({ open, onClose }) => {
+  const { authSession } = useContext(AuthContext);
+
   const lgUp = useMediaQuery((theme) => theme.breakpoints.up('lg'), {
     defaultMatches: true,
     noSsr: false
@@ -44,10 +50,12 @@ export const DashboardSidebar = ({ open, onClose }) => {
             }}>
             <div>
               <Typography color="inherit" variant="subtitle1">
-                Cristhian Manzano
+                {`${authSession.user?.firstName.split(' ')[0]} ${
+                  authSession.user?.lastName.split(' ')[0]
+                }`}
               </Typography>
               <Typography color="neutral.400" variant="body2">
-                Administrador
+                {authSession.user?.email}
               </Typography>
             </div>
           </Box>

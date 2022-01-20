@@ -2,7 +2,7 @@ import { createContext, useState, useMemo } from 'react';
 import { Alert, Snackbar } from '@mui/material';
 import PropTypes from 'prop-types';
 
-export const SnackbarContext = createContext('Cristhian manzano');
+export const SnackbarContext = createContext('');
 
 export const SnackbarGlobal = ({ children }) => {
   const [openSnackbar, setOpenSnackbar] = useState({ open: false });

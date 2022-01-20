@@ -10,11 +10,9 @@ import {
   Typography,
   ListItemIcon
 } from '@mui/material';
-// import PropTypes from 'prop-types';
 import { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../store/context/authContext';
-import { logout } from '../../store/actions/authActions';
 
 export const AccountMenu = () => {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -24,7 +22,7 @@ export const AccountMenu = () => {
   const navigate = useNavigate();
 
   // User context
-  const { userAuth, dispatch } = useContext(AuthContext);
+  const { authSession, setAuthSession } = useContext(AuthContext);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -34,7 +32,8 @@ export const AccountMenu = () => {
   };
 
   const handleLogout = () => {
-    logout(dispatch);
+    setAuthSession({ user: null });
+    localStorage.removeItem('session');
     navigate('/');
   };
 
@@ -105,10 +104,10 @@ export const AccountMenu = () => {
               textOverflow: 'ellipsis'
             }}>
             <Typography noWrap variant="body1">
-              {`${userAuth.user?.firstName} ${userAuth.user?.lastName}`}
+              {`${authSession.user?.firstName} ${authSession.user?.lastName}`}
             </Typography>
             <Typography noWrap variant="body2">
-              Administrador
+              {authSession.user?.roles?.map((role) => role).join('-')}
             </Typography>
           </Box>
         </Box>
