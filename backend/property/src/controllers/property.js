@@ -1,64 +1,59 @@
-const { uploadFiles, deleteFiles } = require("../services/awsService");
-const {
-  validateCreateProperty,
-  validateUpdateProperty,
-} = require("../validations/property");
-const Property = require("../models/property");
-const ImagesProperty = require("../models/imageProperty");
-const sequelize = require("../models");
+const { uploadFiles, deleteFiles } = require('../services/awsService');
+const { validateCreateProperty, validateUpdateProperty } = require('../validations/property');
+const Property = require('../models/property');
+const ImagesProperty = require('../models/imageProperty');
+const sequelize = require('../models');
 
 // Reponse
-const { responseStatusCodes } = require("../helpers/constants");
+const { responseStatusCodes } = require('../helpers/constants');
 const {
   errorResponse,
   validationResponse,
-  successResponse,
-} = require("../helpers/responsesFormat");
+  successResponse
+} = require('../helpers/responsesFormat');
 
-const Logger = require("../config/logger");
+const Logger = require('../config/logger');
 
 const getAll = async (req, res) => {
   try {
     const properties = await Property.findAll({
       include: {
         model: ImagesProperty,
-        as: "ImagesProperties",
+        as: 'ImagesProperties',
         attributes: {
-          exclude: ["idProperty"],
-        },
-      },
+          exclude: ['idProperty']
+        }
+      }
     });
 
     return res
       .status(responseStatusCodes.OK)
-      .json(
-        successResponse(res.statusCode, "Successfull request!", properties)
-      );
+      .json(successResponse(res.statusCode, 'Successfull request!', properties));
   } catch (e) {
-    Logger.error("Error: ", e.message);
+    Logger.error('Error: ', e.message);
     return res
       .status(responseStatusCodes.INTERNAL_SERVER_ERROR)
-      .json(errorResponse(res.statusCode, "Internal server errror."));
+      .json(errorResponse(res.statusCode, 'Internal server errror.'));
   }
 };
 
 const get = async (req, res) => {
   try {
-    const id = +req.params?.id;
+    const id = req.params?.id;
 
-    if (isNaN(id))
+    if (Number.isNaN(id))
       return res
         .status(responseStatusCodes.BAD_REQUEST)
-        .json(errorResponse(res.statusCode, "Id parameter is not a number"));
+        .json(errorResponse(res.statusCode, 'Id parameter is not a number'));
 
     const property = await Property.findByPk(id, {
       include: {
         model: ImagesProperty,
-        as: "ImagesProperties",
+        as: 'ImagesProperties',
         attributes: {
-          exclude: ["idProperty"],
-        },
-      },
+          exclude: ['idProperty']
+        }
+      }
     });
 
     if (!property)
@@ -68,12 +63,12 @@ const get = async (req, res) => {
 
     return res
       .status(responseStatusCodes.OK)
-      .json(successResponse(res.statusCode, "Successfull request!", property));
+      .json(successResponse(res.statusCode, 'Successfull request!', property));
   } catch (e) {
-    Logger.error("ERROR: ", e.message);
+    Logger.error('ERROR: ', e.message);
     return res
       .status(responseStatusCodes.INTERNAL_SERVER_ERROR)
-      .json(errorResponse(res.statusCode, "Internal server errror."));
+      .json(errorResponse(res.statusCode, 'Internal server errror.'));
   }
 };
 
@@ -87,7 +82,7 @@ const create = async (req, res) => {
   try {
     const result = await sequelize.transaction(async (t) => {
       // got owner id by token
-      value.idOwner = +req.user?.id;
+      value.idOwner = req.user?.id;
 
       const createdProperty = await Property.create(value, { transaction: t });
       const imagesUploaded = (await uploadFiles(req.files)) || [];
@@ -99,7 +94,7 @@ const create = async (req, res) => {
               {
                 url: image.Location,
                 key: image.Key || image.key,
-                idProperty: createdProperty.id,
+                idProperty: createdProperty.id
               },
               { transaction: t }
             );
@@ -112,12 +107,12 @@ const create = async (req, res) => {
 
     return res
       .status(responseStatusCodes.OK)
-      .json(successResponse(res.statusCode, "Successfull request!", result));
+      .json(successResponse(res.statusCode, 'Successfull request!', result));
   } catch (e) {
-    Logger.error("ERROR: ", e.message);
+    Logger.error('ERROR: ', e.message);
     return res
       .status(responseStatusCodes.INTERNAL_SERVER_ERROR)
-      .json(errorResponse(res.statusCode, "Internal server errror."));
+      .json(errorResponse(res.statusCode, 'Internal server errror.'));
   }
 };
 
@@ -130,12 +125,12 @@ const update = async (req, res) => {
       .json(validationResponse(res.statusCode, error.message));
 
   try {
-    const id = +req.params?.id;
+    const id = req.params?.id;
 
-    if (isNaN(id))
+    if (Number.isNaN(id))
       return res
         .status(responseStatusCodes.BAD_REQUEST)
-        .json(errorResponse(res.statusCode, "Id parameter is not a number"));
+        .json(errorResponse(res.statusCode, 'Id parameter is not a number'));
 
     const property = await Property.findByPk(id);
 
@@ -149,13 +144,13 @@ const update = async (req, res) => {
     const result = await sequelize.transaction(async (t) => {
       if (value.deletedImages?.length) {
         // Delete images from aws S3
-        await deleteFiles(deletedImages);
+        await deleteFiles(value.deletedImages);
         // Delete images from database
         await Promise.all(
           value.deletedImages.map(async (image) => {
             await ImagesProperty.destroy({
               where: { id: image.id },
-              transaction: t,
+              transaction: t
             });
           })
         );
@@ -170,7 +165,7 @@ const update = async (req, res) => {
               {
                 url: image.Location,
                 key: image.Key || image.key,
-                idProperty: property.id,
+                idProperty: property.id
               },
               { transaction: t }
             );
@@ -183,32 +178,32 @@ const update = async (req, res) => {
 
     return res
       .status(responseStatusCodes.OK)
-      .json(successResponse(res.statusCode, "Successfull request!", result));
+      .json(successResponse(res.statusCode, 'Successfull request!', result));
   } catch (e) {
-    Logger.error("ERROR: ", e.message);
+    Logger.error('ERROR: ', e.message);
     return res
       .status(responseStatusCodes.INTERNAL_SERVER_ERROR)
-      .json(errorResponse(res.statusCode, "Internal server errror."));
+      .json(errorResponse(res.statusCode, 'Internal server errror.'));
   }
 };
 
 const destroy = async (req, res) => {
   try {
-    const id = +req.params?.id;
+    const id = req.params?.id;
 
-    if (isNaN(id))
+    if (Number.isNaN(id))
       return res
         .status(responseStatusCodes.BAD_REQUEST)
-        .json(errorResponse(res.statusCode, "Id parameter is not a number"));
+        .json(errorResponse(res.statusCode, 'Id parameter is not a number'));
 
     const property = await Property.findByPk(id, {
       include: {
         model: ImagesProperty,
-        as: "ImagesProperties",
+        as: 'ImagesProperties',
         attributes: {
-          exclude: ["idProperty"],
-        },
-      },
+          exclude: ['idProperty']
+        }
+      }
     });
 
     if (!property)
@@ -216,19 +211,18 @@ const destroy = async (req, res) => {
         .status(responseStatusCodes.NOT_FOUND)
         .json(errorResponse(res.statusCode, `Property "${id}" not found!`));
 
-    if (property.ImagesProperties?.length)
-      await deleteFiles(property.ImagesProperties);
+    if (property.ImagesProperties?.length) await deleteFiles(property.ImagesProperties);
 
     await property.destroy();
 
     return res
       .status(responseStatusCodes.OK)
-      .json(successResponse(res.statusCode, "Successfull request!", result));
+      .json(successResponse(res.statusCode, 'Successfull request!', property));
   } catch (e) {
-    Logger.error("ERROR: ", e.message);
+    Logger.error('ERROR: ', e.message);
     return res
       .status(responseStatusCodes.INTERNAL_SERVER_ERROR)
-      .json(errorResponse(res.statusCode, "Internal server errror."));
+      .json(errorResponse(res.statusCode, 'Internal server errror.'));
   }
 };
 
@@ -237,5 +231,5 @@ module.exports = {
   get,
   create,
   update,
-  destroy,
+  destroy
 };

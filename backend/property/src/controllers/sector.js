@@ -1,13 +1,10 @@
-const Sector = require("../models/sector");
+const Sector = require('../models/sector');
 
 // Reponse
-const { responseStatusCodes } = require("../helpers/constants");
-const {
-  errorResponse,
-  successResponse,
-} = require("../helpers/responsesFormat");
+const { responseStatusCodes } = require('../helpers/constants');
+const { errorResponse, successResponse } = require('../helpers/responsesFormat');
 
-const Logger = require("../config/logger");
+const Logger = require('../config/logger');
 
 const get = async (req, res) => {
   try {
@@ -15,15 +12,15 @@ const get = async (req, res) => {
 
     return res
       .status(responseStatusCodes.OK)
-      .json(successResponse(res.statusCode, "Successfull request!", sectors));
+      .json(successResponse(res.statusCode, 'Successfull request!', sectors));
   } catch (e) {
-    Logger.error("Error: ", e.message);
+    Logger.error('Error: ', e.message);
     return res
       .status(responseStatusCodes.INTERNAL_SERVER_ERROR)
-      .json(errorResponse(res.statusCode, "Internal server errror."));
+      .json(errorResponse(res.statusCode, 'Internal server errror.'));
   }
 };
 
 module.exports = {
-  get,
+  get
 };

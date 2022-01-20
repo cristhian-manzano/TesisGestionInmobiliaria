@@ -1,4 +1,5 @@
-const Joi = require("joi");
+const Joi = require('joi');
+const Logger = require('../config/logger');
 
 const validateCreateProperty = (data) => {
   const schema = Joi.object({
@@ -10,13 +11,17 @@ const validateCreateProperty = (data) => {
     available: Joi.boolean().required(),
     idTypeProperty: Joi.number().required(),
     idSector: Joi.number().required(),
-    additionalFeatures: Joi.object(),
+    additionalFeatures: Joi.object()
     // get owner with token
   });
+
+  const validateObject = data;
+
   try {
-    data.additionalFeatures &&= JSON.parse(data.additionalFeatures);
+    if (validateObject.additionalFeatures)
+      validateObject.additionalFeatures = JSON.parse(validateObject.additionalFeatures);
   } catch (e) {
-    console.log("Error aditionalFeatures!");
+    Logger.error('Error aditionalFeatures!');
   }
 
   return schema.validate(data);
@@ -32,16 +37,19 @@ const validateUpdateProperty = (data) => {
     available: Joi.boolean(),
     idTypeProperty: Joi.number(),
     additionalFeatures: Joi.object(),
-    deletedImages: Joi.array().items(Joi.object()),
+    deletedImages: Joi.array().items(Joi.object())
   });
 
+  const validateObject = data;
+
   try {
-    data.additionalFeatures &&= JSON.parse(data.additionalFeatures);
+    if (validateObject.additionalFeatures)
+      validateObject.additionalFeatures = JSON.parse(validateObject.additionalFeatures);
   } catch (e) {
-    console.log("Error aditionalFeatures!");
+    Logger.error('Error aditionalFeatures!');
   }
 
-  return schema.validate(data);
+  return schema.validate(validateObject);
 };
 
 module.exports = { validateCreateProperty, validateUpdateProperty };

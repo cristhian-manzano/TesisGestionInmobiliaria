@@ -1,82 +1,82 @@
-const { DataTypes } = require("sequelize");
-const sequelize = require("./index");
+const { DataTypes } = require('sequelize');
+const sequelize = require('./index');
 
-const ImageProperty = require("./imageProperty");
+const ImageProperty = require('./imageProperty');
 
 const Property = sequelize.define(
-  "Property",
+  'Property',
   {
     id: {
       type: DataTypes.BIGINT,
       primaryKey: true,
       autoIncrement: true,
-      allowNull: false,
+      allowNull: false
     },
 
     tagName: {
       type: DataTypes.STRING(150),
-      allowNull: true,
+      allowNull: true
     },
 
     description: {
       type: DataTypes.TEXT,
-      allowNull: true,
+      allowNull: true
     },
 
     area: {
       type: DataTypes.NUMBER({ length: 8, decimals: 2 }),
-      allowNull: true,
+      allowNull: true
     },
 
     price: {
       type: DataTypes.NUMBER({ length: 8, decimals: 2 }),
-      allowNull: true,
+      allowNull: true
     },
 
     address: {
       type: DataTypes.STRING(200),
-      allowNull: true,
+      allowNull: true
     },
 
     available: {
       type: DataTypes.BOOLEAN,
-      allowNull: true,
+      allowNull: true
     },
 
     additionalFeatures: {
       type: DataTypes.JSONB,
-      allowNull: true,
+      allowNull: true
     },
 
     idOwner: {
       type: DataTypes.BIGINT,
-      allowNull: false,
+      allowNull: false
     },
 
     idTypeProperty: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "TypeProperty",
-        key: "id",
-      },
+        model: 'TypeProperty',
+        key: 'id'
+      }
     },
 
     idSector: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "Sector",
-        key: "id",
-      },
-    },
+        model: 'Sector',
+        key: 'id'
+      }
+    }
   },
   { timestamps: false }
 );
 
 Property.hasMany(ImageProperty, {
-  foreignKey: "idProperty",
-  as: "ImagesProperties",
+  foreignKey: 'idProperty',
+  as: 'ImagesProperties'
 });
 
 module.exports = Property;

@@ -1,7 +1,7 @@
-const routes = require("express").Router();
+const routes = require('express').Router();
 
-const { get } = require("../controllers/sector");
+const { get } = require('../controllers/sector');
 
-routes.get("/", get);
+routes.get('/', get);
 
 module.exports = routes;

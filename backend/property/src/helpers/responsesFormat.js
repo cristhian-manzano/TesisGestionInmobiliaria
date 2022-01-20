@@ -16,7 +16,7 @@ exports.successResponse = (statusCode, message, data) => ({
   code: statusCode,
   error: false,
   message,
-  data,
+  data
 });
 
 /**
@@ -29,7 +29,7 @@ exports.successResponse = (statusCode, message, data) => ({
 exports.errorResponse = (statusCode, message) => ({
   code: statusCode,
   error: true,
-  message,
+  message
 });
 
 /**
@@ -41,6 +41,6 @@ exports.errorResponse = (statusCode, message) => ({
 exports.validationResponse = (statusCode, validationError) => ({
   code: statusCode,
   error: true,
-  message: "validation errors",
-  validationError,
+  message: 'validation errors',
+  validationError
 });
