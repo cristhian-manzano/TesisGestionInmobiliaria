@@ -9,9 +9,11 @@ const getAll = async (req, res) => {
   });
 
   if (!roles)
-    res.status(INTERNAL_SERVER_ERROR).json(errorResponse(res.statusCode, 'Cannot get roles!'));
+    return res
+      .status(INTERNAL_SERVER_ERROR)
+      .json(errorResponse(res.statusCode, 'Cannot get roles!'));
 
-  res.status(OK).json(successResponse(res.statusCode, 'success!', roles));
+  return res.status(OK).json(successResponse(res.statusCode, 'success!', roles));
 };
 
 module.exports = {
