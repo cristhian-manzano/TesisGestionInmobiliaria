@@ -1,4 +1,7 @@
 import { useEffect, useState, useContext } from 'react';
+import { Link as RouterLink } from 'react-router-dom';
+import { useForm, Controller } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
 
 import {
   Box,
@@ -11,29 +14,36 @@ import {
   InputLabel,
   MenuItem,
   Button,
-  Autocomplete
+  Autocomplete,
+  FormHelperText
 } from '@mui/material';
 
 import { ArrowBack } from '@mui/icons-material/';
-import { Link as RouterLink } from 'react-router-dom';
+
 import { LoadingContext } from '../../../store/context/LoadingGlobal';
 import { SnackbarContext } from '../../../store/context/SnackbarGlobal';
 import { ImagesUpload } from '../../../components/ImagesUpload';
-// Utils
+import { propertyScheme } from '../../../schemas/property';
 import { sendRequest } from '../../../helpers/utils';
 
 export const Create = () => {
-  // Contexts
   const { handleLoading } = useContext(LoadingContext);
   const { handleOpenSnackbar } = useContext(SnackbarContext);
-
-  // States
-  const [propertyType, setPropertyType] = useState('');
   const [images, setImages] = useState({ loaded: [], uploaded: [], deleted: [] });
-
-  // Types properties
   const [properties, setProperties] = useState([]);
   const [sectors, setSectors] = useState([]);
+
+  const {
+    // reset,
+    // getValues,
+    control,
+    register,
+    handleSubmit,
+    formState: { errors }
+  } = useForm({
+    resolver: yupResolver(propertyScheme),
+    defaultValues: {}
+  });
 
   const fetchProperties = async () => {
     handleLoading(true);
@@ -70,10 +80,20 @@ export const Create = () => {
     fetchSectors();
   }, []);
 
-  const onChangePropertyType = (e) => setPropertyType(e.target.value);
-
   const handleChangeImages = (newState) => {
     setImages(newState);
+  };
+
+  // Put data as variable
+  const onSubmit = () => {
+    // Send data
+    // const sendData = {
+    //   ...data,
+    //   idSector: data.sector[0]?.id,
+    //   additionalFeatures: {},
+    //   propertyImages: images.uploaded
+    // };
+    // FormData send
   };
 
   return (
@@ -86,7 +106,7 @@ export const Create = () => {
         aria-label="Example">
         <ArrowBack /> regresar
       </Button>
-      <Box component="form">
+      <Box component="form" noValidate onSubmit={handleSubmit(onSubmit)}>
         <Card sx={{ p: 4 }}>
           <Typography variant="h4" sx={{ mb: 2 }}>
             Datos de inmueble
@@ -98,63 +118,82 @@ export const Create = () => {
                 <Grid item xs={12} sm={6}>
                   <FormControl fullWidth>
                     <InputLabel id="property-select">Tipo inmueble</InputLabel>
-                    <Select
-                      labelId="property-select"
-                      id="propertyTypeId"
-                      label="Tipo inmueble"
-                      onChange={onChangePropertyType}
-                      value={propertyType}>
-                      <MenuItem value={0} disabled>
-                        Seleccionar
-                      </MenuItem>
 
-                      {properties.map((type) => (
-                        <MenuItem key={type.id} value={type.id}>
-                          {type.name}
-                        </MenuItem>
-                      ))}
-                    </Select>
+                    <Controller
+                      name="idTypeProperty"
+                      control={control}
+                      render={({ field }) => (
+                        <Select
+                          labelId="property-select"
+                          // id="propertyTypeId"
+                          label="Tipo inmueble"
+                          value={field.value ?? ''}
+                          onChange={field.onChange}>
+                          {properties.map((type) => (
+                            <MenuItem key={type.id} value={type.id}>
+                              {type.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      )}
+                    />
+
+                    <FormHelperText error>{errors.idTypeProperty?.message}</FormHelperText>
                   </FormControl>
                 </Grid>
               </Grid>
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="Nombre" />
+              <TextField fullWidth label="Nombre" {...register('tagName')} />
+              <FormHelperText error>{errors.tagName?.message}</FormHelperText>
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="Area" />
+              <TextField fullWidth label="Area" {...register('area')} />
+              <FormHelperText error>{errors.area?.message}</FormHelperText>
             </Grid>
 
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
-                <Autocomplete
-                  disablePortal
-                  id="sectorsAutocomplete"
-                  options={sectors}
-                  isOptionEqualToValue={(option) => option.id}
-                  getOptionLabel={(option) => option.name}
-                  renderInput={(params) => <TextField {...params} label="Sector" />}
+                <Controller
+                  name="sector"
+                  control={control}
+                  render={({ field }) => (
+                    <Autocomplete
+                      disablePortal
+                      id="sectorsAutocomplete"
+                      options={sectors}
+                      onChange={(e, newValue) => field.onChange(newValue)}
+                      getOptionLabel={(option) => option.name}
+                      renderInput={(params) => <TextField {...params} label="Sector" />}
+                    />
+                  )}
                 />
+
+                <FormHelperText error>{errors.sector?.id.message}</FormHelperText>
               </FormControl>
             </Grid>
 
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="Precio" />
+              <TextField fullWidth label="Precio" {...register('price')} />
+              <FormHelperText error>{errors.price?.message}</FormHelperText>
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="Dirección" />
+              <TextField fullWidth label="Dirección" {...register('address')} />
+              <FormHelperText error>{errors.address?.message}</FormHelperText>
             </Grid>
 
             <Grid item xs={12} sm={12}>
               <TextField
                 fullWidth
                 label="Descripción"
+                {...register('description')}
                 placeholder="Agregar descripción de inmueble..."
                 multiline
                 maxRows={20}
                 minRows={5}
                 inputProps={{ maxLength: 2000 }}
               />
+              <FormHelperText error>{errors.description?.message}</FormHelperText>
             </Grid>
 
             <Grid item xs={12} sm={12}>
@@ -162,7 +201,7 @@ export const Create = () => {
             </Grid>
 
             <Grid item xs={12} sm={12}>
-              <Button fullWidth variant="contained">
+              <Button type="submit" fullWidth variant="contained">
                 Crear
               </Button>
             </Grid>
