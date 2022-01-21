@@ -9,7 +9,10 @@
       "request": "launch",
       "name": "Launch Program",
       "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
-      "program": "${workspaceFolder}/src/"
+      "program": "${workspaceFolder}/src/",
+      "env": {
+        "NODE_ENV": "production"
+      }
     }
   ]
 }

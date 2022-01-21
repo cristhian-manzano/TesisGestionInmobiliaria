@@ -20,6 +20,7 @@ import {
 
 import { ArrowBack } from '@mui/icons-material/';
 
+import { AuthContext } from '../../../store/context/authContext';
 import { LoadingContext } from '../../../store/context/LoadingGlobal';
 import { SnackbarContext } from '../../../store/context/SnackbarGlobal';
 import { ImagesUpload } from '../../../components/ImagesUpload';
@@ -27,14 +28,17 @@ import { propertyScheme } from '../../../schemas/property';
 import { sendRequest } from '../../../helpers/utils';
 
 export const Create = () => {
+  // Contexts
   const { handleLoading } = useContext(LoadingContext);
   const { handleOpenSnackbar } = useContext(SnackbarContext);
+  const { authSession } = useContext(AuthContext);
+
   const [images, setImages] = useState({ loaded: [], uploaded: [], deleted: [] });
   const [properties, setProperties] = useState([]);
   const [sectors, setSectors] = useState([]);
 
   const {
-    // reset,
+    reset,
     // getValues,
     control,
     register,
@@ -84,16 +88,61 @@ export const Create = () => {
     setImages(newState);
   };
 
-  // Put data as variable
-  const onSubmit = () => {
-    // Send data
-    // const sendData = {
-    //   ...data,
-    //   idSector: data.sector[0]?.id,
-    //   additionalFeatures: {},
-    //   propertyImages: images.uploaded
-    // };
-    // FormData send
+  const onSubmit = async (data) => {
+    const keysToSend = [
+      'tagName',
+      'description',
+      'area',
+      'price',
+      'address',
+      'idTypeProperty',
+      'idSector',
+      'additionalFeatures',
+      'propertyImages'
+    ];
+
+    const dataToSend = {
+      ...data,
+      idSector: data.sector?.id,
+      propertyImages: images.uploaded.map((image) => image.file)
+    };
+
+    const formData = new FormData();
+
+    Object.keys(dataToSend).forEach((key) => {
+      if (!keysToSend.includes(key)) return;
+      switch (key) {
+        case 'additionalFeatures':
+          formData.append(key, JSON.stringify(dataToSend[key]));
+          break;
+        case 'propertyImages':
+          dataToSend[key]?.forEach((image) => {
+            formData.append(key, image);
+          });
+          break;
+        default:
+          formData.append(key, dataToSend[key]);
+          break;
+      }
+    });
+
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_PROPERTY_SERVICE_URL}/property`,
+      method: 'POST',
+      token: authSession.user?.token,
+      data: formData,
+      isFormData: true
+    });
+    handleLoading(false);
+
+    if (response.error) {
+      handleOpenSnackbar('error', 'No se pudo crear la propiedad!');
+    } else {
+      handleOpenSnackbar('success', 'Propiedad creada exitosamente!');
+      reset();
+      setImages({ loaded: [], uploaded: [], deleted: [] });
+    }
   };
 
   return (
@@ -125,7 +174,6 @@ export const Create = () => {
                       render={({ field }) => (
                         <Select
                           labelId="property-select"
-                          // id="propertyTypeId"
                           label="Tipo inmueble"
                           value={field.value ?? ''}
                           onChange={field.onChange}>
@@ -144,7 +192,7 @@ export const Create = () => {
               </Grid>
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="Nombre" {...register('tagName')} />
+              <TextField fullWidth label="Etiqueta" {...register('tagName')} />
               <FormHelperText error>{errors.tagName?.message}</FormHelperText>
             </Grid>
             <Grid item xs={12} sm={6}>

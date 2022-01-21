@@ -37,7 +37,7 @@ export const sendRequest = async ({
     }
 
     if (token) {
-      headers.append('Authorization', `Bearer ${token}`);
+      headers.append('Authorization', `${token}`); // Bearer?
     }
 
     const response = await fetch(`${urlPath}`, {
