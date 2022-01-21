@@ -3,6 +3,7 @@ const sequelize = require('./index');
 
 const ImageProperty = require('./imageProperty');
 const TypeProperty = require('./typeProperty');
+const Sector = require('./sector');
 
 const Property = sequelize.define(
   'Property',
@@ -83,6 +84,11 @@ Property.hasMany(ImageProperty, {
 Property.belongsTo(TypeProperty, {
   foreignKey: 'idTypeProperty',
   as: 'typeProperty'
+});
+
+Property.belongsTo(Sector, {
+  foreignKey: 'idSector',
+  as: 'sector'
 });
 
 module.exports = Property;

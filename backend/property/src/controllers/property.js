@@ -3,6 +3,7 @@ const { validateCreateProperty, validateUpdateProperty } = require('../validatio
 const Property = require('../models/property');
 const ImagesProperty = require('../models/imageProperty');
 const TypeProperty = require('../models/typeProperty');
+const Sector = require('../models/sector');
 const sequelize = require('../models');
 
 // Reponse
@@ -18,13 +19,28 @@ const Logger = require('../config/logger');
 const getAll = async (req, res) => {
   try {
     const properties = await Property.findAll({
-      include: {
-        model: ImagesProperty,
-        as: 'ImagesProperties',
-        attributes: {
-          exclude: ['idProperty']
+      attributes: { exclude: ['idTypeProperty', 'idSector'] },
+
+      include: [
+        {
+          model: ImagesProperty,
+          as: 'ImagesProperties',
+          attributes: {
+            exclude: ['idProperty']
+          }
+        },
+        {
+          model: TypeProperty,
+          as: 'typeProperty',
+          attributes: {
+            exclude: ['additionalFeatures']
+          }
+        },
+        {
+          model: Sector,
+          as: 'sector'
         }
-      }
+      ]
     });
 
     return res
@@ -43,7 +59,7 @@ const getByOwner = async (req, res) => {
     const ownerId = req.user?.id;
 
     const properties = await Property.findAll({
-      attributes: { exclude: ['idTypeProperty'] },
+      attributes: { exclude: ['idTypeProperty', 'idSector'] },
 
       include: [
         {
@@ -59,6 +75,10 @@ const getByOwner = async (req, res) => {
           attributes: {
             exclude: ['additionalFeatures']
           }
+        },
+        {
+          model: Sector,
+          as: 'sector'
         }
       ],
       where: {
@@ -87,13 +107,28 @@ const get = async (req, res) => {
         .json(errorResponse(res.statusCode, 'Id parameter is not a number'));
 
     const property = await Property.findByPk(id, {
-      include: {
-        model: ImagesProperty,
-        as: 'ImagesProperties',
-        attributes: {
-          exclude: ['idProperty']
+      attributes: { exclude: ['idTypeProperty', 'idSector'] },
+
+      include: [
+        {
+          model: ImagesProperty,
+          as: 'ImagesProperties',
+          attributes: {
+            exclude: ['idProperty']
+          }
+        },
+        {
+          model: TypeProperty,
+          as: 'typeProperty',
+          attributes: {
+            exclude: ['additionalFeatures']
+          }
+        },
+        {
+          model: Sector,
+          as: 'sector'
         }
-      }
+      ]
     });
 
     if (!property)
