@@ -2,6 +2,7 @@ const { uploadFiles, deleteFiles } = require('../services/awsService');
 const { validateCreateProperty, validateUpdateProperty } = require('../validations/property');
 const Property = require('../models/property');
 const ImagesProperty = require('../models/imageProperty');
+const TypeProperty = require('../models/typeProperty');
 const sequelize = require('../models');
 
 // Reponse
@@ -42,13 +43,24 @@ const getByOwner = async (req, res) => {
     const ownerId = req.user?.id;
 
     const properties = await Property.findAll({
-      include: {
-        model: ImagesProperty,
-        as: 'ImagesProperties',
-        attributes: {
-          exclude: ['idProperty']
+      attributes: { exclude: ['idTypeProperty'] },
+
+      include: [
+        {
+          model: ImagesProperty,
+          as: 'ImagesProperties',
+          attributes: {
+            exclude: ['idProperty']
+          }
+        },
+        {
+          model: TypeProperty,
+          as: 'typeProperty',
+          attributes: {
+            exclude: ['additionalFeatures']
+          }
         }
-      },
+      ],
       where: {
         idOwner: ownerId
       }

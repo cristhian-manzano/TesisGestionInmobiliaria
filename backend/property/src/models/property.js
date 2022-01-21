@@ -2,6 +2,7 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('./index');
 
 const ImageProperty = require('./imageProperty');
+const TypeProperty = require('./typeProperty');
 
 const Property = sequelize.define(
   'Property',
@@ -77,6 +78,11 @@ const Property = sequelize.define(
 Property.hasMany(ImageProperty, {
   foreignKey: 'idProperty',
   as: 'ImagesProperties'
+});
+
+Property.belongsTo(TypeProperty, {
+  foreignKey: 'idTypeProperty',
+  as: 'typeProperty'
 });
 
 module.exports = Property;
