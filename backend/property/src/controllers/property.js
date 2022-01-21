@@ -37,6 +37,34 @@ const getAll = async (req, res) => {
   }
 };
 
+const getByOwner = async (req, res) => {
+  try {
+    const ownerId = req.user?.id;
+
+    const properties = await Property.findAll({
+      include: {
+        model: ImagesProperty,
+        as: 'ImagesProperties',
+        attributes: {
+          exclude: ['idProperty']
+        }
+      },
+      where: {
+        idOwner: ownerId
+      }
+    });
+
+    return res
+      .status(responseStatusCodes.OK)
+      .json(successResponse(res.statusCode, 'Successfull request!', properties));
+  } catch (e) {
+    Logger.error('Error: ', e.message);
+    return res
+      .status(responseStatusCodes.INTERNAL_SERVER_ERROR)
+      .json(errorResponse(res.statusCode, 'Internal server errror.'));
+  }
+};
+
 const get = async (req, res) => {
   try {
     const id = req.params?.id;
@@ -231,5 +259,6 @@ module.exports = {
   get,
   create,
   update,
-  destroy
+  destroy,
+  getByOwner
 };
