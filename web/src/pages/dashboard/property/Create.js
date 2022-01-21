@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 
 import {
   Box,
@@ -11,62 +11,69 @@ import {
   InputLabel,
   MenuItem,
   Button,
-  Stack,
-  Divider,
-  IconButton
-  // InputAdornment
+  Autocomplete
 } from '@mui/material';
 
-import { AddCircleOutline, Delete, ArrowBack } from '@mui/icons-material/';
-
+import { ArrowBack } from '@mui/icons-material/';
 import { Link as RouterLink } from 'react-router-dom';
-
-const dataPropertyType = [
-  { id: 1, name: 'Casa', additionalFields: [''] },
-  { id: 2, name: 'Departamento', additionalFields: [''] },
-  { id: 3, name: 'Local', additionalFields: [''] },
-  { id: 4, name: 'Edificio', additionalFields: [''] },
-  { id: 5, name: 'Terreno', additionalFields: [''] }
-];
+import { LoadingContext } from '../../../store/context/LoadingGlobal';
+import { SnackbarContext } from '../../../store/context/SnackbarGlobal';
+import { ImagesUpload } from '../../../components/ImagesUpload';
+// Utils
+import { sendRequest } from '../../../helpers/utils';
 
 export const Create = () => {
+  // Contexts
+  const { handleLoading } = useContext(LoadingContext);
+  const { handleOpenSnackbar } = useContext(SnackbarContext);
+
+  // States
   const [propertyType, setPropertyType] = useState('');
   const [images, setImages] = useState({ loaded: [], uploaded: [], deleted: [] });
 
-  const onChangePropertyType = (e) => setPropertyType(e.target.value);
+  // Types properties
+  const [properties, setProperties] = useState([]);
+  const [sectors, setSectors] = useState([]);
 
-  const uploadImage = (e) => {
-    const uploadedImages = images.uploaded;
-
-    [...e.target.files]?.forEach((image, index) => {
-      // Condición para solo subir archivos < 5 MB
-      if (parseFloat(image.size / 1024 ** 2) > 5) return;
-
-      // Condición para no subir si se sobrepasa el limite establecido (8 por ahora)
-      if (e.target.files.length - index + images.loaded.length + images.uploaded.length > 8) return;
-
-      uploadedImages.push({
-        id: `${image.name}-${Date.now()}`,
-        url: URL.createObjectURL(image),
-        file: image
-      });
+  const fetchProperties = async () => {
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_PROPERTY_SERVICE_URL}/type-property`,
+      method: 'GET'
     });
+    handleLoading(false);
 
-    // Clean input component
-    e.target.value = null;
-    setImages((previous) => ({ ...previous, uploaded: uploadedImages }));
+    if (response.error) {
+      handleOpenSnackbar('error', 'No se pudo obtener los Tipo propiedades!');
+    } else {
+      setProperties(response.data?.data || []);
+    }
   };
 
-  const onDeleteImage = (id) => {
-    const imagesDeleted = images.deleted;
-
-    const loadedFiltered = images.loaded.filter((image) => {
-      if (image.id !== id) return true;
-      imagesDeleted.push(image);
-      return false;
+  const fetchSectors = async () => {
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_PROPERTY_SERVICE_URL}/sector`,
+      method: 'GET'
     });
-    const uploadedFiltered = images.uploaded.filter((image) => image.id !== id);
-    setImages({ loaded: loadedFiltered, uploaded: uploadedFiltered, deleted: imagesDeleted });
+    handleLoading(false);
+
+    if (response.error) {
+      handleOpenSnackbar('error', 'No se pudo obtener los sectores!');
+    } else {
+      setSectors(response.data?.data || []);
+    }
+  };
+
+  useEffect(() => {
+    fetchProperties();
+    fetchSectors();
+  }, []);
+
+  const onChangePropertyType = (e) => setPropertyType(e.target.value);
+
+  const handleChangeImages = (newState) => {
+    setImages(newState);
   };
 
   return (
@@ -93,7 +100,7 @@ export const Create = () => {
                     <InputLabel id="property-select">Tipo inmueble</InputLabel>
                     <Select
                       labelId="property-select"
-                      id="demo-simple-select"
+                      id="propertyTypeId"
                       label="Tipo inmueble"
                       onChange={onChangePropertyType}
                       value={propertyType}>
@@ -101,7 +108,7 @@ export const Create = () => {
                         Seleccionar
                       </MenuItem>
 
-                      {dataPropertyType.map((type) => (
+                      {properties.map((type) => (
                         <MenuItem key={type.id} value={type.id}>
                           {type.name}
                         </MenuItem>
@@ -117,44 +124,26 @@ export const Create = () => {
             <Grid item xs={12} sm={6}>
               <TextField fullWidth label="Area" />
             </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                <Autocomplete
+                  disablePortal
+                  id="sectorsAutocomplete"
+                  options={sectors}
+                  isOptionEqualToValue={(option) => option.id}
+                  getOptionLabel={(option) => option.name}
+                  renderInput={(params) => <TextField {...params} label="Sector" />}
+                />
+              </FormControl>
+            </Grid>
+
             <Grid item xs={12} sm={6}>
               <TextField fullWidth label="Precio" />
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField fullWidth label="Dirección" />
             </Grid>
-
-            {/* Caracteristicas */}
-
-            {/* <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="Habitaciones" />
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="Baños" />
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Alicuota"
-                InputProps={{
-                  startAdornment: <InputAdornment position="start">$</InputAdornment>
-                }}
-              />
-            </Grid> */}
-
-            {/* CASA Y EDIFICIO */}
-            {/* <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="Pisos" />
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="Departamentos" />
-            </Grid> */}
-
-            {/* luz(SI-NO), agua(SI-NO), estacionamiento-parqueo(SI-NO), Amoblado(SI-NO) */}
-            {/* Caracteristicas */}
 
             <Grid item xs={12} sm={12}>
               <TextField
@@ -169,61 +158,8 @@ export const Create = () => {
             </Grid>
 
             <Grid item xs={12} sm={12}>
-              <Box sx={{ p: 2, border: '1px solid #DDDDDD' }}>
-                <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    flexWrap: 'wrap',
-                    my: 1
-                  }}>
-                  <Typography variant="h5">Imágenes</Typography>
-
-                  <label htmlFor="btn-upload">
-                    <input
-                      type="file"
-                      id="btn-upload"
-                      style={{ display: 'none' }}
-                      multiple
-                      accept=".jpg, .jpeg, .png"
-                      onChange={uploadImage}
-                    />
-                    <Button variant="outlined" component="span">
-                      <AddCircleOutline />
-                      Agregar
-                    </Button>
-                  </label>
-                </Box>
-
-                <Stack
-                  direction="row"
-                  divider={<Divider orientation="vertical" flexItem />}
-                  spacing={2}
-                  alignItems="center"
-                  sx={{ overflow: 'auto' }}>
-                  {[...images.loaded, ...images.uploaded].map((image) => (
-                    <Box
-                      key={image?.id}
-                      sx={{
-                        display: 'flex',
-                        position: 'relative'
-                      }}>
-                      <a href={image?.url} target="_blank" rel="noreferrer">
-                        <img src={image?.url} alt="Imagen" height={150} width={150} />
-                      </a>
-
-                      <IconButton
-                        sx={{ position: 'absolute', top: 5, right: 5, p: 0 }}
-                        onClick={() => onDeleteImage(image?.id)}>
-                        <Delete color="error" />
-                      </IconButton>
-                    </Box>
-                  ))}
-                </Stack>
-              </Box>
+              <ImagesUpload images={images} onChangeImages={handleChangeImages} />
             </Grid>
-            {/* FIN PRUEBA */}
 
             <Grid item xs={12} sm={12}>
               <Button fullWidth variant="contained">
