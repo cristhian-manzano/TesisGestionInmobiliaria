@@ -1,5 +1,4 @@
 import { useState, useEffect, useContext } from 'react';
-
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 
 import {
@@ -25,11 +24,10 @@ import { TableMoreMenu } from '../../../components/TableMoreMenu';
 import { sendRequest } from '../../../helpers/utils';
 
 export const Property = () => {
+  const navigate = useNavigate();
   const { authSession } = useContext(AuthContext);
   const { handleLoading } = useContext(LoadingContext);
   const { handleOpenSnackbar } = useContext(SnackbarContext);
-
-  const navigate = useNavigate();
 
   const [properties, setProperties] = useState([]);
 
@@ -53,19 +51,24 @@ export const Property = () => {
     fetchProperties();
   }, []);
 
-  const onView = (id) => {
-    navigate(`${id}`);
-  };
+  const onView = (id) => navigate(`${id}`);
+  const onUpdate = (id) => navigate(`update/${id}`);
 
-  const onUpdate = (id) => {
-    navigate(`update/${id}`);
-  };
+  const onDelete = async (id) => {
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_PROPERTY_SERVICE_URL}/property/${id}`,
+      token: authSession.user?.token,
+      method: 'DELETE'
+    });
+    handleLoading(false);
 
-  // Este es el evento delete
-  const onDelete = (id) => {
-    /* eslint-disable no-console */
-    console.log('ID: ', id);
-    /* eslint-enable no-console */
+    if (response.error) {
+      handleOpenSnackbar('error', 'No se pudo elimnar la propiedad!');
+    } else {
+      await fetchProperties();
+      handleOpenSnackbar('success', 'Propiedad eliminada exitosamente!');
+    }
   };
 
   return (
@@ -103,8 +106,8 @@ export const Property = () => {
                     <TableCell>
                       <TableMoreMenu
                         onView={() => onView(row.id)}
-                        onUpdate={() => onUpdate(row.name)}
-                        onDelete={() => onDelete(row.name)}
+                        onUpdate={() => onUpdate(row.id)}
+                        onDelete={() => onDelete(row.id)}
                       />
                     </TableCell>
                   </TableRow>

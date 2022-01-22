@@ -91,7 +91,7 @@ export const Details = () => {
                 sx={{ my: 3, display: 'flex', flexWrap: 'wrap', justifyContent: 'space-around' }}>
                 {property.ImagesProperties?.map((image) => (
                   <Box key={image.id} sx={{ m: 1 }}>
-                    <img alt="Imagen propiedad" src={image.url} width={125} />
+                    <img alt="Imagen propiedad" src={image.url} height={125} />
                   </Box>
                 ))}
               </Box>
