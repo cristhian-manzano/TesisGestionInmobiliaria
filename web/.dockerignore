@@ -1,0 +1,13 @@
+**/.git
+**/.gitignore
+**/.vscode
+**/.env.example
+node_modules
+build
+
+.eslintrc.json
+.eslintignore
+.prettierrc
+.prettierignore
+
+README.md
