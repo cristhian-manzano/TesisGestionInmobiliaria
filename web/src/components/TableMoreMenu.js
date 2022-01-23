@@ -17,6 +17,7 @@ export const TableMoreMenu = ({ onView, onUpdate, onDelete }) => {
 
       <Menu
         open={isOpen}
+        closeAfterTransition
         anchorEl={ref.current}
         onClose={() => setIsOpen(false)}
         PaperProps={{
@@ -38,7 +39,12 @@ export const TableMoreMenu = ({ onView, onUpdate, onDelete }) => {
           <ListItemText primary="Editar" primaryTypographyProps={{ variant: 'body2' }} />
         </MenuItem>
 
-        <MenuItem sx={{ color: 'text.secondary' }} onClick={onDelete}>
+        <MenuItem
+          sx={{ color: 'text.secondary' }}
+          onClick={() => {
+            onDelete();
+            setIsOpen(false);
+          }}>
           <ListItemIcon>
             <Delete sx={{ fontSize: 25 }} />
           </ListItemIcon>
