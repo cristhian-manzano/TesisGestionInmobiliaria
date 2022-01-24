@@ -1,7 +1,6 @@
 import { useEffect, useState, useContext } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
 
 import {
   Box,
@@ -15,16 +14,15 @@ import {
   MenuItem,
   Button,
   Autocomplete,
-  FormHelperText
+  FormHelperText,
+  InputAdornment
 } from '@mui/material';
 
 import { ArrowBack } from '@mui/icons-material/';
-
 import { AuthContext } from '../../../store/context/authContext';
 import { LoadingContext } from '../../../store/context/LoadingGlobal';
 import { SnackbarContext } from '../../../store/context/SnackbarGlobal';
 import { ImagesUpload } from '../../../components/ImagesUpload';
-import { propertyScheme } from '../../../schemas/property';
 import { sendRequest } from '../../../helpers/utils';
 
 export const Create = () => {
@@ -34,22 +32,35 @@ export const Create = () => {
   const { authSession } = useContext(AuthContext);
 
   const [images, setImages] = useState({ loaded: [], uploaded: [], deleted: [] });
-  const [properties, setProperties] = useState([]);
+  const [typeProperties, setTypeProperties] = useState([]);
   const [sectors, setSectors] = useState([]);
+
+  // Selected type property
+  const [selectedTypeProperty, setSelectedTypeProperty] = useState({});
+
+  const handleSelectTypeProperty = (e) => {
+    const getTypeProperty = typeProperties.find((type) => type.id === e.target.value);
+    setSelectedTypeProperty(getTypeProperty);
+  };
 
   const {
     reset,
-    // getValues,
+    getValues,
     control,
     register,
     handleSubmit,
     formState: { errors }
   } = useForm({
-    resolver: yupResolver(propertyScheme),
     defaultValues: {}
   });
 
-  const fetchProperties = async () => {
+  /* eslint-disable no-console */
+  console.log('Selected type property: ---> ', selectedTypeProperty);
+  console.log('Errors: ---> ', errors);
+  console.log('Values: ---> ', getValues());
+  /* eslint-enable no-console */
+
+  const fetchTypeProperties = async () => {
     handleLoading(true);
     const response = await sendRequest({
       urlPath: `${process.env.REACT_APP_PROPERTY_SERVICE_URL}/type-property`,
@@ -60,7 +71,7 @@ export const Create = () => {
     if (response.error) {
       handleOpenSnackbar('error', 'No se pudo obtener los Tipo propiedades!');
     } else {
-      setProperties(response.data?.data || []);
+      setTypeProperties(response.data?.data || []);
     }
   };
 
@@ -80,7 +91,7 @@ export const Create = () => {
   };
 
   useEffect(() => {
-    fetchProperties();
+    fetchTypeProperties();
     fetchSectors();
   }, []);
 
@@ -89,42 +100,40 @@ export const Create = () => {
   };
 
   const onSubmit = async (data) => {
-    const keysToSend = [
+    const keysForm = [
       'tagName',
       'description',
       'area',
       'price',
       'address',
       'idTypeProperty',
-      'idSector',
-      'additionalFeatures',
-      'propertyImages'
+      'idSector'
     ];
 
+    const fields = Object.keys(data).reduce((obj, key) => {
+      if (keysForm.includes(key)) return { ...obj, [key]: data[key] };
+
+      if (selectedTypeProperty?.additionalFeatures?.includes(key))
+        return { ...obj, additionalFeatures: { ...obj.additionalFeatures, [key]: data[key] } };
+
+      return obj;
+    }, {});
+
     const dataToSend = {
-      ...data,
-      idSector: data.sector?.id,
-      propertyImages: images.uploaded.map((image) => image.file)
+      ...fields,
+      idSector: fields.idSector?.id,
+      additionalFeatures: JSON.stringify(fields.additionalFeatures ?? {})
     };
 
     const formData = new FormData();
+    Object.keys(dataToSend).forEach((key) => formData.append(key, dataToSend[key]));
 
-    Object.keys(dataToSend).forEach((key) => {
-      if (!keysToSend.includes(key)) return;
-      switch (key) {
-        case 'additionalFeatures':
-          formData.append(key, JSON.stringify(dataToSend[key]));
-          break;
-        case 'propertyImages':
-          dataToSend[key]?.forEach((image) => {
-            formData.append(key, image);
-          });
-          break;
-        default:
-          formData.append(key, dataToSend[key]);
-          break;
-      }
-    });
+    // Adding images to formdata
+    images.uploaded
+      .map((image) => image.file)
+      .forEach((image) => {
+        formData.append('propertyImages', image);
+      });
 
     handleLoading(true);
     const response = await sendRequest({
@@ -171,13 +180,17 @@ export const Create = () => {
                     <Controller
                       name="idTypeProperty"
                       control={control}
+                      rules={{ required: true }}
                       render={({ field }) => (
                         <Select
                           labelId="property-select"
                           label="Tipo inmueble"
                           value={field.value ?? ''}
-                          onChange={field.onChange}>
-                          {properties.map((type) => (
+                          onChange={(e) => {
+                            field.onChange(e);
+                            handleSelectTypeProperty(e);
+                          }}>
+                          {typeProperties.map((type) => (
                             <MenuItem key={type.id} value={type.id}>
                               {type.name}
                             </MenuItem>
@@ -186,30 +199,39 @@ export const Create = () => {
                       )}
                     />
 
-                    <FormHelperText error>{errors.idTypeProperty?.message}</FormHelperText>
+                    <FormHelperText error>
+                      {errors.idTypeProperty && 'Debe seleccionar tipo de inmueble'}
+                    </FormHelperText>
                   </FormControl>
                 </Grid>
               </Grid>
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="Etiqueta" {...register('tagName')} />
-              <FormHelperText error>{errors.tagName?.message}</FormHelperText>
+              <FormControl fullWidth>
+                <TextField label="Nombre" {...register('tagName', { required: true })} />
+                <FormHelperText error>{errors.tagName && 'Nombre requerido'}</FormHelperText>
+              </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="Area" {...register('area')} />
-              <FormHelperText error>{errors.area?.message}</FormHelperText>
+              <FormControl fullWidth>
+                <TextField label="Area m2" {...register('area', { required: true })} />
+                <FormHelperText error>{errors.area && 'Area requerida'}</FormHelperText>
+              </FormControl>
             </Grid>
-
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
                 <Controller
-                  name="sector"
+                  name="idSector"
                   control={control}
+                  rules={{ required: true }}
                   render={({ field }) => (
                     <Autocomplete
                       disablePortal
                       id="sectorsAutocomplete"
                       options={sectors}
+                      isOptionEqualToValue={(option) =>
+                        sectors?.find((sector) => sector.id === option?.id)
+                      }
                       onChange={(e, newValue) => field.onChange(newValue)}
                       getOptionLabel={(option) => option.name}
                       renderInput={(params) => <TextField {...params} label="Sector" />}
@@ -217,37 +239,75 @@ export const Create = () => {
                   )}
                 />
 
-                <FormHelperText error>{errors.sector?.id.message}</FormHelperText>
+                <FormHelperText error>
+                  {errors.idSector && 'Debe seleccionar el sector'}
+                </FormHelperText>
               </FormControl>
             </Grid>
-
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="Precio" {...register('price')} />
-              <FormHelperText error>{errors.price?.message}</FormHelperText>
+              <FormControl fullWidth>
+                <TextField
+                  label="Precio mensual"
+                  {...register('price', { required: true })}
+                  InputProps={{
+                    startAdornment: <InputAdornment position="start">$</InputAdornment>
+                  }}
+                />
+                <FormHelperText error>{errors.price && 'Precio requerido'}</FormHelperText>
+              </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField fullWidth label="Dirección" {...register('address')} />
-              <FormHelperText error>{errors.address?.message}</FormHelperText>
+              <FormControl fullWidth>
+                <TextField label="Dirección" {...register('address', { required: true })} />
+                <FormHelperText error>{errors.address && 'Dirección requerida'}</FormHelperText>
+              </FormControl>
             </Grid>
+            {/* start Adittional features */}
+            {/* start Adittional features */}
+            {/* start Adittional features */}
 
+            {selectedTypeProperty?.additionalFeatures?.includes('bedRooms') && (
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth>
+                  <TextField label="Habitaciones" {...register('bedRooms', { required: true })} />
+                  <FormHelperText error>
+                    {errors.bedRooms && 'Habitaciones requeridas'}
+                  </FormHelperText>
+                </FormControl>
+              </Grid>
+            )}
+
+            {selectedTypeProperty?.additionalFeatures?.includes('bathRooms') && (
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth>
+                  <TextField label="Baños" {...register('bathRooms', { required: true })} />
+                  <FormHelperText error>{errors.bathRooms && 'Baños requeridas'}</FormHelperText>
+                </FormControl>
+              </Grid>
+            )}
+
+            {/* end Adittional features */}
+            {/* end Adittional features */}
+            {/* end Adittional features */}
             <Grid item xs={12} sm={12}>
-              <TextField
-                fullWidth
-                label="Descripción"
-                {...register('description')}
-                placeholder="Agregar descripción de inmueble..."
-                multiline
-                maxRows={20}
-                minRows={5}
-                inputProps={{ maxLength: 2000 }}
-              />
-              <FormHelperText error>{errors.description?.message}</FormHelperText>
+              <FormControl fullWidth>
+                <TextField
+                  label="Descripción"
+                  {...register('description', { required: true })}
+                  placeholder="Agregar descripción de inmueble..."
+                  multiline
+                  maxRows={20}
+                  minRows={5}
+                  inputProps={{ maxLength: 2000 }}
+                />
+                <FormHelperText error>
+                  {errors.description && 'Descripción requerida'}
+                </FormHelperText>
+              </FormControl>
             </Grid>
-
             <Grid item xs={12} sm={12}>
               <ImagesUpload images={images} onChangeImages={handleChangeImages} />
             </Grid>
-
             <Grid item xs={12} sm={12}>
               <Button type="submit" fullWidth variant="contained">
                 Crear

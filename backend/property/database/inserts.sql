@@ -77,9 +77,9 @@ INSERT INTO "Sector"("name") VALUES
 
 
 
-INSERT INTO "TypeProperty"("name") VALUES
-	 ('Casa'),
-	 ('Departamento'),
-	 ('Local comercial'),
-	 ('Edificio'),
-	 ('Terreno');
+INSERT INTO "TypeProperty"("name", "additionalFeatures") VALUES
+	 ('Casa', '["bedRooms", "bathRooms", "floors"]'),
+	 ('Departamento', '["bedRooms", "bathRooms"]'),
+	 ('Local comercial', '["bathRooms"]'),
+	 ('Edificio', '["floors"]'),
+	 ('Terreno', '[]');
