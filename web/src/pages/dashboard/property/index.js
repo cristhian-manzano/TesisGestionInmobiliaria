@@ -106,7 +106,7 @@ export const Property = () => {
         <Card>
           <TableContainer component={Paper}>
             <Table sx={{ minWidth: 800 }} aria-label="simple table">
-              <TableHead sx={{ backgroundColor: '#E5E5E5' }}>
+              <TableHead>
                 <TableRow>
                   <TableCell>Nombre</TableCell>
                   <TableCell>Tipo de inmueble</TableCell>

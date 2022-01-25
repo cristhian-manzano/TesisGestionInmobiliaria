@@ -23,6 +23,7 @@ import { AuthContextProvider } from './store/context/authContext';
 
 // new
 import { Create as CreateProperty } from './pages/dashboard/property/Create';
+import { Update as UpdateProperty } from './pages/dashboard/property/Update';
 import { Details as DetailsProperty } from './pages/dashboard/property/Details';
 import { Create as CreateObservation } from './pages/dashboard/observation/Create';
 
@@ -56,6 +57,7 @@ const App = () => {
                       <Route path="" element={<Property />} />
                       <Route path=":id" element={<DetailsProperty />} />
                       <Route path="create" element={<CreateProperty />} />
+                      <Route path="update/:id" element={<UpdateProperty />} />
                     </Route>
 
                     <Route path="tenant" element={<Tenant />} />

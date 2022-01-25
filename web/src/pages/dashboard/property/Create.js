@@ -24,6 +24,7 @@ import { LoadingContext } from '../../../store/context/LoadingGlobal';
 import { SnackbarContext } from '../../../store/context/SnackbarGlobal';
 import { ImagesUpload } from '../../../components/ImagesUpload';
 import { sendRequest } from '../../../helpers/utils';
+import { usePropertyFormData } from '../../../hooks/usePropertyFormData';
 
 export const Create = () => {
   // Contexts
@@ -32,11 +33,14 @@ export const Create = () => {
   const { authSession } = useContext(AuthContext);
 
   const [images, setImages] = useState({ loaded: [], uploaded: [], deleted: [] });
-  const [typeProperties, setTypeProperties] = useState([]);
-  const [sectors, setSectors] = useState([]);
-
   // Selected type property
   const [selectedTypeProperty, setSelectedTypeProperty] = useState({});
+  const { sectors, typeProperties, error, loading } = usePropertyFormData();
+
+  useEffect(() => {
+    handleLoading(loading);
+    if (error) handleOpenSnackbar('error', error);
+  }, [error, loading]);
 
   const handleSelectTypeProperty = (e) => {
     const getTypeProperty = typeProperties.find((type) => type.id === e.target.value);
@@ -50,9 +54,7 @@ export const Create = () => {
     register,
     handleSubmit,
     formState: { errors }
-  } = useForm({
-    defaultValues: {}
-  });
+  } = useForm();
 
   /* eslint-disable no-console */
   console.log('Selected type property: ---> ', selectedTypeProperty);
@@ -60,44 +62,7 @@ export const Create = () => {
   console.log('Values: ---> ', getValues());
   /* eslint-enable no-console */
 
-  const fetchTypeProperties = async () => {
-    handleLoading(true);
-    const response = await sendRequest({
-      urlPath: `${process.env.REACT_APP_PROPERTY_SERVICE_URL}/type-property`,
-      method: 'GET'
-    });
-    handleLoading(false);
-
-    if (response.error) {
-      handleOpenSnackbar('error', 'No se pudo obtener los Tipo propiedades!');
-    } else {
-      setTypeProperties(response.data?.data || []);
-    }
-  };
-
-  const fetchSectors = async () => {
-    handleLoading(true);
-    const response = await sendRequest({
-      urlPath: `${process.env.REACT_APP_PROPERTY_SERVICE_URL}/sector`,
-      method: 'GET'
-    });
-    handleLoading(false);
-
-    if (response.error) {
-      handleOpenSnackbar('error', 'No se pudo obtener los sectores!');
-    } else {
-      setSectors(response.data?.data || []);
-    }
-  };
-
-  useEffect(() => {
-    fetchTypeProperties();
-    fetchSectors();
-  }, []);
-
-  const handleChangeImages = (newState) => {
-    setImages(newState);
-  };
+  const handleChangeImages = (newState) => setImages(newState);
 
   const onSubmit = async (data) => {
     const keysForm = [
@@ -262,10 +227,8 @@ export const Create = () => {
                 <FormHelperText error>{errors.address && 'Dirección requerida'}</FormHelperText>
               </FormControl>
             </Grid>
-            {/* start Adittional features */}
-            {/* start Adittional features */}
-            {/* start Adittional features */}
 
+            {/* ----------------------- start Adittional features ----------------------- */}
             {selectedTypeProperty?.additionalFeatures?.includes('bedRooms') && (
               <Grid item xs={12} sm={6}>
                 <FormControl fullWidth>
@@ -285,10 +248,8 @@ export const Create = () => {
                 </FormControl>
               </Grid>
             )}
+            {/* ----------------------- end Adittional features ----------------------- */}
 
-            {/* end Adittional features */}
-            {/* end Adittional features */}
-            {/* end Adittional features */}
             <Grid item xs={12} sm={12}>
               <FormControl fullWidth>
                 <TextField
