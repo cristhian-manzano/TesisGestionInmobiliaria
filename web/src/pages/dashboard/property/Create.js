@@ -132,7 +132,7 @@ export const Create = () => {
       <Box component="form" noValidate onSubmit={handleSubmit(onSubmit)}>
         <Card sx={{ p: 4 }}>
           <Typography variant="h4" sx={{ mb: 2 }}>
-            Datos de inmueble
+            Crear inmueble
           </Typography>
 
           <Grid container spacing={2}>
