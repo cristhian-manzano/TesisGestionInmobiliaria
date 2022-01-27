@@ -1,8 +1,9 @@
 const routes = require('express').Router();
 
 // Import routes
+const rentRoutes = require('./rent');
 
 // Example
-routes.get('/hello', (req, res) => res.json({ message: 'Hello world!' }));
+routes.use('/rent', rentRoutes);
 
 module.exports = routes;

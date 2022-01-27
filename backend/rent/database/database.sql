@@ -1,6 +1,6 @@
 CREATE TABLE "Rent"(
 	"id" BIGSERIAL NOT NULL,
-	"payday" INTEGER NOT NULL,
+	"paymentDay" INTEGER NOT NULL,
 	"startDate" TIMESTAMPTZ NOT NULL,
 	"endDate" TIMESTAMPTZ NULL,
 	"securityDeposit" NUMERIC(8,2) NULL,
