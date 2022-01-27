@@ -1,0 +1,23 @@
+version: "3.9"
+services:
+  api:
+    build: .
+    ports:
+      - "${APP_PORT}:${APP_PORT}"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - db
+  db:
+    image: "postgres:14.1"
+    ports:
+      - "${PROD_DB_PORT}:5432"
+    environment:
+      - POSTGRES_DB=${PROD_DB_NAME}
+      - POSTGRES_USER=${PROD_DB_USERNAME}
+      - POSTGRES_PASSWORD=${PROD_DB_PASSWORD}
+    volumes:
+      - ./database/:/docker-entrypoint-initdb.d/
+      - ./postgres-data:/var/lib/postgresql/data
