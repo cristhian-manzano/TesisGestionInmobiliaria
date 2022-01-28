@@ -20,13 +20,9 @@ import { TableMoreMenu } from '../../../components/TableMoreMenu';
 export const Observation = () => {
   const navigate = useNavigate();
 
-  const onView = (id) => {
-    navigate(id);
-  };
+  const onView = (id) => navigate(`${id}`);
 
-  const onUpdate = (id) => {
-    navigate(`update/${id}`);
-  };
+  const onUpdate = (id) => navigate(`update/${id}`);
 
   // Este es el evento delete
   const onDelete = (id) => {

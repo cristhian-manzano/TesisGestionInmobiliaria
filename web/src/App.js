@@ -31,6 +31,8 @@ import { Update as UpdateTenant } from './pages/dashboard/tenant/Update';
 import { Details as DetailsTenant } from './pages/dashboard/tenant/Details';
 
 import { Create as CreateObservation } from './pages/dashboard/observation/Create';
+import { Update as UpdateObservation } from './pages/dashboard/observation/Update';
+import { Details as DetailsObservation } from './pages/dashboard/observation/Details';
 
 // Testing
 import { ProtectedRoutes } from './ProtectedRoutes';
@@ -56,6 +58,8 @@ const App = () => {
                     <Route path="observation" element={<Outlet />}>
                       <Route path="" element={<Observation />} />
                       <Route path="create" element={<CreateObservation />} />
+                      <Route path="update/:id" element={<UpdateObservation />} />
+                      <Route path=":id" element={<DetailsObservation />} />
                     </Route>
 
                     <Route path="property" element={<Outlet />}>

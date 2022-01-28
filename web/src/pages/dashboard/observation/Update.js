@@ -14,7 +14,6 @@ import {
 } from '@mui/material';
 
 import { Link as RouterLink } from 'react-router-dom';
-
 import { ArrowBack } from '@mui/icons-material/';
 
 const dataRentSelect = [
@@ -22,9 +21,8 @@ const dataRentSelect = [
   { id: 2, name: 'Edificio central - Erick Luna', additionalFields: [''] }
 ];
 
-export const Create = () => {
+export const Update = () => {
   const [rentSelect, setRentSelect] = useState('');
-
   const onChangeRentSelect = (e) => setRentSelect(e.target.value);
 
   return (
@@ -40,7 +38,7 @@ export const Create = () => {
       <Box component="form">
         <Card sx={{ p: 4 }}>
           <Typography variant="h5" sx={{ my: 2 }}>
-            Crear observación
+            Actualizar observación
           </Typography>
 
           <Grid container spacing={2}>
