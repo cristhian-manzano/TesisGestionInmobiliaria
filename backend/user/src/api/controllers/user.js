@@ -38,10 +38,13 @@ const getByFilter = async (req, res) => {
   try {
     const { email, idCard } = req.query;
 
+    const condition = {
+      ...(email && { email }),
+      ...(idCard && { idCard })
+    };
+
     const user = await User.findOne({
-      where: {
-        [Op.or]: [{ email }, { idCard }]
-      },
+      where: condition,
       include: {
         model: Role,
         as: 'roles',
