@@ -301,11 +301,51 @@ const destroy = async (req, res) => {
   }
 };
 
+const getlistProperties = async (req, res) => {
+  try {
+    const { properties } = req.body;
+
+    if (!properties || !Array.isArray(properties))
+      return res
+        .status(responseStatusCodes.BAD_REQUEST)
+        .json(errorResponse(res.statusCode, 'Invalid property lists!'));
+
+    const PropertiesData = await Property.findAll({
+      where: {
+        id: properties
+      },
+      include: [
+        {
+          model: TypeProperty,
+          as: 'typeProperty',
+          attributes: {
+            exclude: ['additionalFeatures']
+          }
+        },
+        {
+          model: Sector,
+          as: 'sector'
+        }
+      ]
+    });
+
+    return res
+      .status(responseStatusCodes.OK)
+      .json(successResponse(res.statusCode, 'Ok!', PropertiesData));
+  } catch (e) {
+    Logger.error(e.toString());
+    return res
+      .status(responseStatusCodes.INTERNAL_SERVER_ERROR)
+      .json(errorResponse(res.statusCode, 'Cannot get Properties.'));
+  }
+};
+
 module.exports = {
   getAll,
   get,
   create,
   update,
   destroy,
-  getByOwner
+  getByOwner,
+  getlistProperties
 };
