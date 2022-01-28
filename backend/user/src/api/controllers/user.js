@@ -1,5 +1,3 @@
-const { Op } = require('sequelize');
-
 const { INTERNAL_SERVER_ERROR, BAD_REQUEST, OK } = require('../helpers/statusCodes');
 const { successResponse, errorResponse } = require('../helpers/responsesFormat');
 
@@ -62,7 +60,7 @@ const getByFilter = async (req, res) => {
     if (!user)
       return res.status(BAD_REQUEST).json(errorResponse(res.statusCode, 'User not found!'));
 
-    return res.json(successResponse(OK, 'Ok!', user));
+    return res.status(OK).json(successResponse(res.statusCode, 'Ok!', user));
   } catch (e) {
     Logger.error(e.toString());
     return res
@@ -71,4 +69,38 @@ const getByFilter = async (req, res) => {
   }
 };
 
-module.exports = { getById, getByFilter };
+const getlistTenants = async (req, res) => {
+  try {
+    const { tenants } = req.body;
+
+    if (!tenants || !Array.isArray(tenants))
+      return res.status(BAD_REQUEST).json(errorResponse(res.statusCode, 'Invalid tenant lists!'));
+
+    const tenantsData = await User.findAll({
+      where: {
+        id: tenants
+      },
+      include: {
+        model: Role,
+        as: 'roles',
+        attributes: [],
+        where: {
+          // Move it to a variable
+          id: 2
+        }
+      },
+      attributes: {
+        exclude: ['password', 'dateOfBirth', 'updatedAt', 'createdAt']
+      }
+    });
+
+    return res.status(OK).json(successResponse(res.statusCode, 'Ok!', tenantsData));
+  } catch (e) {
+    Logger.error(e.toString());
+    return res
+      .status(INTERNAL_SERVER_ERROR)
+      .json(errorResponse(res.statusCode, 'Cannot get user.'));
+  }
+};
+
+module.exports = { getById, getByFilter, getlistTenants };
