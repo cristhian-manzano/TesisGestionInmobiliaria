@@ -23,9 +23,31 @@ const getAll = async (req, res) => {
       }
     });
 
+    const lists = rents.reduce(
+      (prev, cur) => ({
+        properties: prev.properties ? [...prev.properties, cur.idProperty] : [cur.idProperty],
+        tenants: prev.tenants ? [...prev.tenants, cur.idTenant] : [cur.idTenant]
+      }),
+      {}
+    );
+
+    // ! Que pasa si hay usuarios o propiedades eliminad@s, [vendrian datos incompletos] - Manejalo
+    const tenants = await axios.post(`${process.env.API_USER_URL}/user/tenant/list`, {
+      tenants: lists.tenants
+    });
+    const properties = await axios.post(`${process.env.API_PROPERTY_URL}/property/list`, {
+      properties: lists.properties
+    });
+
+    const rentsData = rents.map((rent) => ({
+      ...rent.dataValues,
+      tenant: tenants.data.data.find((tenant) => rent.idTenant === tenant.id),
+      property: properties.data.data.find((property) => rent.idProperty === property.id)
+    }));
+
     return res
       .status(responseStatusCodes.OK)
-      .json(successResponse(res.statusCode, 'Got it!', rents));
+      .json(successResponse(res.statusCode, 'Got it!', rentsData));
   } catch (e) {
     Logger.error(e.message);
     return res
@@ -46,6 +68,8 @@ const create = async (req, res) => {
 
     // Validate if property and tenant exists
     await axios.get(`${process.env.API_PROPERTY_URL}/property/${value.idProperty}`);
+
+    // Has to be a tenant (Validate!!)
     await axios.get(`${process.env.API_USER_URL}/user/${value.idTenant}`);
 
     const createdRent = await Rent.create({
