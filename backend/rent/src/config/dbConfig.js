@@ -8,9 +8,9 @@ module.exports = {
     dialect: 'postgres'
   },
   development: {
-    username: 'database_dev',
-    password: 'database_dev',
-    database: 'database_dev',
+    username: 'rent-admin',
+    password: '12345.',
+    database: 'postgres',
     host: '127.0.0.1',
     port: 5432,
     dialect: 'postgres'

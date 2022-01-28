@@ -33,6 +33,10 @@ const Rent = sequelize.define(
     idTenant: {
       type: DataTypes.BIGINT,
       allowNull: false
+    },
+    idOwner: {
+      type: DataTypes.BIGINT,
+      allowNull: false
     }
   },
   {

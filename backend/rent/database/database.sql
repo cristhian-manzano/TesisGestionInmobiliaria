@@ -5,6 +5,7 @@ CREATE TABLE "Rent"(
 	"endDate" TIMESTAMPTZ NULL,
 	"securityDeposit" NUMERIC(8,2) NULL,
 	"idProperty" BIGINT NOT NULL,
+	"idOwner" BIGINT NOT NULL,
 	"idTenant" BIGINT NOT NULL,
 	CONSTRAINT "Rent_pkey" PRIMARY KEY ("id")
 );
