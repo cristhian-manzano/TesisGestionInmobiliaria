@@ -1,3 +1,4 @@
+const { Op } = require('sequelize');
 const { uploadFiles, deleteFiles } = require('../services/awsService');
 const { validateCreateProperty, validateUpdateProperty } = require('../validations/property');
 const Property = require('../models/property');
@@ -201,20 +202,23 @@ const update = async (req, res) => {
 
   try {
     const id = req.params?.id;
+    const idOwner = req.user?.id;
 
     if (Number.isNaN(id))
       return res
         .status(responseStatusCodes.BAD_REQUEST)
         .json(errorResponse(res.statusCode, 'Id parameter is not a number'));
 
-    const property = await Property.findByPk(id);
+    const property = await Property.findOne({
+      where: {
+        [Op.and]: [{ id }, { idOwner }]
+      }
+    });
 
     if (!property)
       return res
         .status(responseStatusCodes.NOT_FOUND)
         .json(errorResponse(res.statusCode, `Property "${id}" not found!`));
-
-    // !! VALIDATE THAT USER ONLY CAN UPDATE --HIS-- PROPERTY
 
     const result = await sequelize.transaction(async (t) => {
       if (value.deletedImages?.length) {
@@ -265,13 +269,17 @@ const update = async (req, res) => {
 const destroy = async (req, res) => {
   try {
     const id = req.params?.id;
+    const idOwner = req.user?.id;
 
     if (Number.isNaN(id))
       return res
         .status(responseStatusCodes.BAD_REQUEST)
         .json(errorResponse(res.statusCode, 'Id parameter is not a number'));
 
-    const property = await Property.findByPk(id, {
+    const property = await Property.findOne({
+      where: {
+        [Op.and]: [{ id }, { idOwner }]
+      },
       include: {
         model: ImagesProperty,
         as: 'ImagesProperties',

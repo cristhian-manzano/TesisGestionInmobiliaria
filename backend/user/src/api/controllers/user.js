@@ -32,17 +32,53 @@ const getById = async (req, res) => {
   }
 };
 
+const getTenantById = async (req, res) => {
+  try {
+    const { id: idUser } = req.params;
+
+    const user = await User.findOne({
+      where: {
+        id: idUser
+      },
+      include: {
+        model: Role,
+        as: 'roles',
+        attributes: [],
+        where: {
+          // Move it to a variable
+          id: 2
+        }
+      },
+      attributes: {
+        exclude: ['password', 'createdAt', 'updatedAt']
+      }
+    });
+
+    if (!user)
+      return res.status(BAD_REQUEST).json(errorResponse(res.statusCode, 'Tenant not found!'));
+
+    return res.json(successResponse(OK, 'Ok!', user));
+  } catch (e) {
+    Logger.error(e.toString());
+    return res
+      .status(INTERNAL_SERVER_ERROR)
+      .json(errorResponse(res.statusCode, 'Cannot get tenant.'));
+  }
+};
+
 const getByFilter = async (req, res) => {
   try {
     const { email, idCard } = req.query;
 
-    const condition = {
-      ...(email && { email }),
-      ...(idCard && { idCard })
-    };
+    // Validate email and idCard (with joi)
+    if (!(email || idCard))
+      return res.status(BAD_REQUEST).json(errorResponse(res.statusCode, 'Invalid request!'));
 
     const user = await User.findOne({
-      where: condition,
+      where: {
+        ...(email && { email }),
+        ...(idCard && { idCard })
+      },
       include: {
         model: Role,
         as: 'roles',
@@ -103,4 +139,4 @@ const getlistTenants = async (req, res) => {
   }
 };
 
-module.exports = { getById, getByFilter, getlistTenants };
+module.exports = { getById, getByFilter, getlistTenants, getTenantById };

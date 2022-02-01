@@ -15,13 +15,8 @@ const {
 
 const getAll = async (req, res) => {
   try {
-    const authUserId = req.user.id;
-
-    const rents = await Rent.findAll({
-      where: {
-        idOwner: authUserId
-      }
-    });
+    const idOwner = req.user.id;
+    const rents = await Rent.findAll({ where: { idOwner } });
 
     const lists = rents.reduce(
       (prev, cur) => ({
@@ -58,7 +53,7 @@ const getAll = async (req, res) => {
 
 const create = async (req, res) => {
   try {
-    const authUserId = req.user.id;
+    const authUserId = req.user?.id;
     const { error, value } = createValidation(req.body);
 
     if (error)
@@ -68,9 +63,7 @@ const create = async (req, res) => {
 
     // Validate if property and tenant exists
     await axios.get(`${process.env.API_PROPERTY_URL}/property/${value.idProperty}`);
-
-    // Has to be a tenant (Validate!!)
-    await axios.get(`${process.env.API_USER_URL}/user/${value.idTenant}`);
+    await axios.get(`${process.env.API_USER_URL}/user/tenant/${value.idTenant}`);
 
     const createdRent = await Rent.create({
       ...value,
@@ -91,7 +84,7 @@ const create = async (req, res) => {
 
 const get = async (req, res) => {
   try {
-    const authUserId = req.user.id;
+    const authUserId = req.user?.id;
     const { id: idRent } = req.params;
 
     const rent = await Rent.findOne({
@@ -118,7 +111,7 @@ const get = async (req, res) => {
 
 const destroy = async (req, res) => {
   try {
-    const authUserId = req.user?.id || 1;
+    const authUserId = req.user?.id;
     const { id: idRent } = req.params;
 
     const deleted = await Rent.destroy({

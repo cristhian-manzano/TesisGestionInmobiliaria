@@ -46,4 +46,14 @@ const Observation = sequelize.define(
   }
 );
 
+Rent.hasMany(Observation, {
+  foreignKey: 'idRent',
+  as: 'observations'
+});
+
+Observation.belongsTo(Rent, {
+  foreignKey: 'idRent',
+  as: 'rent'
+});
+
 module.exports = Observation;

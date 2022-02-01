@@ -4,12 +4,19 @@ const observationCreateValidation = (data) => {
   const scheme = Joi.object({
     description: Joi.string().max(300).required(),
     solved: Joi.boolean().required(),
-    idRent: Joi.number().required(),
-    idUser: Joi.number().required()
-    // date: Joi.date(),
+    idRent: Joi.number().required()
   });
 
   return scheme.validate(data);
 };
 
-module.exports = { observationCreateValidation };
+const observationUpdateValidation = (data) => {
+  const scheme = Joi.object({
+    description: Joi.string().max(300).required(),
+    solved: Joi.boolean().required()
+  });
+
+  return scheme.validate(data);
+};
+
+module.exports = { observationCreateValidation, observationUpdateValidation };
