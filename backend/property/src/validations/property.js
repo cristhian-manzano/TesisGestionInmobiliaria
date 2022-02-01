@@ -45,6 +45,9 @@ const validateUpdateProperty = (data) => {
   try {
     if (validateObject.additionalFeatures)
       validateObject.additionalFeatures = JSON.parse(validateObject.additionalFeatures);
+
+    if (validateObject.deletedImages)
+      validateObject.deletedImages = JSON.parse(validateObject.deletedImages);
   } catch (e) {
     Logger.error('Error aditionalFeatures!');
   }

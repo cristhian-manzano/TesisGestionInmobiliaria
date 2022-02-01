@@ -40,21 +40,9 @@ export const Update = () => {
   const { sectors, typeProperties, error, loading } = usePropertyFormData();
   const [updateProperty, setUpdateProperty] = useState(null);
 
-  const {
-    reset,
-    control,
-    register,
-    handleSubmit,
-    formState: { errors }
-  } = useForm();
-
-  useEffect(() => {
-    handleLoading(loading);
-    if (error) handleOpenSnackbar('error', error);
-  }, [error, loading]);
+  const { reset, control, register, handleSubmit, formState } = useForm();
 
   // Fetch property
-
   const fetchProperty = async () => {
     handleLoading(true);
     const response = await sendRequest({
@@ -70,10 +58,11 @@ export const Update = () => {
     }
   };
 
+  useEffect(() => fetchProperty(), []);
+
   useEffect(() => {
-    if (!updateProperty) {
-      fetchProperty();
-    } else {
+    // reset form with user data
+    if (updateProperty) {
       reset({
         idTypeProperty: updateProperty.typeProperty.id,
         tagName: updateProperty.tagName,
@@ -84,6 +73,7 @@ export const Update = () => {
         idSector: updateProperty.sector,
         ...updateProperty.additionalFeatures
       });
+
       setSelectedTypeProperty(
         typeProperties.find((type) => type.id === updateProperty.typeProperty.id)
       );
@@ -96,11 +86,63 @@ export const Update = () => {
     setSelectedTypeProperty(getTypeProperty);
   };
 
-  const onSubmit = (data) => {
-    console.log('Data submit: ', data);
-  };
-
   const handleChangeImages = (newState) => setImages(newState);
+
+  const onSubmit = async (data) => {
+    // Get changed values
+    const changedFields = Object.keys(formState.dirtyFields).reduce(
+      (previous, newValue) => ({ ...previous, [newValue]: data[newValue] }),
+      {}
+    );
+
+    const keysForm = ['tagName', 'description', 'area', 'price', 'address', 'idTypeProperty'];
+
+    const fields = Object.keys(changedFields).reduce((previous, newValue) => {
+      if (keysForm.includes(newValue)) return { ...previous, [newValue]: changedFields[newValue] };
+      if (selectedTypeProperty?.additionalFeatures?.includes(newValue))
+        return {
+          ...previous,
+          additionalFeatures: {
+            ...previous.additionalFeatures,
+            [newValue]: changedFields[newValue]
+          }
+        };
+      return previous;
+    }, {});
+
+    const dataToSend = {
+      ...fields,
+      additionalFeatures: JSON.stringify(fields.additionalFeatures ?? {}),
+      ...(images.deleted.length > 0 && { deletedImages: JSON.stringify(images.deleted) })
+    };
+
+    console.log(dataToSend);
+
+    const formData = new FormData();
+    Object.keys(dataToSend).forEach((key) => formData.append(key, dataToSend[key]));
+    // Adding images to formdata
+    images.uploaded
+      .map((image) => image.file)
+      .forEach((image) => {
+        formData.append('propertyImages', image);
+      });
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_PROPERTY_SERVICE_URL}/property/${updateProperty.id}`,
+      method: 'PUT',
+      token: authSession.user?.token,
+      data: formData,
+      isFormData: true
+    });
+    handleLoading(false);
+    if (response.error) {
+      handleOpenSnackbar('error', 'No se pudo actualizar la propiedad!');
+    } else {
+      handleOpenSnackbar('success', 'Propiedad actualizada exitosamente!');
+      setImages({ loaded: [], uploaded: [], deleted: [] });
+      fetchProperty();
+    }
+  };
 
   return (
     <Box>
@@ -149,7 +191,7 @@ export const Update = () => {
                     />
 
                     <FormHelperText error>
-                      {errors.idTypeProperty && 'Debe seleccionar tipo de inmueble'}
+                      {formState.errors.idTypeProperty && 'Debe seleccionar tipo de inmueble'}
                     </FormHelperText>
                   </FormControl>
                 </Grid>
@@ -162,7 +204,9 @@ export const Update = () => {
                   {...register('tagName', { required: true })}
                   InputLabelProps={{ shrink: true }}
                 />
-                <FormHelperText error>{errors.tagName && 'Nombre requerido'}</FormHelperText>
+                <FormHelperText error>
+                  {formState.errors.tagName && 'Nombre requerido'}
+                </FormHelperText>
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -172,7 +216,7 @@ export const Update = () => {
                   {...register('area', { required: true })}
                   InputLabelProps={{ shrink: true }}
                 />
-                <FormHelperText error>{errors.area && 'Area requerida'}</FormHelperText>
+                <FormHelperText error>{formState.errors.area && 'Area requerida'}</FormHelperText>
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -183,7 +227,9 @@ export const Update = () => {
                   rules={{ required: true }}
                   render={({ field }) => (
                     <Autocomplete
+                      disabled
                       disablePortal
+                      value={field.value ?? null}
                       options={sectors}
                       isOptionEqualToValue={(option, value) => {
                         return option.id === value.id;
@@ -196,7 +242,7 @@ export const Update = () => {
                 />
 
                 <FormHelperText error>
-                  {errors.idSector && 'Debe seleccionar el sector'}
+                  {formState.errors.idSector && 'Debe seleccionar el sector'}
                 </FormHelperText>
               </FormControl>
             </Grid>
@@ -209,7 +255,9 @@ export const Update = () => {
                     startAdornment: <InputAdornment position="start">$</InputAdornment>
                   }}
                 />
-                <FormHelperText error>{errors.price && 'Precio requerido'}</FormHelperText>
+                <FormHelperText error>
+                  {formState.errors.price && 'Precio requerido'}
+                </FormHelperText>
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -219,7 +267,9 @@ export const Update = () => {
                   {...register('address', { required: true })}
                   InputLabelProps={{ shrink: true }}
                 />
-                <FormHelperText error>{errors.address && 'Dirección requerida'}</FormHelperText>
+                <FormHelperText error>
+                  {formState.errors.address && 'Dirección requerida'}
+                </FormHelperText>
               </FormControl>
             </Grid>
 
@@ -233,7 +283,7 @@ export const Update = () => {
                     InputLabelProps={{ shrink: true }}
                   />
                   <FormHelperText error>
-                    {errors.bedRooms && 'Habitaciones requeridas'}
+                    {formState.errors.bedRooms && 'Habitaciones requeridas'}
                   </FormHelperText>
                 </FormControl>
               </Grid>
@@ -247,7 +297,9 @@ export const Update = () => {
                     {...register('bathRooms', { required: true })}
                     InputLabelProps={{ shrink: true }}
                   />
-                  <FormHelperText error>{errors.bathRooms && 'Baños requeridas'}</FormHelperText>
+                  <FormHelperText error>
+                    {formState.errors.bathRooms && 'Baños requeridas'}
+                  </FormHelperText>
                 </FormControl>
               </Grid>
             )}
@@ -266,7 +318,7 @@ export const Update = () => {
                   InputLabelProps={{ shrink: true }}
                 />
                 <FormHelperText error>
-                  {errors.description && 'Descripción requerida'}
+                  {formState.errors.description && 'Descripción requerida'}
                 </FormHelperText>
               </FormControl>
             </Grid>
@@ -274,8 +326,14 @@ export const Update = () => {
               <ImagesUpload images={images} onChangeImages={handleChangeImages} />
             </Grid>
             <Grid item xs={12} sm={12}>
-              <Button type="submit" fullWidth variant="contained">
-                Crear
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                disabled={
+                  !formState.isDirty && images.uploaded.length === 0 && images.deleted.length === 0
+                }>
+                Actualizar
               </Button>
             </Grid>
           </Grid>

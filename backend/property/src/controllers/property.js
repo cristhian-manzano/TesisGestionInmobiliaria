@@ -102,11 +102,6 @@ const get = async (req, res) => {
   try {
     const id = req.params?.id;
 
-    if (Number.isNaN(id))
-      return res
-        .status(responseStatusCodes.BAD_REQUEST)
-        .json(errorResponse(res.statusCode, 'Id parameter is not a number'));
-
     const property = await Property.findByPk(id, {
       attributes: { exclude: ['idTypeProperty', 'idSector'] },
 
@@ -203,11 +198,6 @@ const update = async (req, res) => {
   try {
     const id = req.params?.id;
     const idOwner = req.user?.id;
-
-    if (Number.isNaN(id))
-      return res
-        .status(responseStatusCodes.BAD_REQUEST)
-        .json(errorResponse(res.statusCode, 'Id parameter is not a number'));
 
     const property = await Property.findOne({
       where: {
