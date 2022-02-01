@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { Op } = require('sequelize');
+// const { Op } = require('sequelize');
 const Logger = require('../config/logger');
 const { responseStatusCodes } = require('../helpers/constants');
 const {
@@ -10,7 +10,10 @@ const {
 const Observation = require('../models/observation');
 const Rent = require('../models/rent');
 
-const { observationCreateValidation } = require('../validation/observation');
+const {
+  observationCreateValidation,
+  observationUpdateValidation
+} = require('../validation/observation');
 
 const getAll = async (req, res) => {
   try {
@@ -47,11 +50,14 @@ const get = async (req, res) => {
     const { id } = req.params;
 
     const observation = await Observation.findOne({
+      where: {
+        id
+      },
       include: [
         {
           model: Rent,
           as: 'rent',
-          where: { [Op.and]: [{ idOwner }, { id }] },
+          where: { idOwner },
           attributes: ['id', 'idOwner', 'idProperty', 'idTenant']
         }
       ],
@@ -78,7 +84,7 @@ const get = async (req, res) => {
 
 const create = async (req, res) => {
   try {
-    const authUserId = req.user?.id;
+    const idOwner = req.user?.id;
     const { error, value } = observationCreateValidation(req.body);
 
     if (error)
@@ -88,7 +94,7 @@ const create = async (req, res) => {
 
     const createdObservation = await Observation.create({
       ...value,
-      idUser: authUserId,
+      idUser: idOwner,
       date: new Date()
     });
 
@@ -103,13 +109,98 @@ const create = async (req, res) => {
   }
 };
 
-// const update = (req, res) => {};
-// const destroy = (req, res) => {};
+const update = async (req, res) => {
+  try {
+    const idOwner = req.user?.id;
+    const { id } = req.params;
+    const { error, value } = observationUpdateValidation(req.body);
+
+    if (error)
+      return res
+        .status(responseStatusCodes.UNPROCESSABLE_ENTITY)
+        .json(validationResponse(res.statusCode, error.message));
+
+    const observation = await Observation.findOne({
+      where: {
+        id
+      },
+      include: [
+        {
+          model: Rent,
+          as: 'rent',
+          where: { idOwner },
+          attributes: []
+        }
+      ],
+      attributes: {
+        exclude: ['idRent']
+      }
+    });
+
+    if (!observation)
+      return res
+        .status(responseStatusCodes.NOT_FOUND)
+        .json(errorResponse(res.statusCode, 'Observation not found!'));
+
+    observation.set(value);
+
+    const updated = await observation.save();
+
+    return res
+      .status(responseStatusCodes.OK)
+      .json(successResponse(res.statusCode, 'Updated!', updated));
+  } catch (e) {
+    Logger.error(e.message);
+    return res
+      .status(responseStatusCodes.INTERNAL_SERVER_ERROR)
+      .json(errorResponse(res.statusCode, e.message));
+  }
+};
+
+const destroy = async (req, res) => {
+  try {
+    const idOwner = req.user?.id;
+    const { id } = req.params;
+
+    const observation = await Observation.findOne({
+      where: {
+        id
+      },
+      include: [
+        {
+          model: Rent,
+          as: 'rent',
+          where: { idOwner },
+          attributes: []
+        }
+      ],
+      attributes: {
+        exclude: ['idRent']
+      }
+    });
+
+    if (!observation)
+      return res
+        .status(responseStatusCodes.NOT_FOUND)
+        .json(errorResponse(res.statusCode, 'Observation not found!'));
+
+    const destroyed = await observation.destroy();
+
+    return res
+      .status(responseStatusCodes.OK)
+      .json(successResponse(res.statusCode, 'Deleted!', destroyed));
+  } catch (e) {
+    Logger.error(e.message);
+    return res
+      .status(responseStatusCodes.INTERNAL_SERVER_ERROR)
+      .json(errorResponse(res.statusCode, e.message));
+  }
+};
 
 module.exports = {
   getAll,
   get,
-  create
-  // update,
-  // destroy
+  create,
+  update,
+  destroy
 };

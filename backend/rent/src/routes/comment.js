@@ -1,7 +1,12 @@
 const routes = require('express').Router();
 
-const { getAll } = require('../controllers/comment');
+const { validateToken } = require('../middlewares/authMiddleware');
+const { getAll, create, destroy } = require('../controllers/comment');
 
-routes.get('/', getAll);
+routes.use(validateToken);
+
+routes.post('/', create);
+routes.get('/:id', getAll);
+routes.delete('/:id', destroy);
 
 module.exports = routes;

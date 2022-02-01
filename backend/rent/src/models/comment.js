@@ -41,4 +41,14 @@ const Comment = sequelize.define(
   }
 );
 
+Observation.hasMany(Comment, {
+  foreignKey: 'idObservation',
+  as: 'comments'
+});
+
+Comment.belongsTo(Observation, {
+  foreignKey: 'idObservation',
+  as: 'observation'
+});
+
 module.exports = Comment;
