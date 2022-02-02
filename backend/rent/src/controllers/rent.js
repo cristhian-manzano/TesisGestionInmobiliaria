@@ -4,7 +4,7 @@ const { Op } = require('sequelize');
 const Rent = require('../models/rent');
 
 const Logger = require('../config/logger');
-const { createValidation } = require('../validation/rent');
+const { rentCreateValidation, rentUpdateValidation } = require('../validation/rent');
 const { responseStatusCodes } = require('../helpers/constants');
 
 const {
@@ -63,7 +63,7 @@ const getAll = async (req, res) => {
 const create = async (req, res) => {
   try {
     const authUserId = req.user?.id;
-    const { error, value } = createValidation(req.body);
+    const { error, value } = rentCreateValidation(req.body);
 
     if (error)
       return res
@@ -83,6 +83,43 @@ const create = async (req, res) => {
     return res
       .status(responseStatusCodes.OK)
       .json(successResponse(res.statusCode, 'Got it!', createdRent));
+  } catch (e) {
+    Logger.error(e.message);
+    return res
+      .status(responseStatusCodes.INTERNAL_SERVER_ERROR)
+      .json(errorResponse(res.statusCode, e.message));
+  }
+};
+
+const update = async (req, res) => {
+  try {
+    const authUserId = req.user?.id;
+    const { id: idRent } = req.params;
+    const { error, value } = rentUpdateValidation(req.body);
+
+    if (error)
+      return res
+        .status(responseStatusCodes.UNPROCESSABLE_ENTITY)
+        .json(validationResponse(res.statusCode, error.message));
+
+    const rent = await Rent.findOne({
+      where: {
+        [Op.and]: [{ id: idRent }, { idOwner: authUserId }]
+      }
+    });
+
+    if (!rent)
+      return res
+        .status(responseStatusCodes.NOT_FOUND)
+        .json(errorResponse(res.statusCode, 'Rent not found!'));
+
+    rent.set(value);
+    const updatedRent = await rent.save();
+
+    // Result property and result tenant
+    return res
+      .status(responseStatusCodes.OK)
+      .json(successResponse(res.statusCode, 'Got it!', updatedRent));
   } catch (e) {
     Logger.error(e.message);
     return res
@@ -162,5 +199,6 @@ module.exports = {
   getAll,
   create,
   destroy,
-  get
+  get,
+  update
 };
