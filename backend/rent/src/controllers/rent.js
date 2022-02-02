@@ -16,7 +16,9 @@ const {
 const getAll = async (req, res) => {
   try {
     const idOwner = req.user.id;
-    const rents = await Rent.findAll({ where: { idOwner } });
+    const rents = await Rent.findAll({
+      where: { idOwner }
+    });
 
     const lists = rents.reduce(
       (prev, cur) => ({
@@ -27,12 +29,19 @@ const getAll = async (req, res) => {
     );
 
     // ! Que pasa si hay usuarios o propiedades eliminad@s, [vendrian datos incompletos] - Manejalo
-    const tenants = await axios.post(`${process.env.API_USER_URL}/user/tenant/list`, {
-      tenants: lists.tenants
-    });
-    const properties = await axios.post(`${process.env.API_PROPERTY_URL}/property/list`, {
-      properties: lists.properties
-    });
+    // ! Solución temporal
+
+    const tenants =
+      lists.tenants &&
+      (await axios.post(`${process.env.API_USER_URL}/user/tenant/list`, {
+        tenants: lists.tenants
+      }));
+
+    const properties =
+      lists.properties &&
+      (await axios.post(`${process.env.API_PROPERTY_URL}/property/list`, {
+        properties: lists.properties
+      }));
 
     const rentsData = rents.map((rent) => ({
       ...rent.dataValues,
