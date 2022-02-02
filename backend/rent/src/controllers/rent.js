@@ -107,9 +107,27 @@ const get = async (req, res) => {
         .status(responseStatusCodes.NOT_FOUND)
         .json(errorResponse(res.statusCode, 'Rent not found!'));
 
+    const tenant =
+      rent.idTenant &&
+      (await axios.post(`${process.env.API_USER_URL}/user/tenant/list`, {
+        tenants: [rent.idTenant]
+      }));
+
+    const property =
+      rent.idProperty &&
+      (await axios.post(`${process.env.API_PROPERTY_URL}/property/list`, {
+        properties: [rent.idProperty]
+      }));
+
+    const rentsData = {
+      ...rent.dataValues,
+      tenant: tenant.data.data[0],
+      property: property.data.data[0]
+    };
+
     return res
       .status(responseStatusCodes.OK)
-      .json(successResponse(res.statusCode, 'Got it!', rent));
+      .json(successResponse(res.statusCode, 'Got it!', rentsData));
   } catch (e) {
     Logger.error(e.message);
     return res
