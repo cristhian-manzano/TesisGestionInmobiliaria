@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 
 import {
@@ -18,39 +18,57 @@ import {
 import { Alert } from '../../../components/Alert';
 import { TableMoreMenu } from '../../../components/TableMoreMenu';
 
-const rows = [
-  {
-    id: 1,
-    name: 'Cristhian Manzano',
-    email: 'cristhian@gmail.com',
-    phone: '01282822',
-    apartment: 1
-  },
-  { id: 2, name: 'Erick Luna', email: 'erick@gmail.com', phone: '22090933', apartment: 2 }
-];
+import { sendRequest } from '../../../helpers/utils';
+
+import { AuthContext } from '../../../store/context/authContext';
+import { LoadingContext } from '../../../store/context/LoadingGlobal';
+import { SnackbarContext } from '../../../store/context/SnackbarGlobal';
 
 export const Tenant = () => {
   const navigate = useNavigate();
+  const { authSession } = useContext(AuthContext);
+  const { handleLoading } = useContext(LoadingContext);
+  const { handleOpenSnackbar } = useContext(SnackbarContext);
 
-  const [selectedProperty, setSelectedProperty] = useState(null);
+  const [selectedTenant, setSelectedTenant] = useState(null);
   const [alert, setAlert] = useState({ open: false, title: '', description: '' });
+
+  const [tenantsRent, setTenantsRent] = useState([]);
 
   const onView = (id) => navigate(`${id}`);
   const onUpdate = (id) => navigate(`update/${id}`);
 
-  const openDeleteAlert = (property) => {
-    setSelectedProperty(property);
+  const openDeleteAlert = (tenantRent) => {
+    setSelectedTenant(tenantRent);
 
     setAlert({
       open: true,
-      title: `¿Está seguro que desea eliminar el inquilino '${property.tagName}'?`,
+      title: `¿Está seguro que desea eliminar el inquilino '${tenantRent?.tenant?.firstName} ${tenantRent?.tenant?.lastName}'?`,
       description:
         'Al aceptar se eliminará el inquilino de manera permanente y no podrá deshacer los cambios.'
     });
   };
 
+  const fetchTenantsRent = async () => {
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/rent`,
+      token: authSession.user?.token,
+      method: 'GET'
+    });
+    handleLoading(false);
+
+    if (response.error) {
+      handleOpenSnackbar('error', 'Hubo un error al obtener los inquilinos');
+    } else {
+      setTenantsRent(response.data.data);
+    }
+  };
+
+  useEffect(() => fetchTenantsRent(), []);
+
   const closeDeleteAlert = () => {
-    setSelectedProperty(null);
+    setSelectedTenant(null);
     setAlert((previous) => ({
       ...previous,
       open: false
@@ -58,7 +76,19 @@ export const Tenant = () => {
   };
 
   const onDelete = async () => {
-    console.log('DELETING: ', selectedProperty?.id);
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/rent/${selectedTenant?.id}`,
+      token: authSession.user?.token,
+      method: 'DELETE'
+    });
+    handleLoading(false);
+    if (response.error) {
+      handleOpenSnackbar('error', 'No se pudo elimnar el inquilino!');
+    } else {
+      await fetchTenantsRent();
+      handleOpenSnackbar('success', 'Inquilino eliminado exitosamente!');
+    }
   };
 
   return (
@@ -83,27 +113,44 @@ export const Tenant = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {rows.map((row) => (
-                  <TableRow
-                    hover
-                    key={row.name}
-                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                    <TableCell>{row.name}</TableCell>
-                    <TableCell>{row.email}</TableCell>
-                    <TableCell>{row.phone}</TableCell>
-                    <TableCell>{row.apartment}</TableCell>
+                {tenantsRent.length > 0 ? (
+                  tenantsRent.map((rent) => (
+                    <TableRow
+                      hover
+                      key={rent?.id}
+                      sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                      <TableCell>{rent?.tenant?.firstName}</TableCell>
+                      <TableCell>{rent?.tenant?.email}</TableCell>
+                      <TableCell>{rent?.tenant?.phone}</TableCell>
+                      <TableCell>{rent?.property?.tagName}</TableCell>
 
-                    <TableCell>
-                      {/* eslint-disable no-console */}
-                      <TableMoreMenu
-                        onView={() => onView(row.id)}
-                        onUpdate={() => onUpdate(row.id)}
-                        onDelete={() => openDeleteAlert(row)}
-                      />
-                      {/* eslint-enable no-console */}
+                      <TableCell>
+                        <TableMoreMenu
+                          onView={() => onView(rent?.id)}
+                          onUpdate={() => onUpdate(rent?.id)}
+                          onDelete={() => openDeleteAlert(rent)}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  // Valida - que no salga esto si esta cargando...
+                  <TableRow>
+                    <TableCell colSpan={5}>
+                      <Box
+                        sx={{
+                          p: 4,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                        <Typography variant="h5" sx={{ opacity: 0.5 }}>
+                          Aún no ha registrado inquilinos.
+                        </Typography>
+                      </Box>
                     </TableCell>
                   </TableRow>
-                ))}
+                )}
               </TableBody>
             </Table>
           </TableContainer>

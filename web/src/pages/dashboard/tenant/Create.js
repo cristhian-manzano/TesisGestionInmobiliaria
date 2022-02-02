@@ -41,6 +41,7 @@ export const Create = () => {
   const {
     register,
     handleSubmit,
+    reset,
     control,
     formState: { errors }
   } = useForm();
@@ -107,7 +108,32 @@ export const Create = () => {
     });
   };
 
-  const handleSubmitForm = (data) => console.log(data);
+  const handleSubmitForm = async (data) => {
+    const { propertyType, ...dataSend } = data;
+
+    const body = {
+      ...dataSend,
+      idTenant: searchTenant?.tenant?.id,
+      idProperty: propertyType.id
+    };
+
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/rent`,
+      method: 'POST',
+      token: authSession.user?.token,
+      data: body
+    });
+    handleLoading(false);
+
+    if (response.error) {
+      handleOpenSnackbar('error', 'No se pudo crear!');
+    } else {
+      handleOpenSnackbar('success', 'Creado exitosamente!');
+      reset();
+      onCancelSearch();
+    }
+  };
 
   return (
     <Box>
@@ -252,7 +278,7 @@ export const Create = () => {
                 <TextField
                   disabled={!searchTenant.obtained}
                   label="Día de pago mensual"
-                  {...register('paymentDate', { required: true })}
+                  {...register('paymentDay', { required: true })}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
@@ -262,7 +288,7 @@ export const Create = () => {
                   }}
                 />
                 <FormHelperText error>
-                  {errors.paymentDate && 'paymentDate is required'}
+                  {errors.paymentDay && 'paymentDay is required'}
                 </FormHelperText>
               </FormControl>
             </Grid>

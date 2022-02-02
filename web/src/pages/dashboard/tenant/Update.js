@@ -1,5 +1,5 @@
 import { useState, useContext, useEffect } from 'react';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useParams } from 'react-router-dom';
 
 import {
   Box,
@@ -25,18 +25,44 @@ import { AuthContext } from '../../../store/context/authContext';
 import { sendRequest } from '../../../helpers/utils';
 
 export const Update = () => {
+  const { id } = useParams();
   const { handleLoading } = useContext(LoadingContext);
   const { handleOpenSnackbar } = useContext(SnackbarContext);
   const { authSession } = useContext(AuthContext);
 
   const [properties, setProperties] = useState([]);
+  const [updatetenantRent, setUpdateTenantRent] = useState({});
 
-  const {
-    register,
-    handleSubmit,
-    control,
-    formState: { errors }
-  } = useForm();
+  const { register, handleSubmit, control, reset, formState } = useForm();
+
+  const fetchTenantRent = async () => {
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/rent/${id}`,
+      token: authSession.user?.token,
+      method: 'GET'
+    });
+    handleLoading(false);
+
+    if (response.error) {
+      handleOpenSnackbar('error', 'Hubo un error al obtener el inquilino');
+    } else {
+      setUpdateTenantRent(response.data.data);
+    }
+  };
+
+  useEffect(() => fetchTenantRent(), [id]);
+
+  useEffect(() => {
+    if (Object.keys(updatetenantRent).length > 0) {
+      reset({
+        propertyType: { id: updatetenantRent.property.id, name: updatetenantRent.property.tagName },
+        securityDeposit: updatetenantRent?.securityDeposit ?? '',
+        startDate: updatetenantRent?.startDate ?? '',
+        paymentDay: updatetenantRent?.paymentDay ?? ''
+      });
+    }
+  }, [updatetenantRent]);
 
   const fetchProperties = async () => {
     handleLoading(true);
@@ -58,7 +84,29 @@ export const Update = () => {
 
   useEffect(() => fetchProperties(), []);
 
-  const handleSubmitForm = (data) => console.log(data);
+  const handleSubmitForm = async (data) => {
+    const updatedField = {};
+
+    Object.keys(formState.dirtyFields).forEach((key) => {
+      updatedField[key] = data[key];
+    });
+
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/rent/${id}`,
+      method: 'PUT',
+      token: authSession.user?.token,
+      data: updatedField
+    });
+    handleLoading(false);
+
+    if (response.error) {
+      handleOpenSnackbar('error', 'No se pudo crear!');
+    } else {
+      handleOpenSnackbar('success', 'Actualizado exitosamente!');
+      fetchTenantRent();
+    }
+  };
 
   return (
     <Box>
@@ -79,22 +127,32 @@ export const Update = () => {
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
-                <TextField label="Nombre" value="" disabled />
+                <TextField
+                  label="Nombre"
+                  value={`${updatetenantRent?.tenant?.firstName ?? ''} ${
+                    updatetenantRent?.tenant?.lastName ?? ''
+                  }`}
+                  disabled
+                />
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
-                <TextField label="Cédula" value="" disabled />
+                <TextField label="Cédula" value={updatetenantRent?.tenant?.idCard ?? ''} disabled />
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
-                <TextField label="Teléfono" value="" disabled />
+                <TextField
+                  label="Teléfono"
+                  value={updatetenantRent?.tenant?.phone ?? ''}
+                  disabled
+                />
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
-                <TextField label="Email" value="" disabled />
+                <TextField label="Email" value={updatetenantRent?.tenant?.email ?? ''} disabled />
               </FormControl>
             </Grid>
 
@@ -106,6 +164,7 @@ export const Update = () => {
                   rules={{ required: true }}
                   render={({ field }) => (
                     <Autocomplete
+                      disabled
                       disablePortal
                       value={field.value ?? null}
                       onChange={(event, newValue) => field.onChange(newValue)}
@@ -119,7 +178,7 @@ export const Update = () => {
                   )}
                 />
                 <FormHelperText error>
-                  {errors.propertyType && 'propertyType is required'}
+                  {formState.errors.propertyType && 'propertyType is required'}
                 </FormHelperText>
               </FormControl>
             </Grid>
@@ -134,7 +193,7 @@ export const Update = () => {
                   }}
                 />
                 <FormHelperText error>
-                  {errors.securityDeposit && 'securityDeposit is required'}
+                  {formState.errors.securityDeposit && 'securityDeposit is required'}
                 </FormHelperText>
               </FormControl>
             </Grid>
@@ -156,7 +215,9 @@ export const Update = () => {
                     )}
                   />
                 </LocalizationProvider>
-                <FormHelperText error>{errors.startDate && 'startDate is required'}</FormHelperText>
+                <FormHelperText error>
+                  {formState.errors.startDate && 'startDate is required'}
+                </FormHelperText>
               </FormControl>
             </Grid>
 
@@ -164,7 +225,8 @@ export const Update = () => {
               <FormControl fullWidth>
                 <TextField
                   label="Día de pago mensual"
-                  {...register('paymentDate', { required: true })}
+                  {...register('paymentDay', { required: true })}
+                  InputLabelProps={{ shrink: true }}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
@@ -174,13 +236,13 @@ export const Update = () => {
                   }}
                 />
                 <FormHelperText error>
-                  {errors.paymentDate && 'paymentDate is required'}
+                  {formState.errors.paymentDay && 'paymentDay is required'}
                 </FormHelperText>
               </FormControl>
             </Grid>
 
             <Grid item xs={12} sm={12}>
-              <Button type="submit" fullWidth variant="contained">
+              <Button disabled={!formState.isDirty} type="submit" fullWidth variant="contained">
                 Actualizar
               </Button>
             </Grid>
