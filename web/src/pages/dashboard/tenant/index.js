@@ -108,7 +108,7 @@ export const Tenant = () => {
                   <TableCell>Nombre</TableCell>
                   <TableCell>Email</TableCell>
                   <TableCell>Teléfono</TableCell>
-                  <TableCell>Apartamento</TableCell>
+                  <TableCell>Inmueble</TableCell>
                   <TableCell />
                 </TableRow>
               </TableHead>

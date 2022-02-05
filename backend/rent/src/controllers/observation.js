@@ -17,14 +17,14 @@ const {
 
 const getAll = async (req, res) => {
   try {
-    const idOwner = req.user?.id;
+    const idUser = req.user?.id;
 
     const observations = await Observation.findAll({
       include: [
         {
           model: Rent,
           as: 'rent',
-          where: { idOwner },
+          where: { idOwner: idUser },
           attributes: ['id', 'idOwner', 'idProperty', 'idTenant']
         }
       ],

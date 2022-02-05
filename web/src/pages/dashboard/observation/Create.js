@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState, useContext, useEffect } from 'react';
+import { Link as RouterLink } from 'react-router-dom';
+import { useForm, Controller } from 'react-hook-form';
 
 import {
   Box,
@@ -10,22 +12,59 @@ import {
   Select,
   InputLabel,
   MenuItem,
-  Button
+  Button,
+  FormHelperText
 } from '@mui/material';
 
-import { Link as RouterLink } from 'react-router-dom';
-
 import { ArrowBack } from '@mui/icons-material/';
-
-const dataRentSelect = [
-  { id: 1, name: 'Casa norte - Cristhian Manzano', additionalFields: [''] },
-  { id: 2, name: 'Edificio central - Erick Luna', additionalFields: [''] }
-];
+import { sendRequest } from '../../../helpers/utils';
+import { AuthContext } from '../../../store/context/authContext';
+import { LoadingContext } from '../../../store/context/LoadingGlobal';
+import { SnackbarContext } from '../../../store/context/SnackbarGlobal';
 
 export const Create = () => {
-  const [rentSelect, setRentSelect] = useState('');
+  const { authSession } = useContext(AuthContext);
+  const { handleLoading } = useContext(LoadingContext);
+  const { handleOpenSnackbar } = useContext(SnackbarContext);
+  const [tenantsRent, setTenantsRent] = useState([]);
 
-  const onChangeRentSelect = (e) => setRentSelect(e.target.value);
+  const { register, handleSubmit, control, reset, formState } = useForm();
+
+  const fetchTenantsRent = async () => {
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/rent`,
+      token: authSession.user?.token,
+      method: 'GET'
+    });
+    handleLoading(false);
+
+    if (response.error) {
+      handleOpenSnackbar('error', 'Hubo un error al obtener los inquilinos');
+    } else {
+      setTenantsRent(response.data.data);
+    }
+  };
+
+  useEffect(() => fetchTenantsRent(), []);
+
+  const onSubmitForm = async (data) => {
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `http://localhost:3200/observation`,
+      method: 'POST',
+      token: authSession.user?.token,
+      data
+    });
+    handleLoading(false);
+
+    if (response.error) {
+      handleOpenSnackbar('error', 'No se pudo crear!');
+    } else {
+      handleOpenSnackbar('success', 'Creado exitosamente!');
+      reset();
+    }
+  };
 
   return (
     <Box>
@@ -37,7 +76,7 @@ export const Create = () => {
         aria-label="Example">
         <ArrowBack /> regresar
       </Button>
-      <Box component="form">
+      <Box component="form" onSubmit={handleSubmit(onSubmitForm)}>
         <Card sx={{ p: 4 }}>
           <Typography variant="h5" sx={{ my: 2 }}>
             Crear observación
@@ -49,41 +88,58 @@ export const Create = () => {
                 <Grid item xs={12} sm={6}>
                   <FormControl fullWidth>
                     <InputLabel id="rent-select">Alquileres</InputLabel>
-                    <Select
-                      labelId="rent-select"
-                      id="demo-simple-select"
-                      label="Alquileres"
-                      onChange={onChangeRentSelect}
-                      value={rentSelect}>
-                      <MenuItem value={0} disabled>
-                        Seleccionar
-                      </MenuItem>
+                    <Controller
+                      name="idRent"
+                      control={control}
+                      rules={{ required: true }}
+                      defaultValue=""
+                      render={({ field }) => (
+                        <Select labelId="rent-select" label="Alquileres" {...field}>
+                          <MenuItem value={0} disabled>
+                            Seleccionar
+                          </MenuItem>
 
-                      {dataRentSelect.map((type) => (
-                        <MenuItem key={type.id} value={type.id}>
-                          {type.name}
-                        </MenuItem>
-                      ))}
-                    </Select>
+                          {tenantsRent.map((rent) => (
+                            <MenuItem key={rent.id} value={rent.id}>
+                              {`${rent.property?.description ?? ''} - ${
+                                rent.tenant?.firstName ?? ''
+                              } ${rent.tenant?.lastName ?? ''}`}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      )}
+                    />
+
+                    <FormHelperText error>
+                      {formState.errors?.idRent && 'Alquiler required'}
+                    </FormHelperText>
                   </FormControl>
                 </Grid>
               </Grid>
             </Grid>
 
             <Grid item xs={12} sm={12}>
-              <TextField
-                fullWidth
-                label="Descripción"
-                placeholder="Agregar descripción de inmueble..."
-                multiline
-                maxRows={20}
-                minRows={5}
-                inputProps={{ maxLength: 2000 }}
-              />
+              <FormControl fullWidth>
+                <TextField
+                  name="description"
+                  label="Descripción"
+                  placeholder="Agregar descripción de inmueble..."
+                  multiline
+                  {...register('description', { required: true, maxLength: 300 })}
+                  maxRows={20}
+                  minRows={5}
+                  inputProps={{ maxLength: 2000 }}
+                />
+                <FormHelperText error>
+                  {formState.errors.description?.type === 'required' && 'Description required'}
+                  {formState.errors.description?.type === 'maxLength' &&
+                    'Description maxlength 300'}
+                </FormHelperText>
+              </FormControl>
             </Grid>
 
             <Grid item xs={12} sm={12}>
-              <Button fullWidth variant="contained">
+              <Button type="submit" fullWidth variant="contained">
                 Crear
               </Button>
             </Grid>
