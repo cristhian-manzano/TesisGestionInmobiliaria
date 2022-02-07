@@ -1,7 +1,8 @@
 import { useState, useEffect, useContext } from 'react';
 import { useParams, Link as RouterLink } from 'react-router-dom';
+import { ArrowBack, Clear, ArrowDropDown, ArrowDropUp, Comment } from '@mui/icons-material/';
 
-import { ArrowBack, MoreVert, ArrowDropDown, ArrowDropUp, Comment } from '@mui/icons-material/';
+import { useForm } from 'react-hook-form';
 
 import {
   Box,
@@ -18,35 +19,35 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Fab
+  Fab,
+  IconButton,
+  FormHelperText
 } from '@mui/material';
 
 import { sendRequest } from '../../../helpers/utils';
-
 import { AuthContext } from '../../../store/context/authContext';
 import { LoadingContext } from '../../../store/context/LoadingGlobal';
 import { SnackbarContext } from '../../../store/context/SnackbarGlobal';
-
-const observationx = {
-  property: 'Casa norte',
-  description: `Lorem ipsum dolor sit amet consectetur adipisicing elit. Dicta id nobis facilis facere nam, quibusdam mollitia ex minus iste maiores consequatur soluta eveniet necessitatibus hic vero. Quia voluptate necessitatibus rerum. Voluptatem, dolore. Saepe volupta`,
-  date: '2020-01-01',
-  solved: false,
-  user: 'Cristhian Manzano'
-};
 
 export const Details = () => {
   const { id } = useParams();
   const [open, setOpen] = useState(false);
   const [openComments, setOpenComments] = useState(false);
+  const [observation, setObservation] = useState(null);
+  const [comments, setComments] = useState([]);
+  // contexts
   const { authSession } = useContext(AuthContext);
   const { handleLoading } = useContext(LoadingContext);
   const { handleOpenSnackbar } = useContext(SnackbarContext);
 
-  const [observation, setObservation] = useState({});
+  const { register, handleSubmit, reset, formState } = useForm();
 
   const handleOpenComments = () => setOpenComments((previous) => !previous);
-  const handleOpenDialog = (condition) => setOpen(condition);
+
+  const handleOpenDialog = (condition) => {
+    setOpen(condition);
+    reset(); // Clear Form
+  };
 
   const fetchObservation = async () => {
     handleLoading(true);
@@ -69,6 +70,46 @@ export const Details = () => {
   useEffect(() => {
     fetchObservation();
   }, []);
+
+  const fetchComments = async () => {
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `http://localhost:3200/comment/${observation?.id}`,
+      method: 'GET',
+      token: `${authSession?.user?.token}`
+    });
+    handleLoading(false);
+    if (response.error) {
+      handleOpenSnackbar('error', 'Cannot get comments');
+      return;
+    }
+    setComments(response.data?.data);
+  };
+
+  useEffect(() => {
+    if (observation) fetchComments();
+  }, [observation]);
+
+  const handleSubmitComment = async (data) => {
+    const dataToSend = { ...data, idObservation: observation?.id };
+
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `http://localhost:3200/comment`,
+      method: 'POST',
+      token: authSession.user?.token,
+      data: dataToSend
+    });
+    handleLoading(false);
+
+    if (response.error) {
+      handleOpenSnackbar('error', 'No se pudo crear!');
+    } else {
+      handleOpenSnackbar('success', 'Creado exitosamente!');
+      handleOpenDialog(false);
+    }
+    fetchComments();
+  };
 
   return (
     <Box sx={{ mb: '100px' }}>
@@ -108,8 +149,8 @@ export const Details = () => {
                 R
               </Avatar>
             }
-            title={observationx.user}
-            subheader={observationx.date}
+            title="observation.user"
+            subheader="observation.date"
           />
           <CardContent>
             <Box sx={{ maxWidth: '100vw', overflow: 'hidden' }}>
@@ -117,67 +158,70 @@ export const Details = () => {
                 Departamento - Casa 123{' '}
               </Typography>
               <Typography variant="body1" sx={{ mb: 2 }}>
-                {observation.description}
+                {observation?.description}
               </Typography>
             </Box>
           </CardContent>
         </Card>
 
         <Dialog open={open} onClose={() => handleOpenDialog(false)} fullWidth>
-          <DialogTitle>Comentario</DialogTitle>
-          <DialogContent>
-            <FormControl fullWidth>
-              <TextField
-                placeholder="Agregar comentario..."
-                multiline
-                maxRows={20}
-                minRows={5}
-                inputProps={{ maxLength: 2000 }}
-              />
-            </FormControl>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => handleOpenDialog(false)}>Cancelar</Button>
-            <Button
-              onClick={() => {
-                handleOpenDialog(false);
-              }}>
-              Enviar
-            </Button>
-          </DialogActions>
+          <Box component="form" onSubmit={handleSubmit(handleSubmitComment)}>
+            <DialogTitle>Comentario</DialogTitle>
+            <DialogContent>
+              <FormControl fullWidth>
+                <TextField
+                  {...register('description', { required: true, maxLength: 200 })}
+                  placeholder="Agregar comentario..."
+                  multiline
+                  maxRows={20}
+                  minRows={5}
+                  inputProps={{ maxLength: 2000 }}
+                />
+                <FormHelperText error>
+                  {formState.errors.description?.type === 'required' && 'descripción requerida'}
+                  {formState.errors.description?.type === 'maxLength' &&
+                    'Longitud máxima permitidad: 200'}
+                </FormHelperText>
+              </FormControl>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => handleOpenDialog(false)}>Cancelar</Button>
+              <Button type="submit">Enviar</Button>
+            </DialogActions>
+          </Box>
         </Dialog>
 
         <Box>
           <Divider sx={{ mt: 2 }}>
-            {/* <Chip label="COMENTARIOS" /> */}
             <Button onClick={handleOpenComments} color="secondary">
               {openComments ? 'Ocultar comentarios' : 'Ver comentarios'}{' '}
               {openComments ? <ArrowDropUp /> : <ArrowDropDown />}
             </Button>
           </Divider>
 
-          {openComments && (
-            <Card sx={{ p: 3, my: 1 }}>
-              <CardHeader
-                avatar={
-                  <Avatar sx={{ backgroundColor: 'red' }} aria-label="recipe">
-                    R
-                  </Avatar>
-                }
-                title={observationx.user}
-                subheader={observationx.date}
-                // action={
-                //   <IconButton aria-label="settings">
-                //     <MoreVert />
-                //   </IconButton>
-                // }
-              />
-              <CardContent>
-                Observation {id}
-                {observationx.description}
-              </CardContent>
-            </Card>
-          )}
+          {openComments &&
+            comments.map((comment) => (
+              <Card key={comment?.id} sx={{ p: 3, my: 1 }}>
+                <CardHeader
+                  avatar={
+                    <Avatar sx={{ backgroundColor: 'red' }} aria-label="recipe">
+                      R
+                    </Avatar>
+                  }
+                  title="comment.user"
+                  subheader={comment?.date}
+                  action={
+                    <IconButton aria-label="delete">
+                      <Clear color="error" />
+                    </IconButton>
+                  }
+                />
+                <CardContent>
+                  Observation {id}
+                  {comment?.description}
+                </CardContent>
+              </Card>
+            ))}
         </Box>
       </Box>
     </Box>

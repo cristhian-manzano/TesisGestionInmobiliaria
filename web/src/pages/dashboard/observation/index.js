@@ -114,6 +114,7 @@ export const Observation = () => {
                   <TableCell>Observación</TableCell>
                   <TableCell>Solucionado</TableCell>
                   <TableCell>Fecha</TableCell>
+                  <TableCell>Usuario</TableCell>
                   <TableCell>Propiedad</TableCell>
                 </TableRow>
               </TableHead>
@@ -126,12 +127,13 @@ export const Observation = () => {
                       sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                       <TableCell>{observation.id}</TableCell>
                       <TableCell>
-                        <Typography noWrap sx={{ width: 350 }}>
+                        <Typography noWrap sx={{ width: 300 }}>
                           {observation.description}
                         </Typography>
                       </TableCell>
                       <TableCell>{observation.solved ? 'Si' : 'No'}</TableCell>
                       <TableCell>{observation.date}</TableCell>
+                      <TableCell>Yo</TableCell>
                       <TableCell>{observation.rent?.idProperty}</TableCell>
                       <TableCell>
                         <TableMoreMenu
