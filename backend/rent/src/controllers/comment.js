@@ -11,7 +11,7 @@ const Comment = require('../models/comment');
 
 const { commentCreateValidation } = require('../validation/comment');
 
-const getAll = async (req, res) => {
+const getByObservation = async (req, res) => {
   try {
     // const idOwner = req.user?.id;
     const { id: idObservation } = req.params;
@@ -87,7 +87,7 @@ const destroy = async (req, res) => {
 };
 
 module.exports = {
-  getAll,
+  getByObservation,
   create,
   destroy
 };
