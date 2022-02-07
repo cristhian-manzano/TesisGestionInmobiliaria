@@ -11,7 +11,8 @@ import {
   TableRow,
   TableCell,
   Paper,
-  Button
+  Button,
+  TablePagination
 } from '@mui/material';
 
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
@@ -38,6 +39,9 @@ export const Observation = () => {
   const { handleOpenSnackbar } = useContext(SnackbarContext);
 
   const [selectedObservation, setSelectedObservation] = useState(null);
+
+  const [page, setPage] = useState(2);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const fetchObservations = async () => {
     handleLoading(true);
@@ -96,6 +100,15 @@ export const Observation = () => {
     }
   };
 
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
   return (
     <>
       <Box>
@@ -108,7 +121,7 @@ export const Observation = () => {
         <Card>
           <TableContainer component={Paper}>
             <Table sx={{ minWidth: 800 }} aria-label="simple table">
-              <TableHead>
+              <TableHead sx={{ backgroundColor: '#e9e9e9' }}>
                 <TableRow>
                   <TableCell>ID</TableCell>
                   <TableCell>Observación</TableCell>
@@ -116,6 +129,7 @@ export const Observation = () => {
                   <TableCell>Fecha</TableCell>
                   <TableCell>Usuario</TableCell>
                   <TableCell>Propiedad</TableCell>
+                  <TableCell />
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -164,6 +178,14 @@ export const Observation = () => {
               </TableBody>
             </Table>
           </TableContainer>
+          <TablePagination
+            component="div"
+            count={100}
+            page={page}
+            onPageChange={handleChangePage}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
         </Card>
       </Box>
       <Alert state={alert} closeAlert={closeDeleteAlert} onConfirm={() => onDelete()} />

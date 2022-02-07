@@ -12,7 +12,8 @@ import {
   TableRow,
   TableCell,
   Paper,
-  Button
+  Button,
+  TablePagination
 } from '@mui/material';
 
 import { AuthContext } from '../../../store/context/authContext';
@@ -35,6 +36,9 @@ export const Property = () => {
   const [selectedProperty, setSelectedProperty] = useState(null);
 
   const [alert, setAlert] = useState({ open: false, title: '', description: '' });
+
+  const [page, setPage] = useState(2);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const openDeleteAlert = (property) => {
     setSelectedProperty(property);
@@ -94,6 +98,14 @@ export const Property = () => {
     }
   };
 
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
   return (
     <>
       <Box>
@@ -106,7 +118,7 @@ export const Property = () => {
         <Card>
           <TableContainer component={Paper}>
             <Table sx={{ minWidth: 800 }} aria-label="simple table">
-              <TableHead>
+              <TableHead sx={{ backgroundColor: '#e9e9e9' }}>
                 <TableRow>
                   <TableCell>Nombre</TableCell>
                   <TableCell>Tipo de inmueble</TableCell>
@@ -157,6 +169,14 @@ export const Property = () => {
               </TableBody>
             </Table>
           </TableContainer>
+          <TablePagination
+            component="div"
+            count={100}
+            page={page}
+            onPageChange={handleChangePage}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
         </Card>
       </Box>
 
