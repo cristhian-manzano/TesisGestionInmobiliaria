@@ -68,9 +68,14 @@ export const DashboardSidebar = ({ open, onClose }) => {
         }}
       />
       <Box sx={{ flexGrow: 1 }}>
-        {sidebarConfig.map((item) => (
-          <NavItem key={item.title} icon={item.icon} href={item.href} title={item.title} />
-        ))}
+        {sidebarConfig.map((item) =>
+          item.roles.map(
+            (role) =>
+              authSession.user?.roles.includes(role) && (
+                <NavItem key={item.title} icon={item.icon} href={item.href} title={item.title} />
+              )
+          )
+        )}
       </Box>
       <Divider sx={{ borderColor: '#2D3748' }} />
       <Box
