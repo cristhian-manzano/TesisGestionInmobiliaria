@@ -21,6 +21,8 @@ import { SnackbarGlobal } from './store/context/SnackbarGlobal';
 import { LoadingGlobal } from './store/context/LoadingGlobal';
 import { AuthContextProvider } from './store/context/authContext';
 
+import { Profile } from './pages/dashboard/Profile';
+
 // new
 import { Create as CreateProperty } from './pages/dashboard/property/Create';
 import { Update as UpdateProperty } from './pages/dashboard/property/Update';
@@ -54,6 +56,7 @@ const App = () => {
                 <Route path="/dashboard" element={<ProtectedRoutes />}>
                   <Route path="" element={<DashboardLayout />}>
                     <Route index element={<Home />} />
+                    <Route path="profile" element={<Profile />} />
 
                     <Route path="observation" element={<Outlet />}>
                       <Route path="" element={<Observation />} />

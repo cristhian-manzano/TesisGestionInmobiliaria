@@ -31,6 +31,11 @@ export const AccountMenu = () => {
     setAnchorEl(null);
   };
 
+  const handleProfile = () => {
+    navigate('/dashboard/profile');
+    handleClose();
+  };
+
   const handleLogout = () => {
     setAuthSession({ user: null });
     localStorage.removeItem('session');
@@ -114,7 +119,7 @@ export const AccountMenu = () => {
 
         <Divider sx={{ my: 1 }} />
 
-        <MenuItem onClick={handleClose}>
+        <MenuItem onClick={handleProfile}>
           <ListItemIcon>
             <AccountCircle fontSize="small" />
           </ListItemIcon>

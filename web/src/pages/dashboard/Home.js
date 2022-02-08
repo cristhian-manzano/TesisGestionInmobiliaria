@@ -15,24 +15,24 @@ import {
 
 // Temporal data
 const rows = [
-  {
-    id: 1,
-    name: 'Cristhian Manzano',
-    email: 'email@gmail.com',
-    phone: '16-10-2021',
-    apartment: 'Casa norte',
-    date: '16-10-2021',
-    payment: '$500'
-  },
-  {
-    id: 2,
-    name: 'Cristhian Manzano',
-    email: 'email@gmail.com',
-    phone: '16-10-2021',
-    apartment: 'Casa norte',
-    date: '16-10-2021',
-    payment: '$500'
-  }
+  // {
+  //   id: 1,
+  //   name: 'Cristhian Manzano',
+  //   email: 'email@gmail.com',
+  //   phone: '16-10-2021',
+  //   apartment: 'Casa norte',
+  //   date: '16-10-2021',
+  //   payment: '$500'
+  // },
+  // {
+  //   id: 2,
+  //   name: 'Cristhian Manzano',
+  //   email: 'email@gmail.com',
+  //   phone: '16-10-2021',
+  //   apartment: 'Casa norte',
+  //   date: '16-10-2021',
+  //   payment: '$500'
+  // }
 ];
 
 export const Home = () => {
@@ -45,7 +45,7 @@ export const Home = () => {
               Nuevas observaciones
             </Typography>
             <Typography variant="h5" sx={{ mt: 1 }}>
-              3
+              -
             </Typography>
           </Card>
         </Grid>
@@ -55,7 +55,7 @@ export const Home = () => {
               Inquilinos pendientes
             </Typography>
             <Typography variant="h5" sx={{ mt: 1 }}>
-              5
+              -
             </Typography>
           </Card>
         </Grid>
@@ -65,7 +65,7 @@ export const Home = () => {
               Cantidad de inquilinos
             </Typography>
             <Typography variant="h5" sx={{ mt: 1 }}>
-              35
+              -
             </Typography>
           </Card>
         </Grid>
@@ -75,7 +75,7 @@ export const Home = () => {
               Ingresos mes actual
             </Typography>
             <Typography variant="h5" sx={{ mt: 1 }}>
-              $ 4000
+              $ -
             </Typography>
           </Card>
         </Grid>
