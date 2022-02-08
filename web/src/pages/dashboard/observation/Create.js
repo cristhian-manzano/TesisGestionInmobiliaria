@@ -51,7 +51,7 @@ export const Create = () => {
   const onSubmitForm = async (data) => {
     handleLoading(true);
     const response = await sendRequest({
-      urlPath: `http://localhost:3200/observation`,
+      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/observation`,
       method: 'POST',
       token: authSession.user?.token,
       data

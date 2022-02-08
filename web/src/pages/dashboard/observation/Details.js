@@ -21,7 +21,7 @@ import { Comments } from './Comments';
 
 export const Details = () => {
   const { id } = useParams();
-  const [openComments, setOpenComments] = useState(false);
+  const [openComments, setOpenComments] = useState(true);
   const [observation, setObservation] = useState(null);
   // contexts
   const { authSession } = useContext(AuthContext);
@@ -33,7 +33,7 @@ export const Details = () => {
   const fetchObservation = async () => {
     handleLoading(true);
     const response = await sendRequest({
-      urlPath: `http://localhost:3200/observation/${id}`,
+      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/observation/${id}`,
       method: 'GET',
       token: `${authSession?.user?.token}`
     });

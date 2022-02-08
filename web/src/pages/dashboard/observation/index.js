@@ -12,15 +12,17 @@ import {
   TableCell,
   Paper,
   Button,
-  TablePagination
+  TablePagination,
+  TextField,
+  InputAdornment,
+  IconButton
 } from '@mui/material';
 
+import { Search } from '@mui/icons-material';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import { TableMoreMenu } from '../../../components/TableMoreMenu';
-
 import { Alert } from '../../../components/Alert';
 import { sendRequest } from '../../../helpers/utils';
-
 import { AuthContext } from '../../../store/context/authContext';
 import { LoadingContext } from '../../../store/context/LoadingGlobal';
 import { SnackbarContext } from '../../../store/context/SnackbarGlobal';
@@ -29,35 +31,27 @@ export const Observation = () => {
   const navigate = useNavigate();
   const onView = (id) => navigate(`${id}`);
   const onUpdate = (id) => navigate(`update/${id}`);
-
   const [observations, setObservations] = useState([]);
-
   const [alert, setAlert] = useState({ open: false, title: '', description: '' });
-
   const { authSession } = useContext(AuthContext);
   const { handleLoading } = useContext(LoadingContext);
   const { handleOpenSnackbar } = useContext(SnackbarContext);
-
   const [selectedObservation, setSelectedObservation] = useState(null);
-
   const [page, setPage] = useState(2);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const fetchObservations = async () => {
     handleLoading(true);
     const response = await sendRequest({
-      urlPath: 'http://localhost:3200/observation',
+      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/observation`,
       method: 'GET',
       token: `${authSession?.user?.token}`
     });
-
     handleLoading(false);
-
     if (response.error) {
       handleOpenSnackbar('error', 'Cannot get observations');
       return;
     }
-
     setObservations(response.data?.data);
   };
 
@@ -119,6 +113,20 @@ export const Observation = () => {
           </Button>
         </Box>
         <Card>
+          <Box sx={{ py: 2 }}>
+            <TextField
+              placeholder="search"
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton>
+                      <Search />
+                    </IconButton>
+                  </InputAdornment>
+                )
+              }}
+            />
+          </Box>
           <TableContainer component={Paper}>
             <Table sx={{ minWidth: 800 }} aria-label="simple table">
               <TableHead sx={{ backgroundColor: '#e9e9e9' }}>

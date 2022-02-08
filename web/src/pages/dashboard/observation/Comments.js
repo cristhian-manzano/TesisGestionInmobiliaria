@@ -22,7 +22,6 @@ import {
 } from '@mui/material';
 
 import { Alert } from '../../../components/Alert';
-
 import { sendRequest } from '../../../helpers/utils';
 import { AuthContext } from '../../../store/context/authContext';
 import { LoadingContext } from '../../../store/context/LoadingGlobal';
@@ -35,9 +34,7 @@ export const Comments = ({ observation, openComments }) => {
   const { authSession } = useContext(AuthContext);
   const { handleLoading } = useContext(LoadingContext);
   const { handleOpenSnackbar } = useContext(SnackbarContext);
-
   const [selectedComment, setSelectedComment] = useState(null);
-
   const [alert, setAlert] = useState({ open: false, title: '', description: '' });
 
   const { register, handleSubmit, reset, formState } = useForm();
@@ -50,7 +47,7 @@ export const Comments = ({ observation, openComments }) => {
   const fetchComments = async () => {
     handleLoading(true);
     const response = await sendRequest({
-      urlPath: `http://localhost:3200/comment/${observation?.id}`,
+      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/comment/${observation?.id}`,
       method: 'GET',
       token: `${authSession?.user?.token}`
     });
@@ -71,7 +68,7 @@ export const Comments = ({ observation, openComments }) => {
 
     handleLoading(true);
     const response = await sendRequest({
-      urlPath: `http://localhost:3200/comment`,
+      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/comment`,
       method: 'POST',
       token: authSession.user?.token,
       data: dataToSend
