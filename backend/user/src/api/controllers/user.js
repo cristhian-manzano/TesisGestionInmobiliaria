@@ -105,6 +105,40 @@ const getByFilter = async (req, res) => {
   }
 };
 
+const getlistUsers = async (req, res) => {
+  try {
+    const { users } = req.body;
+
+    if (!users || !Array.isArray(users))
+      return res.status(BAD_REQUEST).json(errorResponse(res.statusCode, 'Invalid user lists!'));
+
+    const UsersData = await User.findAll({
+      where: {
+        id: users
+      },
+      include: {
+        model: Role,
+        as: 'roles',
+        attributes: [],
+        where: {
+          // Move it to a variable
+          name: ['Arrendador', 'Arrendatario']
+        }
+      },
+      attributes: {
+        exclude: ['password', 'dateOfBirth', 'updatedAt', 'createdAt']
+      }
+    });
+
+    return res.status(OK).json(successResponse(res.statusCode, 'Ok!', UsersData));
+  } catch (e) {
+    Logger.error(e.toString());
+    return res
+      .status(INTERNAL_SERVER_ERROR)
+      .json(errorResponse(res.statusCode, 'Cannot get user.'));
+  }
+};
+
 const getlistTenants = async (req, res) => {
   try {
     const { tenants } = req.body;
@@ -122,7 +156,7 @@ const getlistTenants = async (req, res) => {
         attributes: [],
         where: {
           // Move it to a variable
-          id: 2
+          name: 'Arrendatario'
         }
       },
       attributes: {
@@ -139,4 +173,4 @@ const getlistTenants = async (req, res) => {
   }
 };
 
-module.exports = { getById, getByFilter, getlistTenants, getTenantById };
+module.exports = { getById, getByFilter, getlistTenants, getTenantById, getlistUsers };
