@@ -100,9 +100,23 @@ const get = async (req, res) => {
         .status(responseStatusCodes.NOT_FOUND)
         .json(errorResponse(res.statusCode, 'Observation not found!'));
 
+    const user = await axios.post(`${process.env.API_USER_URL}/user/list`, {
+      users: [observation.idUser]
+    });
+
+    const property = await axios.post(`${process.env.API_PROPERTY_URL}/property/list`, {
+      properties: [observation.rent?.idProperty]
+    });
+
+    const observationData = {
+      ...observation.dataValues,
+      user: user.data.data[0],
+      property: property.data.data[0]
+    };
+
     return res
       .status(responseStatusCodes.OK)
-      .json(successResponse(res.statusCode, 'Got it!', observation));
+      .json(successResponse(res.statusCode, 'Got it!', observationData));
   } catch (e) {
     Logger.error(e.message);
     return res

@@ -1,4 +1,5 @@
 require('dotenv').config();
+const axios = require('axios');
 const { Op } = require('sequelize');
 const Logger = require('../config/logger');
 const { responseStatusCodes } = require('../helpers/constants');
@@ -8,6 +9,7 @@ const {
   validationResponse
 } = require('../helpers/responsesFormat');
 const Comment = require('../models/comment');
+
 // const Observation = require('../models/observation');
 
 const { commentCreateValidation } = require('../validation/comment');
@@ -28,9 +30,23 @@ const getByObservation = async (req, res) => {
       // ]
     });
 
+    const usersList = comments.reduce((prev, cur) => {
+      if (!prev.includes(cur.idUser)) return [...prev, cur.idUser];
+      return prev;
+    }, []);
+
+    const users = await axios.post(`${process.env.API_USER_URL}/user/list`, {
+      users: usersList
+    });
+
+    const commentData = comments.map((comment) => ({
+      ...comment.dataValues,
+      user: users.data.data.find((user) => comment.idUser === user.id)
+    }));
+
     return res
       .status(responseStatusCodes.OK)
-      .json(successResponse(res.statusCode, 'Got it!', comments));
+      .json(successResponse(res.statusCode, 'Got it!', commentData));
   } catch (e) {
     Logger.error(e.message);
     return res
