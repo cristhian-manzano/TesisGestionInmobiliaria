@@ -1,5 +1,6 @@
 require('dotenv').config();
 // const { Op } = require('sequelize');
+const axios = require('axios');
 const Logger = require('../config/logger');
 const { responseStatusCodes } = require('../helpers/constants');
 const {
@@ -33,9 +34,37 @@ const getAll = async (req, res) => {
       }
     });
 
+    const lists = observations.reduce(
+      (prev, cur) => ({
+        properties: prev.properties
+          ? [...prev.properties, cur.rent.idProperty]
+          : [cur.rent.idProperty],
+        users: prev.users ? [...prev.users, cur.idUser] : [cur.idUser]
+      }),
+      {}
+    );
+
+    const users =
+      lists.users &&
+      (await axios.post(`${process.env.API_USER_URL}/user/list`, {
+        users: lists.users
+      }));
+
+    const properties =
+      lists.properties &&
+      (await axios.post(`${process.env.API_PROPERTY_URL}/property/list`, {
+        properties: lists.properties
+      }));
+
+    const observationsData = observations.map((observation) => ({
+      ...observation.dataValues,
+      user: users.data.data.find((user) => observation.idUser === user.id),
+      property: properties.data.data.find((property) => observation.rent.idProperty === property.id)
+    }));
+
     return res
       .status(responseStatusCodes.OK)
-      .json(successResponse(res.statusCode, 'Got it!', observations));
+      .json(successResponse(res.statusCode, 'Got it!', observationsData));
   } catch (e) {
     Logger.error(e.message);
     return res
