@@ -174,12 +174,8 @@ export const Comments = ({ observation, openComments }) => {
             comments.map((comment) => (
               <Card key={comment?.id} sx={{ p: 3, my: 1 }}>
                 <CardHeader
-                  avatar={
-                    <Avatar sx={{ backgroundColor: 'red' }} aria-label="recipe">
-                      R
-                    </Avatar>
-                  }
-                  title="comment.user"
+                  avatar={<Avatar aria-label="recipe">{comment.user?.firstName[0]}</Avatar>}
+                  title={`${comment.user?.firstName ?? ''} ${comment.user?.lastName ?? ''}`}
                   subheader={comment?.date}
                   action={
                     <IconButton aria-label="delete" onClick={() => openDeleteAlert(comment)}>

@@ -71,13 +71,13 @@ export const Details = () => {
                 R
               </Avatar>
             }
-            title="observation.user"
-            subheader="observation.date"
+            title={`${observation?.user?.firstName ?? ''} ${observation?.user?.lastName ?? ''}`}
+            subheader={new Date(observation?.date).toLocaleString()}
           />
           <CardContent>
             <Box sx={{ maxWidth: '100vw', overflow: 'hidden' }}>
               <Typography variant="h5" sx={{ mb: 2 }}>
-                Departamento - Casa 123{' '}
+                {observation?.property?.tagName ?? ''}
               </Typography>
               <Typography variant="body1" sx={{ mb: 2 }}>
                 {observation?.description}
