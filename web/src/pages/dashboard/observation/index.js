@@ -154,9 +154,15 @@ export const Observation = () => {
                         </Typography>
                       </TableCell>
                       <TableCell>{observation.solved ? 'Si' : 'No'}</TableCell>
-                      <TableCell>{observation.date}</TableCell>
-                      <TableCell>Yo</TableCell>
-                      <TableCell>{observation.rent?.idProperty}</TableCell>
+                      <TableCell>{new Date(observation.date).toLocaleString()}</TableCell>
+                      <TableCell>
+                        {authSession.user?.email === observation.user?.email
+                          ? 'Yo'
+                          : `${observation.user?.firstName ?? ''} ${
+                              observation.user?.lastName ?? ''
+                            }`}
+                      </TableCell>
+                      <TableCell>{observation.property?.tagName}</TableCell>
                       <TableCell>
                         <TableMoreMenu
                           onView={() => onView(observation.id)}
