@@ -68,7 +68,11 @@ export const Details = () => {
           <Card sx={{ p: 3, my: 1 }}>
             <CardHeader
               avatar={<Avatar aria-label="recipe">R</Avatar>}
-              title={`${observation?.user?.firstName ?? ''} ${observation?.user?.lastName ?? ''}`}
+              title={
+                observation.user?.email === authSession.user?.email
+                  ? 'Yo'
+                  : `${observation?.user?.firstName ?? ''} ${observation?.user?.lastName ?? ''}`
+              }
               subheader={new Date(observation?.date).toLocaleString()}
             />
             <CardContent>

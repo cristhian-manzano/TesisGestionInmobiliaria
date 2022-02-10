@@ -37,7 +37,12 @@ export const Update = () => {
   const [images, setImages] = useState({ loaded: [], uploaded: [], deleted: [] });
   // Selected type property
   const [selectedTypeProperty, setSelectedTypeProperty] = useState({});
-  const { sectors, typeProperties, error, loading } = usePropertyFormData();
+  const {
+    sectors,
+    typeProperties
+    // error,
+    // loading
+  } = usePropertyFormData();
   const [updateProperty, setUpdateProperty] = useState(null);
 
   const { reset, control, register, handleSubmit, formState } = useForm();
@@ -115,8 +120,6 @@ export const Update = () => {
       additionalFeatures: JSON.stringify(fields.additionalFeatures ?? {}),
       ...(images.deleted.length > 0 && { deletedImages: JSON.stringify(images.deleted) })
     };
-
-    console.log(dataToSend);
 
     const formData = new FormData();
     Object.keys(dataToSend).forEach((key) => formData.append(key, dataToSend[key]));

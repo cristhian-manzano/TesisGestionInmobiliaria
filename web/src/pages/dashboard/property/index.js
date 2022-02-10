@@ -16,10 +16,13 @@ import {
   TablePagination,
   TextField,
   InputAdornment,
-  IconButton
+  IconButton,
+  MenuItem,
+  ListItemIcon,
+  ListItemText
 } from '@mui/material';
 
-import { Search } from '@mui/icons-material';
+import { Search, Visibility, Edit, Delete } from '@mui/icons-material';
 
 import { AuthContext } from '../../../store/context/authContext';
 import { LoadingContext } from '../../../store/context/LoadingGlobal';
@@ -156,11 +159,37 @@ export const Property = () => {
                       <TableCell>{row.price}</TableCell>
 
                       <TableCell>
-                        <TableMoreMenu
-                          onView={() => onView(row.id)}
-                          onUpdate={() => onUpdate(row.id)}
-                          onDelete={() => openDeleteAlert(row)}
-                        />
+                        <TableMoreMenu>
+                          <MenuItem onClick={() => onView(row.id)}>
+                            <ListItemIcon>
+                              <Visibility sx={{ fontSize: 25 }} />
+                            </ListItemIcon>
+                            <ListItemText
+                              primary="Ver mas"
+                              primaryTypographyProps={{ variant: 'body2' }}
+                            />
+                          </MenuItem>
+
+                          <MenuItem onClick={() => onUpdate(row.id)}>
+                            <ListItemIcon>
+                              <Edit sx={{ fontSize: 25 }} />
+                            </ListItemIcon>
+                            <ListItemText
+                              primary="Editar"
+                              primaryTypographyProps={{ variant: 'body2' }}
+                            />
+                          </MenuItem>
+
+                          <MenuItem onClick={() => openDeleteAlert(row)}>
+                            <ListItemIcon>
+                              <Delete sx={{ fontSize: 25 }} />
+                            </ListItemIcon>
+                            <ListItemText
+                              primary="Eliminar"
+                              primaryTypographyProps={{ variant: 'body2' }}
+                            />
+                          </MenuItem>
+                        </TableMoreMenu>
                       </TableCell>
                     </TableRow>
                   ))

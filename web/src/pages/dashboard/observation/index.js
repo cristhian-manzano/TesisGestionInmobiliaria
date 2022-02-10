@@ -15,10 +15,13 @@ import {
   TablePagination,
   TextField,
   InputAdornment,
-  IconButton
+  IconButton,
+  MenuItem,
+  ListItemIcon,
+  ListItemText
 } from '@mui/material';
 
-import { Search } from '@mui/icons-material';
+import { Search, Delete, Visibility } from '@mui/icons-material';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import { TableMoreMenu } from '../../../components/TableMoreMenu';
 import { Alert } from '../../../components/Alert';
@@ -30,7 +33,7 @@ import { SnackbarContext } from '../../../store/context/SnackbarGlobal';
 export const Observation = () => {
   const navigate = useNavigate();
   const onView = (id) => navigate(`${id}`);
-  const onUpdate = (id) => navigate(`update/${id}`);
+
   const [observations, setObservations] = useState([]);
   const [alert, setAlert] = useState({ open: false, title: '', description: '' });
   const { authSession } = useContext(AuthContext);
@@ -131,7 +134,6 @@ export const Observation = () => {
             <Table sx={{ minWidth: 800 }} aria-label="simple table">
               <TableHead sx={{ backgroundColor: '#e9e9e9' }}>
                 <TableRow>
-                  <TableCell>ID</TableCell>
                   <TableCell>Observación</TableCell>
                   <TableCell>Solucionado</TableCell>
                   <TableCell>Fecha</TableCell>
@@ -147,7 +149,6 @@ export const Observation = () => {
                       hover
                       key={observation.id}
                       sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                      <TableCell>{observation.id}</TableCell>
                       <TableCell>
                         <Typography noWrap sx={{ width: 300 }}>
                           {observation.description}
@@ -164,11 +165,29 @@ export const Observation = () => {
                       </TableCell>
                       <TableCell>{observation.property?.tagName}</TableCell>
                       <TableCell>
-                        <TableMoreMenu
-                          onView={() => onView(observation.id)}
-                          onUpdate={() => onUpdate(observation.id)}
-                          onDelete={() => openDeleteAlert(observation)}
-                        />
+                        <TableMoreMenu>
+                          <MenuItem onClick={() => onView(observation.id)}>
+                            <ListItemIcon>
+                              <Visibility sx={{ fontSize: 25 }} />
+                            </ListItemIcon>
+                            <ListItemText
+                              primary="Ver mas"
+                              primaryTypographyProps={{ variant: 'body2' }}
+                            />
+                          </MenuItem>
+
+                          {authSession.user?.email === observation.user?.email && (
+                            <MenuItem onClick={() => openDeleteAlert(observation)}>
+                              <ListItemIcon>
+                                <Delete sx={{ fontSize: 25 }} />
+                              </ListItemIcon>
+                              <ListItemText
+                                primary="Eliminar"
+                                primaryTypographyProps={{ variant: 'body2' }}
+                              />
+                            </MenuItem>
+                          )}
+                        </TableMoreMenu>
                       </TableCell>
                     </TableRow>
                   ))

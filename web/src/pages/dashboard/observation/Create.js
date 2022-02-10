@@ -101,9 +101,9 @@ export const Create = () => {
 
                           {tenantsRent.map((rent) => (
                             <MenuItem key={rent.id} value={rent.id}>
-                              {`${rent.property?.description ?? ''} - ${
-                                rent.tenant?.firstName ?? ''
-                              } ${rent.tenant?.lastName ?? ''}`}
+                              {`${rent.property?.tagName ?? ''} - ${rent.tenant?.firstName ?? ''} ${
+                                rent.tenant?.lastName ?? ''
+                              }`}
                             </MenuItem>
                           ))}
                         </Select>

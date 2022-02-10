@@ -1,4 +1,12 @@
-import { Dashboard, Group, RateReview, HomeWork, AddBusiness, Paid } from '@mui/icons-material';
+import {
+  Dashboard,
+  Group,
+  RateReview,
+  HomeWork,
+  AddBusiness,
+  Receipt,
+  Paid
+} from '@mui/icons-material';
 
 import { ROLES } from '../../helpers/constants';
 
@@ -25,6 +33,18 @@ export const sidebarConfig = [
     href: '/dashboard/payments',
     icon: <Paid fontSize="small" />,
     title: 'Pagos',
+    roles: [ROLES.ARRENDADOR, ROLES.ARRENDATARIO]
+  },
+  {
+    href: '/dashboard/rents',
+    icon: <AddBusiness fontSize="small" />,
+    title: 'Alquileres',
+    roles: [ROLES.ARRENDATARIO]
+  },
+  {
+    href: '/dashboard/contracts',
+    icon: <Receipt fontSize="small" />,
+    title: 'Contratos',
     roles: [ROLES.ARRENDADOR, ROLES.ARRENDATARIO]
   },
   {

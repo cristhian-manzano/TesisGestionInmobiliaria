@@ -1,11 +1,11 @@
 import { useRef, useState } from 'react';
 
 // material
-import { Menu, MenuItem, IconButton, ListItemIcon, ListItemText } from '@mui/material';
-import { MoreVert, Delete, Edit, Visibility } from '@mui/icons-material/';
+import { Menu, IconButton } from '@mui/material';
+import { MoreVert } from '@mui/icons-material/';
 import PropTypes from 'prop-types';
 
-export const TableMoreMenu = ({ onView, onUpdate, onDelete }) => {
+export const TableMoreMenu = ({ children }) => {
   const ref = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -25,38 +25,12 @@ export const TableMoreMenu = ({ onView, onUpdate, onDelete }) => {
         }}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}>
-        <MenuItem sx={{ color: 'text.secondary' }} onClick={onView}>
-          <ListItemIcon>
-            <Visibility sx={{ fontSize: 25 }} />
-          </ListItemIcon>
-          <ListItemText primary="Ver mas" primaryTypographyProps={{ variant: 'body2' }} />
-        </MenuItem>
-
-        <MenuItem sx={{ color: 'text.secondary' }} onClick={onUpdate}>
-          <ListItemIcon>
-            <Edit sx={{ fontSize: 25 }} />
-          </ListItemIcon>
-          <ListItemText primary="Editar" primaryTypographyProps={{ variant: 'body2' }} />
-        </MenuItem>
-
-        <MenuItem
-          sx={{ color: 'text.secondary' }}
-          onClick={() => {
-            onDelete();
-            setIsOpen(false);
-          }}>
-          <ListItemIcon>
-            <Delete sx={{ fontSize: 25 }} />
-          </ListItemIcon>
-          <ListItemText primary="Eliminar" primaryTypographyProps={{ variant: 'body2' }} />
-        </MenuItem>
+        {children}
       </Menu>
     </>
   );
 };
 
 TableMoreMenu.propTypes = {
-  onView: PropTypes.func.isRequired,
-  onUpdate: PropTypes.func.isRequired,
-  onDelete: PropTypes.func.isRequired
+  children: PropTypes.node.isRequired
 };
