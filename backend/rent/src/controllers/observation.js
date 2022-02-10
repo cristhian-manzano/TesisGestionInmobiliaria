@@ -1,5 +1,5 @@
 require('dotenv').config();
-// const { Op } = require('sequelize');
+const { Op } = require('sequelize');
 const axios = require('axios');
 const Logger = require('../config/logger');
 const { responseStatusCodes } = require('../helpers/constants');
@@ -25,7 +25,9 @@ const getAll = async (req, res) => {
         {
           model: Rent,
           as: 'rent',
-          where: { idOwner: idUser },
+          where: {
+            [Op.or]: [{ idOwner: idUser }, { idTenant: idUser }]
+          },
           attributes: ['id', 'idOwner', 'idProperty', 'idTenant']
         }
       ],
@@ -75,7 +77,7 @@ const getAll = async (req, res) => {
 
 const get = async (req, res) => {
   try {
-    const idOwner = req.user?.id;
+    const idUser = req.user?.id;
     const { id } = req.params;
 
     const observation = await Observation.findOne({
@@ -86,7 +88,9 @@ const get = async (req, res) => {
         {
           model: Rent,
           as: 'rent',
-          where: { idOwner },
+          where: {
+            [Op.or]: [{ idOwner: idUser }, { idTenant: idUser }]
+          },
           attributes: ['id', 'idOwner', 'idProperty', 'idTenant']
         }
       ],

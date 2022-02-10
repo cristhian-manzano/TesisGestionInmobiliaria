@@ -175,12 +175,18 @@ export const Comments = ({ observation, openComments }) => {
               <Card key={comment?.id} sx={{ p: 3, my: 1 }}>
                 <CardHeader
                   avatar={<Avatar aria-label="recipe">{comment.user?.firstName[0]}</Avatar>}
-                  title={`${comment.user?.firstName ?? ''} ${comment.user?.lastName ?? ''}`}
-                  subheader={comment?.date}
+                  title={
+                    comment.user?.email === authSession.user?.email
+                      ? 'Yo'
+                      : `${comment.user?.firstName ?? ''} ${comment.user?.lastName ?? ''}`
+                  }
+                  subheader={new Date(comment?.date).toLocaleString()}
                   action={
-                    <IconButton aria-label="delete" onClick={() => openDeleteAlert(comment)}>
-                      <Clear color="error" />
-                    </IconButton>
+                    comment.user?.email === authSession.user?.email && (
+                      <IconButton aria-label="delete" onClick={() => openDeleteAlert(comment)}>
+                        <Clear color="error" />
+                      </IconButton>
+                    )
                   }
                 />
                 <CardContent>{comment?.description}</CardContent>

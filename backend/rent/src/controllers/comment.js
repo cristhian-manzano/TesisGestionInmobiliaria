@@ -84,12 +84,12 @@ const create = async (req, res) => {
 
 const destroy = async (req, res) => {
   try {
-    const idOwner = req.user?.id;
+    const idUser = req.user?.id;
     const { id } = req.params;
 
     const comment = await Comment.findOne({
       where: {
-        [Op.and]: [{ id }, { idUser: idOwner }]
+        [Op.and]: [{ id }, { idUser }]
       }
     });
 

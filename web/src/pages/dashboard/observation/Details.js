@@ -63,40 +63,38 @@ export const Details = () => {
         <ArrowBack /> regresar
       </Button>
 
-      <Box>
-        <Card sx={{ p: 3, my: 1 }}>
-          <CardHeader
-            avatar={
-              <Avatar sx={{ backgroundColor: 'red' }} aria-label="recipe">
-                R
-              </Avatar>
-            }
-            title={`${observation?.user?.firstName ?? ''} ${observation?.user?.lastName ?? ''}`}
-            subheader={new Date(observation?.date).toLocaleString()}
-          />
-          <CardContent>
-            <Box sx={{ maxWidth: '100vw', overflow: 'hidden' }}>
-              <Typography variant="h5" sx={{ mb: 2 }}>
-                {observation?.property?.tagName ?? ''}
-              </Typography>
-              <Typography variant="body1" sx={{ mb: 2 }}>
-                {observation?.description}
-              </Typography>
-            </Box>
-          </CardContent>
-        </Card>
-
+      {observation && (
         <Box>
-          <Divider sx={{ mt: 2 }}>
-            <Button onClick={handleOpenComments} color="secondary">
-              {openComments ? 'Ocultar comentarios' : 'Ver comentarios'}{' '}
-              {openComments ? <ArrowDropUp /> : <ArrowDropDown />}
-            </Button>
-          </Divider>
+          <Card sx={{ p: 3, my: 1 }}>
+            <CardHeader
+              avatar={<Avatar aria-label="recipe">R</Avatar>}
+              title={`${observation?.user?.firstName ?? ''} ${observation?.user?.lastName ?? ''}`}
+              subheader={new Date(observation?.date).toLocaleString()}
+            />
+            <CardContent>
+              <Box sx={{ maxWidth: '100vw', overflow: 'hidden' }}>
+                <Typography variant="h5" sx={{ mb: 2 }}>
+                  {observation?.property?.tagName ?? ''}
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 2 }}>
+                  {observation?.description}
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
 
-          <Comments observation={observation} openComments={openComments} />
+          <Box>
+            <Divider sx={{ mt: 2 }}>
+              <Button onClick={handleOpenComments} color="secondary">
+                {openComments ? 'Ocultar comentarios' : 'Ver comentarios'}{' '}
+                {openComments ? <ArrowDropUp /> : <ArrowDropDown />}
+              </Button>
+            </Divider>
+
+            <Comments observation={observation} openComments={openComments} />
+          </Box>
         </Box>
-      </Box>
+      )}
     </Box>
   );
 };
