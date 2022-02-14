@@ -36,6 +36,14 @@ import { Create as CreateObservation } from './pages/dashboard/observation/Creat
 import { Update as UpdateObservation } from './pages/dashboard/observation/Update';
 import { Details as DetailsObservation } from './pages/dashboard/observation/Details';
 
+import { Payment } from './pages/dashboard/payment/index';
+import { Create as CreatePayment } from './pages/dashboard/payment/Create';
+import { Details as DetailsPayment } from './pages/dashboard/payment/Details';
+
+import { Contract } from './pages/dashboard/contract/index';
+import { Create as CreateContract } from './pages/dashboard/contract/Create';
+import { Details as DetailsContract } from './pages/dashboard/contract/Details';
+
 // Testing
 import { ProtectedRoutes } from './ProtectedRoutes';
 
@@ -58,25 +66,37 @@ const App = () => {
                     <Route index element={<Home />} />
                     <Route path="profile" element={<Profile />} />
 
-                    <Route path="observation" element={<Outlet />}>
+                    <Route path="observations" element={<Outlet />}>
                       <Route path="" element={<Observation />} />
                       <Route path="create" element={<CreateObservation />} />
                       <Route path="update/:id" element={<UpdateObservation />} />
                       <Route path=":id" element={<DetailsObservation />} />
                     </Route>
 
-                    <Route path="property" element={<Outlet />}>
+                    <Route path="properties" element={<Outlet />}>
                       <Route path="" element={<Property />} />
                       <Route path=":id" element={<DetailsProperty />} />
                       <Route path="create" element={<CreateProperty />} />
                       <Route path="update/:id" element={<UpdateProperty />} />
                     </Route>
 
-                    <Route path="tenant" element={<Outlet />}>
+                    <Route path="tenants" element={<Outlet />}>
                       <Route path="" element={<Tenant />} />
                       <Route path=":id" element={<DetailsTenant />} />
                       <Route path="create" element={<CreateTenant />} />
                       <Route path="update/:id" element={<UpdateTenant />} />
+                    </Route>
+
+                    <Route path="payments" element={<Outlet />}>
+                      <Route path="" element={<Payment />} />
+                      <Route path="create" element={<CreatePayment />} />
+                      <Route path=":id" element={<DetailsPayment />} />
+                    </Route>
+
+                    <Route path="contracts" element={<Outlet />}>
+                      <Route path="" element={<Contract />} />
+                      <Route path="create" element={<CreateContract />} />
+                      <Route path=":id" element={<DetailsContract />} />
                     </Route>
 
                     <Route path="*" element={<h1>Página no encontrada</h1>} />

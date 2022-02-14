@@ -18,13 +18,13 @@ export const sidebarConfig = [
     roles: [ROLES.ADMINISTRADOR, ROLES.ARRENDADOR, ROLES.ARRENDATARIO]
   },
   {
-    href: '/dashboard/tenant',
+    href: '/dashboard/tenants',
     icon: <Group fontSize="small" />,
     title: 'Inquilinos',
     roles: [ROLES.ARRENDADOR]
   },
   {
-    href: '/dashboard/property',
+    href: '/dashboard/properties',
     icon: <HomeWork fontSize="small" />,
     title: 'Inmuebles',
     roles: [ROLES.ARRENDADOR]
@@ -48,7 +48,7 @@ export const sidebarConfig = [
     roles: [ROLES.ARRENDADOR, ROLES.ARRENDATARIO]
   },
   {
-    href: '/dashboard/observation',
+    href: '/dashboard/observations',
     icon: <RateReview fontSize="small" />,
     title: 'Observaciones',
     roles: [ROLES.ARRENDADOR, ROLES.ARRENDATARIO]
