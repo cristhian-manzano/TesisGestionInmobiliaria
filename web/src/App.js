@@ -33,7 +33,6 @@ import { Update as UpdateTenant } from './pages/dashboard/tenant/Update';
 import { Details as DetailsTenant } from './pages/dashboard/tenant/Details';
 
 import { Create as CreateObservation } from './pages/dashboard/observation/Create';
-import { Update as UpdateObservation } from './pages/dashboard/observation/Update';
 import { Details as DetailsObservation } from './pages/dashboard/observation/Details';
 
 import { Payment } from './pages/dashboard/payment/index';
@@ -69,7 +68,6 @@ const App = () => {
                     <Route path="observations" element={<Outlet />}>
                       <Route path="" element={<Observation />} />
                       <Route path="create" element={<CreateObservation />} />
-                      <Route path="update/:id" element={<UpdateObservation />} />
                       <Route path=":id" element={<DetailsObservation />} />
                     </Route>
 

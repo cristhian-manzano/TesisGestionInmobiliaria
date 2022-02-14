@@ -25,16 +25,17 @@ import { Search, Delete, Visibility } from '@mui/icons-material';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import { TableMoreMenu } from '../../../components/TableMoreMenu';
 import { Alert } from '../../../components/Alert';
-import { sendRequest } from '../../../helpers/utils';
 import { AuthContext } from '../../../store/context/authContext';
 import { LoadingContext } from '../../../store/context/LoadingGlobal';
 import { SnackbarContext } from '../../../store/context/SnackbarGlobal';
+import { useObservation } from './useObservation';
 
 export const Observation = () => {
   const navigate = useNavigate();
   const onView = (id) => navigate(`${id}`);
 
-  const [observations, setObservations] = useState([]);
+  const { api, data, error, loading } = useObservation();
+
   const [alert, setAlert] = useState({ open: false, title: '', description: '' });
   const { authSession } = useContext(AuthContext);
   const { handleLoading } = useContext(LoadingContext);
@@ -43,23 +44,15 @@ export const Observation = () => {
   const [page, setPage] = useState(2);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  const fetchObservations = async () => {
-    handleLoading(true);
-    const response = await sendRequest({
-      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/observation`,
-      method: 'GET',
-      token: `${authSession?.user?.token}`
-    });
-    handleLoading(false);
-    if (response.error) {
-      handleOpenSnackbar('error', 'Cannot get observations');
-      return;
-    }
-    setObservations(response.data?.data);
-  };
+  useEffect(() => {
+    handleLoading(loading);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading]);
 
   useEffect(() => {
-    fetchObservations();
+    api.list();
+    if (error) handleOpenSnackbar('error', 'Cannot get observations');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const openDeleteAlert = (observation) => {
@@ -82,17 +75,12 @@ export const Observation = () => {
   };
 
   const onDelete = async () => {
-    handleLoading(true);
-    const response = await sendRequest({
-      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/observation/${selectedObservation?.id}`,
-      token: authSession.user?.token,
-      method: 'DELETE'
-    });
-    handleLoading(false);
-    if (response.error) {
+    await api.remove(selectedObservation?.id);
+
+    if (error) {
       handleOpenSnackbar('error', 'No se pudo elimnar la observación!');
     } else {
-      await fetchObservations();
+      await api.list();
       handleOpenSnackbar('success', 'Observación eliminado exitosamente!');
     }
   };
@@ -143,8 +131,8 @@ export const Observation = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {observations.length > 0 ? (
-                  observations.map((observation) => (
+                {data?.length > 0 ? (
+                  data?.map((observation) => (
                     <TableRow
                       hover
                       key={observation.id}

@@ -13,43 +13,32 @@ import {
   Divider
 } from '@mui/material';
 
-import { sendRequest } from '../../../helpers/utils';
 import { AuthContext } from '../../../store/context/authContext';
 import { LoadingContext } from '../../../store/context/LoadingGlobal';
 import { SnackbarContext } from '../../../store/context/SnackbarGlobal';
 import { Comments } from './Comments';
+import { useObservation } from './useObservation';
 
 export const Details = () => {
   const { id } = useParams();
   const [openComments, setOpenComments] = useState(true);
-  const [observation, setObservation] = useState(null);
   // contexts
   const { authSession } = useContext(AuthContext);
   const { handleLoading } = useContext(LoadingContext);
   const { handleOpenSnackbar } = useContext(SnackbarContext);
+  const { api, data, error, loading } = useObservation();
 
   const handleOpenComments = () => setOpenComments((previous) => !previous);
 
-  const fetchObservation = async () => {
-    handleLoading(true);
-    const response = await sendRequest({
-      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/observation/${id}`,
-      method: 'GET',
-      token: `${authSession?.user?.token}`
-    });
-
-    handleLoading(false);
-
-    if (response.error) {
-      handleOpenSnackbar('error', 'Cannot get observation');
-      return;
-    }
-
-    setObservation(response.data?.data);
-  };
+  useEffect(() => {
+    handleLoading(loading);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading]);
 
   useEffect(() => {
-    fetchObservation();
+    api.details(id);
+    if (error) handleOpenSnackbar('error', 'Cannot get observation');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -63,25 +52,25 @@ export const Details = () => {
         <ArrowBack /> regresar
       </Button>
 
-      {observation && (
+      {data && (
         <Box>
           <Card sx={{ p: 3, my: 1 }}>
             <CardHeader
               avatar={<Avatar aria-label="recipe">R</Avatar>}
               title={
-                observation.user?.email === authSession.user?.email
+                data.user?.email === authSession.user?.email
                   ? 'Yo'
-                  : `${observation?.user?.firstName ?? ''} ${observation?.user?.lastName ?? ''}`
+                  : `${data?.user?.firstName ?? ''} ${data?.user?.lastName ?? ''}`
               }
-              subheader={new Date(observation?.date).toLocaleString()}
+              subheader={new Date(data?.date).toLocaleString()}
             />
             <CardContent>
               <Box sx={{ maxWidth: '100vw', overflow: 'hidden' }}>
                 <Typography variant="h5" sx={{ mb: 2 }}>
-                  {observation?.property?.tagName ?? ''}
+                  {data?.property?.tagName ?? ''}
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 2 }}>
-                  {observation?.description}
+                  {data?.description}
                 </Typography>
               </Box>
             </CardContent>
@@ -95,7 +84,7 @@ export const Details = () => {
               </Button>
             </Divider>
 
-            <Comments observation={observation} openComments={openComments} />
+            <Comments observation={data} openComments={openComments} />
           </Box>
         </Box>
       )}

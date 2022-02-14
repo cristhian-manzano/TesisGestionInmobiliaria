@@ -21,14 +21,15 @@ import { sendRequest } from '../../../helpers/utils';
 import { AuthContext } from '../../../store/context/authContext';
 import { LoadingContext } from '../../../store/context/LoadingGlobal';
 import { SnackbarContext } from '../../../store/context/SnackbarGlobal';
+import { useObservation } from './useObservation';
 
 export const Create = () => {
   const { authSession } = useContext(AuthContext);
   const { handleLoading } = useContext(LoadingContext);
   const { handleOpenSnackbar } = useContext(SnackbarContext);
   const [tenantsRent, setTenantsRent] = useState([]);
-
   const { register, handleSubmit, control, reset, formState } = useForm();
+  const { api, error, loading } = useObservation();
 
   const fetchTenantsRent = async () => {
     handleLoading(true);
@@ -46,22 +47,23 @@ export const Create = () => {
     }
   };
 
-  useEffect(() => fetchTenantsRent(), []);
+  useEffect(() => {
+    fetchTenantsRent();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const onSubmitForm = async (data) => {
-    handleLoading(true);
-    const response = await sendRequest({
-      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/observation`,
-      method: 'POST',
-      token: authSession.user?.token,
-      data
-    });
-    handleLoading(false);
+  useEffect(() => {
+    handleLoading(loading);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading]);
 
-    if (response.error) {
-      handleOpenSnackbar('error', 'No se pudo crear!');
+  const onSubmitForm = async (dataForm) => {
+    await api.create(dataForm);
+
+    if (error) {
+      handleOpenSnackbar('error', 'No se pudo crear la observación.');
     } else {
-      handleOpenSnackbar('success', 'Creado exitosamente!');
+      handleOpenSnackbar('success', 'Observación creada.');
       reset();
     }
   };
