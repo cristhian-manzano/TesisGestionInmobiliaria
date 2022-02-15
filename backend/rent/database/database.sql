@@ -11,15 +11,25 @@ CREATE TABLE "Rent"(
 );
 
 
+CREATE TABLE "ContractFile"(
+	"id" BIGSERIAL NOT NULL,
+	"key" VARCHAR(255) NOT NULL,
+	"url" TEXT NOT NULL,
+	CONSTRAINT "Image_pkey" PRIMARY KEY ("id")
+);
+
+
+
 CREATE TABLE "LeaseAgreement"(
 	"id" BIGSERIAL NOT NULL,
 	"startDate" TIMESTAMPTZ NOT NULL,
 	"endDate" TIMESTAMPTZ NOT NULL,
-	"file" TEXT NULL,
+	"idContractFile" BIGINT NULL,
 	"active" BOOLEAN NOT NULL,
 	"idRent" BIGINT NOT NULL,
 	CONSTRAINT "LeaseAgreement_pkey" PRIMARY KEY ("id"),
-	CONSTRAINT "LeaseAgreement_idRent_fkey" FOREIGN KEY ("idRent") REFERENCES "Rent"("id") ON DELETE CASCADE ON UPDATE CASCADE
+	CONSTRAINT "LeaseAgreement_idRent_fkey" FOREIGN KEY ("idRent") REFERENCES "Rent"("id") ON DELETE CASCADE ON UPDATE CASCADE,
+	CONSTRAINT "LeaseAgreement_idContractFile_fkey" FOREIGN KEY ("idContractFile") REFERENCES "ContractFile"("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 

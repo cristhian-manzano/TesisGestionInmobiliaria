@@ -6,7 +6,6 @@ const leaseAgreementCreateValidation = (data) => {
     endDate: Joi.date().required(),
     active: Joi.boolean().required(),
     idRent: Joi.number().required()
-    // file:
   });
 
   return scheme.validate(data);

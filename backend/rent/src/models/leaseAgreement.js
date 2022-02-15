@@ -1,6 +1,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('./index');
 const Rent = require('./rent');
+const ContractFile = require('./ContractFile');
 
 const LeaseAgreement = sequelize.define(
   'LeaseAgreement',
@@ -21,11 +22,6 @@ const LeaseAgreement = sequelize.define(
       allowNull: false
     },
 
-    file: {
-      type: DataTypes.TEXT,
-      allowNull: true
-    },
-
     active: {
       type: DataTypes.BOOLEAN,
       allowNull: false
@@ -38,11 +34,41 @@ const LeaseAgreement = sequelize.define(
         model: Rent,
         key: 'id'
       }
+    },
+    idContractFile: {
+      type: DataTypes.BIGINT,
+      allowNull: true,
+      references: {
+        model: ContractFile,
+        key: 'id'
+      }
     }
   },
   {
     timestamps: false
   }
 );
+
+LeaseAgreement.belongsTo(ContractFile, {
+  as: 'contractFile',
+  foreignKey: 'idContractFile'
+});
+
+ContractFile.hasOne(LeaseAgreement, {
+  as: 'LeaseAgrement',
+  foreignKey: 'idContractFile'
+});
+
+// Rent relationship
+
+LeaseAgreement.belongsTo(Rent, {
+  as: 'rent',
+  foreignKey: 'idRent'
+});
+
+Rent.hasMany(LeaseAgreement, {
+  as: 'leases',
+  foreignKey: 'idRent'
+});
 
 module.exports = LeaseAgreement;
