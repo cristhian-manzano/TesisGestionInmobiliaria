@@ -10,7 +10,7 @@ const uploadFiles = async (files) => {
         S3.upload({
           Bucket: process.env.AWS_BUCKET_NAME,
           Body: file.buffer,
-          Key: `${Date.now()}-${file.originalname}`
+          Key: `properties/${Date.now()}-${file.originalname}`
         }).promise()
       )
     );
