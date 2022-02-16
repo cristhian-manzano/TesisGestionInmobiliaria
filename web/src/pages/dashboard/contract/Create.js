@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 
@@ -15,22 +15,71 @@ import {
   Button,
   FormHelperText,
   IconButton,
-  Link
+  Link,
+  Select,
+  MenuItem,
+  InputLabel
 } from '@mui/material';
 
-import { ArrowBack, AddCircleOutline, Delete } from '@mui/icons-material/';
+import { ArrowBack, Add, Delete } from '@mui/icons-material/';
+
+import { LoadingContext } from '../../../store/context/LoadingGlobal';
+import { SnackbarContext } from '../../../store/context/SnackbarGlobal';
+import { AuthContext } from '../../../store/context/authContext';
+
+import { useTenantRent } from '../tenant/useTenantRent';
+import { sendRequest } from '../../../helpers/utils';
 
 export const Create = () => {
   const [paymentFile, setPaymentFile] = useState(null);
+  const { handleLoading } = useContext(LoadingContext);
+  const { handleOpenSnackbar } = useContext(SnackbarContext);
+  const { authSession } = useContext(AuthContext);
+
+  const { api, data: tenantsRent, error, loading } = useTenantRent();
+
+  useEffect(() => {
+    handleLoading(loading);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading]);
+
+  useEffect(() => {
+    api.getAll();
+    if (error) handleOpenSnackbar('error', 'Cannot get rents');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const {
-    register,
     control,
     handleSubmit,
+    reset,
     formState: { errors }
   } = useForm();
 
-  const onSubmit = async (data) => {};
+  const onSubmit = async (dataForm) => {
+    const dataToSend = {
+      ...dataForm,
+      ...(paymentFile && { contractFile: paymentFile.file })
+    };
+    const formData = new FormData();
+    Object.keys(dataToSend).forEach((key) => formData.append(key, dataToSend[key]));
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/contracts`,
+      method: 'POST',
+      token: authSession.user?.token,
+      data: formData,
+      isFormData: true
+    });
+    handleLoading(false);
+    if (response.error) {
+      handleOpenSnackbar('error', 'No se pudo crear el contrato!');
+    } else {
+      handleOpenSnackbar('success', 'Contrato creado exitosamente!');
+      reset();
+      setPaymentFile(null);
+    }
+  };
 
   const uploadFile = (e) => {
     const file = e.target.files[0];
@@ -40,6 +89,8 @@ export const Create = () => {
       url: URL.createObjectURL(file),
       file
     });
+
+    e.target.value = null;
   };
 
   const onDeletPaymentFile = () => {
@@ -63,12 +114,47 @@ export const Create = () => {
           </Typography>
 
           <Grid container spacing={2}>
+            <Grid item xs={12} sm={12}>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth>
+                    <InputLabel id="rent-select">Alquileres</InputLabel>
+                    <Controller
+                      name="idRent"
+                      control={control}
+                      rules={{ required: true }}
+                      defaultValue=""
+                      render={({ field }) => (
+                        <Select labelId="rent-select" label="Alquileres" {...field}>
+                          <MenuItem value={0} disabled>
+                            Seleccionar
+                          </MenuItem>
+
+                          {tenantsRent?.map((rent) => (
+                            <MenuItem key={rent.id} value={rent.id}>
+                              {`${rent.property?.tagName ?? ''} - ${rent.tenant?.firstName ?? ''} ${
+                                rent.tenant?.lastName ?? ''
+                              }`}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      )}
+                    />
+
+                    <FormHelperText error>{errors?.idRent && 'Alquiler required'}</FormHelperText>
+                  </FormControl>
+                </Grid>
+              </Grid>
+            </Grid>
+
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
                   <Controller
                     name="startDate"
+                    rules={{ required: true }}
                     control={control}
+                    defaultValue={null}
                     render={({ field }) => (
                       <MobileDatePicker
                         label="Fecha de inicio"
@@ -81,7 +167,9 @@ export const Create = () => {
                     )}
                   />
                 </LocalizationProvider>
-                <FormHelperText error>{errors.startDate?.message}</FormHelperText>
+                <FormHelperText error>
+                  {errors.startDate?.type === 'required' && 'Fecha de inicio required'}
+                </FormHelperText>
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -89,7 +177,9 @@ export const Create = () => {
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
                   <Controller
                     name="endDate"
+                    rules={{ required: true }}
                     control={control}
+                    defaultValue={null}
                     render={({ field }) => (
                       <MobileDatePicker
                         label="Fecha de fin"
@@ -103,7 +193,9 @@ export const Create = () => {
                   />
                 </LocalizationProvider>
 
-                <FormHelperText error>{errors.endDate?.message}</FormHelperText>
+                <FormHelperText error>
+                  {errors.endDate?.type === 'required' && 'Fecha de fin required'}
+                </FormHelperText>
               </FormControl>
             </Grid>
 
@@ -128,14 +220,20 @@ export const Create = () => {
                       onChange={uploadFile}
                     />
                     <Button variant="outlined" component="span">
-                      <AddCircleOutline />
-                      Agregar
+                      <Add />
+                      {/* Agregar */}
                     </Button>
                   </label>
                 </Box>
 
                 {paymentFile && (
-                  <Box sx={{ display: 'flex', p: 1 }}>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      p: 1
+                    }}>
                     <Link href={paymentFile?.url} target="_blank" rel="noopener">
                       {paymentFile?.file.name}
                     </Link>
