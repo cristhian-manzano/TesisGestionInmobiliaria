@@ -9,6 +9,7 @@ const uploadFiles = async (files) => {
       files.map(async (file) =>
         S3.upload({
           Bucket: process.env.AWS_BUCKET_NAME,
+          ContentType: file.mimetype,
           Body: file.buffer,
           Key: `properties/${Date.now()}-${file.originalname}`
         }).promise()

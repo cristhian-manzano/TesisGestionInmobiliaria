@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 
 import {
@@ -22,24 +22,46 @@ import {
   ListItemText
 } from '@mui/material';
 
-import { Search, Visibility, Edit, Delete } from '@mui/icons-material';
+import { Search, Visibility, Delete, FileOpen } from '@mui/icons-material';
 import { Alert } from '../../../components/Alert';
 import { TableMoreMenu } from '../../../components/TableMoreMenu';
+import { LoadingContext } from '../../../store/context/LoadingGlobal';
+import { SnackbarContext } from '../../../store/context/SnackbarGlobal';
+import { useContract } from './useContract';
+
+import { ModalIframe } from '../../../components/ModalIframe';
 
 export const Contract = () => {
   const navigate = useNavigate();
 
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [alert, setAlert] = useState({ open: false, title: '', description: '' });
-  const [contracts, setContract] = useState([]);
+  const { handleLoading } = useContext(LoadingContext);
+  const { handleOpenSnackbar } = useContext(SnackbarContext);
   const [page, setPage] = useState(2);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const { api, data, error, loading } = useContract();
+
+  const [modalFile, setModalFile] = useState({
+    open: false,
+    url: ''
+  });
+
+  const openModalFile = (urlFile) => {
+    setModalFile({ open: true, url: urlFile });
+  };
+
+  const closeModalFile = () => setModalFile({ open: false, url: '' });
 
   const onView = (id) => navigate(`${id}`);
-  const onUpdate = (id) => navigate(`update/${id}`);
 
   useEffect(() => {
-    setContract([]);
+    handleLoading(loading);
+  }, [loading]);
+
+  useEffect(() => {
+    api.getAll();
+    if (error) handleOpenSnackbar('error', 'Cannot get contracts');
   }, []);
 
   const openDeleteAlert = (payment) => {
@@ -105,22 +127,30 @@ export const Contract = () => {
                 <TableRow>
                   <TableCell>Fecha de inicio</TableCell>
                   <TableCell>Fecha de fin</TableCell>
-                  <TableCell>Archivo</TableCell>
+                  {/* <TableCell>Archivo</TableCell> */}
+                  <TableCell>Propiedad</TableCell>
+                  <TableCell>Inquilino</TableCell>
                   <TableCell>Activo</TableCell>
                   <TableCell />
                 </TableRow>
               </TableHead>
               <TableBody>
-                {contracts.length > 0 ? (
-                  contracts.map((contract) => (
+                {data?.length > 0 ? (
+                  data?.map((contract) => (
                     <TableRow
                       hover
-                      key={contract?.x ?? ''}
+                      key={contract.id ?? ''}
                       sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                      <TableCell>{contract?.x ?? ''}</TableCell>
-                      <TableCell>{contract?.x ?? ''}</TableCell>
-                      <TableCell>{contract?.x ?? ''}</TableCell>
-                      <TableCell>{contract?.x ?? ''}</TableCell>
+                      <TableCell>
+                        {new Date(contract.startDate).toLocaleDateString('es-ES') ?? ''}
+                      </TableCell>
+                      <TableCell>
+                        {new Date(contract.endDate).toLocaleDateString('es-ES') ?? ''}
+                      </TableCell>
+                      {/* <TableCell>{contract.contractFile.key ?? ''}</TableCell> */}
+                      <TableCell>{contract.rent.idProperty ?? ''}</TableCell>
+                      <TableCell>{contract.rent.idTenant ?? ''}</TableCell>
+                      <TableCell>{contract.active ? 'Activo' : 'Inactivo'}</TableCell>
 
                       <TableCell>
                         <TableMoreMenu>
@@ -134,17 +164,17 @@ export const Contract = () => {
                             />
                           </MenuItem>
 
-                          <MenuItem onClick={() => onUpdate(contract?.x ?? '')}>
+                          <MenuItem onClick={() => openModalFile(contract?.contractFile?.url)}>
                             <ListItemIcon>
-                              <Edit sx={{ fontSize: 25 }} />
+                              <FileOpen sx={{ fontSize: 25 }} />
                             </ListItemIcon>
                             <ListItemText
-                              primary="Editar"
+                              primary="Ver archivo"
                               primaryTypographyProps={{ variant: 'body2' }}
                             />
                           </MenuItem>
 
-                          <MenuItem onClick={() => openDeleteAlert(contract?.x ?? '')}>
+                          <MenuItem onClick={() => openDeleteAlert(contract?.id ?? '')}>
                             <ListItemIcon>
                               <Delete sx={{ fontSize: 25 }} />
                             </ListItemIcon>
@@ -188,6 +218,11 @@ export const Contract = () => {
           />
         </Card>
       </Box>
+
+      {modalFile.open && (
+        <ModalIframe opened={modalFile.open} url={modalFile.url} onCloseModal={closeModalFile} />
+      )}
+
       <Alert state={alert} closeAlert={closeDeleteAlert} onConfirm={() => onDelete()} />
     </>
   );

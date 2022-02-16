@@ -6,6 +6,7 @@ const uploadFile = async (file) => {
 
   return S3.upload({
     Bucket: process.env.AWS_BUCKET_NAME,
+    ContentType: file.mimetype,
     Body: file.buffer,
     Key: `contracts/${Date.now()}-${file.originalname}`
   }).promise();
