@@ -37,22 +37,20 @@ const getAll = async (req, res) => {
     });
 
     const lists = observations.reduce(
-      (prev, cur) => ({
-        properties: prev.properties
-          ? [...prev.properties, cur.rent.idProperty]
-          : [cur.rent.idProperty],
-        users: prev.users ? [...prev.users, cur.idUser] : [cur.idUser]
+      ({ properties, users }, cur) => ({
+        properties: properties ? [...properties, cur.rent.idProperty] : [cur.rent.idProperty],
+        users: users ? [...users, cur.idUser] : [cur.idUser]
       }),
       {}
     );
 
-    const users =
+    const usersData =
       lists.users &&
       (await axios.post(`${process.env.API_USER_URL}/user/list`, {
         users: lists.users
       }));
 
-    const properties =
+    const propertiesData =
       lists.properties &&
       (await axios.post(`${process.env.API_PROPERTY_URL}/property/list`, {
         properties: lists.properties
@@ -60,8 +58,10 @@ const getAll = async (req, res) => {
 
     const observationsData = observations.map((observation) => ({
       ...observation.dataValues,
-      user: users.data.data.find((user) => observation.idUser === user.id),
-      property: properties.data.data.find((property) => observation.rent.idProperty === property.id)
+      user: usersData.data.data.find((user) => observation.idUser === user.id),
+      property: propertiesData.data.data.find(
+        (property) => observation.rent.idProperty === property.id
+      )
     }));
 
     return res

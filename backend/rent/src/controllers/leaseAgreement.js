@@ -1,3 +1,4 @@
+const axios = require('axios');
 const { Op } = require('sequelize');
 const Logger = require('../config/logger');
 const { responseStatusCodes } = require('../helpers/constants');
@@ -59,24 +60,56 @@ const getAll = async (req, res) => {
     const idUser = req.user.id;
 
     const Leases = await LeaseAgrement.findAll({
+      attributes: { exclude: ['idRent'] },
       include: [
         {
           model: Rent,
           as: 'rent',
-          where: {
-            [Op.or]: [{ idOwner: idUser }, { idTenant: idUser }]
-          }
+          where: { [Op.or]: [{ idOwner: idUser }, { idTenant: idUser }] }
         },
-        {
-          model: ContractFile,
-          as: 'contractFile'
-        }
+        { model: ContractFile, as: 'contractFile' }
       ]
+    });
+
+    // Get ids of users and properties - for request to service
+    const LeasesDetails = Leases.reduce(
+      ({ tenants, owners, properties }, { rent }) => ({
+        tenants: tenants.concat(tenants.includes(rent.idTenant) ? [] : rent.idTenant),
+        owners: owners.concat(owners.includes(rent.idOwner) ? [] : rent.idOwner),
+        properties: properties.concat(properties.includes(rent.idProperty) ? [] : rent.idProperty)
+      }),
+      { properties: [], owners: [], tenants: [] }
+    );
+
+    // Refactor this
+    const { data: usersResponse } =
+      [...LeasesDetails.tenants, ...LeasesDetails.owners].length > 0 &&
+      (await axios.post(`${process.env.API_USER_URL}/user/list`, {
+        users: [...LeasesDetails.tenants, ...LeasesDetails.owners]
+      }));
+
+    const { data: propertiesResponse } =
+      LeasesDetails.properties &&
+      (await axios.post(`${process.env.API_PROPERTY_URL}/property/list`, {
+        properties: LeasesDetails.properties
+      }));
+
+    const Data = Leases.map((lease) => {
+      const owner = usersResponse.data?.find((user) => user.id === lease.rent.idOwner);
+      const tenant = usersResponse.data?.find((user) => user.id === lease.rent.idTenant);
+      const property = propertiesResponse.data?.find((prop) => prop.id === lease.rent.idProperty);
+
+      return {
+        ...lease.dataValues,
+        owner,
+        tenant,
+        property
+      };
     });
 
     return res
       .status(responseStatusCodes.OK)
-      .json(successResponse(res.statusCode, 'Got it!', Leases));
+      .json(successResponse(res.statusCode, 'Got it!', Data));
   } catch (e) {
     Logger.error(e.message);
     return res
