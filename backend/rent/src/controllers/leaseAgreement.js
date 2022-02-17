@@ -15,6 +15,7 @@ const Rent = require('../models/rent');
 const ContractFile = require('../models/ContractFile');
 const { leaseAgreementCreateValidation } = require('../validation/leaseAgreement');
 const { uploadFile } = require('../services/awsService');
+const { user } = require('pg/lib/defaults');
 
 const create = async (req, res) => {
   try {
@@ -123,7 +124,7 @@ const get = async (req, res) => {
     const { id } = req.params;
     const idUser = req.user.id;
 
-    const Lease = await LeaseAgrement.findByPk(id, {
+    const lease = await LeaseAgrement.findByPk(id, {
       include: [
         {
           model: Rent,
@@ -139,9 +140,30 @@ const get = async (req, res) => {
       ]
     });
 
+    if (!lease)
+      return res
+        .status(responseStatusCodes.NOT_FOUND)
+        .json(errorResponse(res.statusCode, 'Lease not found!'));
+
+    // Refactor this
+    const usersResponse = await axios.post(`${process.env.API_USER_URL}/user/list`, {
+      users: [lease.rent.idOwner, lease.rent.idTenant]
+    });
+
+    const propertyResponse = await axios.post(`${process.env.API_PROPERTY_URL}/property/list`, {
+      properties: [lease.rent.idProperty]
+    });
+
+    const leaseData = {
+      ...lease.dataValues,
+      owner: usersResponse.data.data?.find((u) => u.id === lease.rent.idOwner),
+      tenant: usersResponse.data.data?.find((u) => u.id === lease.rent.idTenant),
+      property: propertyResponse.data.data[0]
+    };
+
     return res
       .status(responseStatusCodes.OK)
-      .json(successResponse(res.statusCode, 'Got it!', Lease));
+      .json(successResponse(res.statusCode, 'Got it!', leaseData));
   } catch (e) {
     Logger.error(e.message);
     return res
@@ -175,6 +197,8 @@ const destroy = async (req, res) => {
         .json(errorResponse(res.statusCode, 'leaseAgreement not found!'));
 
     const destroyed = await leaseAgreement.destroy();
+
+    // ! Delete S3 files!!!!
 
     return res
       .status(responseStatusCodes.OK)
