@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-
-import { Box, Button, Modal } from '@mui/material';
 import PropTypes from 'prop-types';
+import { Box, Button, Modal } from '@mui/material';
+import { saveAs } from 'file-saver';
 
 export const ModalIframe = ({ opened, url, onCloseModal }) => {
   const [errorLoading, setErrorLoading] = useState(false);
@@ -16,6 +16,11 @@ export const ModalIframe = ({ opened, url, onCloseModal }) => {
 
     validateUrl();
   }, [url]);
+
+  const saveFile = () => {
+    const name = decodeURI(url).split('/').slice(-1)[0];
+    saveAs(url, name);
+  };
 
   return (
     <Modal
@@ -43,9 +48,11 @@ export const ModalIframe = ({ opened, url, onCloseModal }) => {
         }}>
         {!errorLoading ? (
           <iframe
-            id="inlineFrameExample"
-            title="Inline Frame Example"
-            style={{ flexGrow: 1, width: '100%' }}
+            title="Contract document"
+            style={{
+              flexGrow: 1,
+              width: '100%'
+            }}
             src={url}
           />
         ) : (
@@ -57,9 +64,22 @@ export const ModalIframe = ({ opened, url, onCloseModal }) => {
           </Box>
         )}
 
-        <Button sx={{ my: 2 }} color="primary" variant="contained" onClick={onCloseModal}>
-          Cerrar
-        </Button>
+        <Box
+          sx={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            my: 2,
+            justifyContent: 'center',
+            alignItems: 'center'
+          }}>
+          <Button sx={{ m: 1 }} color="primary" variant="contained" onClick={saveFile}>
+            descargar
+          </Button>
+
+          <Button sx={{ m: 1 }} color="inherit" variant="contained" onClick={onCloseModal}>
+            Cerrar
+          </Button>
+        </Box>
       </Box>
     </Modal>
   );

@@ -9,7 +9,7 @@ export const useContract = () => {
   const [error, setError] = useState(false);
   const [data, setData] = useState(null);
 
-  const getAll = async () => {
+  const list = async () => {
     setLoading(true);
     const response = await sendRequest({
       urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/contracts`,
@@ -23,6 +23,34 @@ export const useContract = () => {
     } else {
       setData(response.data.data);
     }
+  };
+
+  const get = async (id) => {
+    setLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/contracts/${id}`,
+      token: authSession.user?.token,
+      method: 'GET'
+    });
+    setLoading(false);
+
+    if (response.error) {
+      setError(true);
+    } else {
+      setData(response.data.data);
+    }
+  };
+
+  const remove = async (id) => {
+    setLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/contracts/${id}`,
+      token: authSession.user?.token,
+      method: 'DELETE'
+    });
+    setLoading(false);
+
+    if (response.error) setError(response.error);
   };
 
   const create = async (dataForm) => {
@@ -39,8 +67,10 @@ export const useContract = () => {
   };
 
   const api = {
-    getAll,
-    create
+    list,
+    create,
+    get,
+    remove
   };
 
   return { loading, error, data, api };

@@ -34,7 +34,7 @@ import { ModalIframe } from '../../../components/ModalIframe';
 export const Contract = () => {
   const navigate = useNavigate();
 
-  const [selectedPayment, setSelectedPayment] = useState(null);
+  const [selectedContract, setSelectedContract] = useState(null);
   const [alert, setAlert] = useState({ open: false, title: '', description: '' });
   const { handleLoading } = useContext(LoadingContext);
   const { handleOpenSnackbar } = useContext(SnackbarContext);
@@ -61,24 +61,24 @@ export const Contract = () => {
   }, [loading]);
 
   useEffect(() => {
-    api.getAll();
+    api.list();
     if (error) handleOpenSnackbar('error', 'Cannot get contracts');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const openDeleteAlert = (payment) => {
-    setSelectedPayment(payment);
+  const openDeleteAlert = (contract) => {
+    setSelectedContract(contract);
 
     setAlert({
       open: true,
-      title: `¿Está seguro que desea eliminar el contrato '${payment?.tenant?.firstName} ${payment?.tenant?.lastName}'?`,
+      title: `¿Está seguro que desea eliminar el contrato '${contract?.id}'?`,
       description:
         'Al aceptar se eliminará el contrato de manera permanente y no podrá deshacer los cambios.'
     });
   };
 
   const closeDeleteAlert = () => {
-    setSelectedPayment(null);
+    setSelectedContract(null);
     setAlert((previous) => ({
       ...previous,
       open: false
@@ -86,7 +86,14 @@ export const Contract = () => {
   };
 
   const onDelete = async () => {
-    console.log(selectedPayment);
+    await api.remove(selectedContract?.id);
+
+    if (error) {
+      handleOpenSnackbar('error', 'No se pudo elimnar el contrato!');
+    } else {
+      await api.list();
+      handleOpenSnackbar('success', 'contrato eliminado exitosamente!');
+    }
   };
 
   const handleChangePage = (event, newPage) => {
@@ -127,6 +134,7 @@ export const Contract = () => {
             <Table sx={{ minWidth: 800 }} aria-label="simple table">
               <TableHead sx={{ backgroundColor: '#e9e9e9' }}>
                 <TableRow>
+                  <TableCell>ID</TableCell>
                   <TableCell>Fecha de inicio</TableCell>
                   <TableCell>Fecha de fin</TableCell>
                   {/* <TableCell>Archivo</TableCell> */}
@@ -143,6 +151,7 @@ export const Contract = () => {
                       hover
                       key={contract.id ?? ''}
                       sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                      <TableCell>{contract.id ?? ''}</TableCell>
                       <TableCell>
                         {new Date(contract.startDate).toLocaleDateString('es-ES') ?? ''}
                       </TableCell>
@@ -150,8 +159,10 @@ export const Contract = () => {
                         {new Date(contract.endDate).toLocaleDateString('es-ES') ?? ''}
                       </TableCell>
                       {/* <TableCell>{contract.contractFile.key ?? ''}</TableCell> */}
-                      <TableCell>{contract.rent.idProperty ?? ''}</TableCell>
-                      <TableCell>{contract.rent.idTenant ?? ''}</TableCell>
+                      <TableCell>{contract.property?.tagName ?? ''}</TableCell>
+                      <TableCell>
+                        {`${contract.tenant?.firstName ?? ''} ${contract.tenant?.lastName ?? ''}`}
+                      </TableCell>
                       <TableCell>{contract.active ? 'Activo' : 'Inactivo'}</TableCell>
 
                       <TableCell>
@@ -176,7 +187,7 @@ export const Contract = () => {
                             />
                           </MenuItem>
 
-                          <MenuItem onClick={() => openDeleteAlert(contract?.id ?? '')}>
+                          <MenuItem onClick={() => openDeleteAlert(contract)}>
                             <ListItemIcon>
                               <Delete sx={{ fontSize: 25 }} />
                             </ListItemIcon>

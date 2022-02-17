@@ -160,8 +160,6 @@ export const Create = () => {
                         label="Fecha de inicio"
                         value={field.value}
                         onChange={field.onChange}
-                        maxDate={new Date()}
-                        minDate={new Date(1900, 1, 1)}
                         renderInput={(params) => <TextField {...params} />}
                       />
                     )}
@@ -185,8 +183,6 @@ export const Create = () => {
                         label="Fecha de fin"
                         value={field.value}
                         onChange={field.onChange}
-                        maxDate={new Date()}
-                        minDate={new Date(1900, 1, 1)}
                         renderInput={(params) => <TextField {...params} />}
                       />
                     )}
