@@ -18,7 +18,8 @@ import {
   IconButton,
   MenuItem,
   ListItemIcon,
-  ListItemText
+  ListItemText,
+  Chip
 } from '@mui/material';
 
 import { Search, Delete, Visibility } from '@mui/icons-material';
@@ -123,10 +124,11 @@ export const Observation = () => {
               <TableHead sx={{ backgroundColor: '#e9e9e9' }}>
                 <TableRow>
                   <TableCell>Observación</TableCell>
-                  <TableCell>Solucionado</TableCell>
+                  <TableCell>Comentarios</TableCell>
                   <TableCell>Fecha</TableCell>
                   <TableCell>Usuario</TableCell>
                   <TableCell>Propiedad</TableCell>
+                  <TableCell />
                   <TableCell />
                 </TableRow>
               </TableHead>
@@ -138,11 +140,12 @@ export const Observation = () => {
                       key={observation.id}
                       sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                       <TableCell>
-                        <Typography noWrap sx={{ width: 300 }}>
+                        <Typography noWrap sx={{ width: 250 }}>
                           {observation.description}
                         </Typography>
                       </TableCell>
-                      <TableCell>{observation.solved ? 'Si' : 'No'}</TableCell>
+
+                      <TableCell>{observation.comments ?? ''}</TableCell>
                       <TableCell>{new Date(observation.date).toLocaleString()}</TableCell>
                       <TableCell>
                         {authSession.user?.email === observation.user?.email
@@ -152,6 +155,11 @@ export const Observation = () => {
                             }`}
                       </TableCell>
                       <TableCell>{observation.property?.tagName}</TableCell>
+                      <TableCell>
+                        {authSession.user?.email !== observation.user?.email &&
+                          !observation.read && <Chip color="warning" label="No leída" />}
+                      </TableCell>
+
                       <TableCell>
                         <TableMoreMenu>
                           <MenuItem onClick={() => onView(observation.id)}>

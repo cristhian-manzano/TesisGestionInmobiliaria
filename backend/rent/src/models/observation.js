@@ -22,7 +22,7 @@ const Observation = sequelize.define(
       allowNull: false
     },
 
-    solved: {
+    read: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false

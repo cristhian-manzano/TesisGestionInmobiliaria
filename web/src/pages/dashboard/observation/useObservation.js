@@ -19,6 +19,8 @@ export const useObservation = () => {
     });
     setLoading(false);
 
+    // console.log(response.error);
+
     if (response.error) setError(response.error);
   };
 

@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { Op } = require('sequelize');
+const sequelize = require('sequelize');
 const axios = require('axios');
 const Logger = require('../config/logger');
 const { responseStatusCodes } = require('../helpers/constants');
@@ -9,6 +9,7 @@ const {
   validationResponse
 } = require('../helpers/responsesFormat');
 const Observation = require('../models/observation');
+const Comment = require('../models/comment');
 const Rent = require('../models/rent');
 
 const {
@@ -26,14 +27,16 @@ const getAll = async (req, res) => {
           model: Rent,
           as: 'rent',
           where: {
-            [Op.or]: [{ idOwner: idUser }, { idTenant: idUser }]
+            [sequelize.Op.or]: [{ idOwner: idUser }, { idTenant: idUser }]
           },
           attributes: ['id', 'idOwner', 'idProperty', 'idTenant']
+        },
+        {
+          model: Comment,
+          as: 'comments'
         }
       ],
-      attributes: {
-        exclude: ['idRent']
-      }
+      attributes: { exclude: ['idRent'] }
     });
 
     const lists = observations.reduce(
@@ -58,6 +61,7 @@ const getAll = async (req, res) => {
 
     const observationsData = observations.map((observation) => ({
       ...observation.dataValues,
+      comments: observation.comments?.length,
       user: usersData.data.data.find((user) => observation.idUser === user.id),
       property: propertiesData.data.data.find(
         (property) => observation.rent.idProperty === property.id
@@ -89,7 +93,7 @@ const get = async (req, res) => {
           model: Rent,
           as: 'rent',
           where: {
-            [Op.or]: [{ idOwner: idUser }, { idTenant: idUser }]
+            [sequelize.Op.or]: [{ idOwner: idUser }, { idTenant: idUser }]
           },
           attributes: ['id', 'idOwner', 'idProperty', 'idTenant']
         }
@@ -103,6 +107,11 @@ const get = async (req, res) => {
       return res
         .status(responseStatusCodes.NOT_FOUND)
         .json(errorResponse(res.statusCode, 'Observation not found!'));
+
+    if (!observation.read && observation.idUser !== idUser) {
+      // Update state (read)
+      await observation.update({ read: true });
+    }
 
     const user = await axios.post(`${process.env.API_USER_URL}/user/list`, {
       users: [observation.idUser]

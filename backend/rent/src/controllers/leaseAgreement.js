@@ -15,7 +15,6 @@ const Rent = require('../models/rent');
 const ContractFile = require('../models/ContractFile');
 const { leaseAgreementCreateValidation } = require('../validation/leaseAgreement');
 const { uploadFile } = require('../services/awsService');
-const { user } = require('pg/lib/defaults');
 
 const create = async (req, res) => {
   try {

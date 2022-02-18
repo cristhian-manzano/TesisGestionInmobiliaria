@@ -8,7 +8,7 @@ export const ModalIframe = ({ opened, url, onCloseModal }) => {
 
   useEffect(() => {
     const validateUrl = async () => {
-      const response = await fetch(url, { method: 'GET' });
+      const response = await fetch(url, { method: 'HEAD' });
       if (!response.ok) {
         setErrorLoading(true);
       }
@@ -72,9 +72,11 @@ export const ModalIframe = ({ opened, url, onCloseModal }) => {
             justifyContent: 'center',
             alignItems: 'center'
           }}>
-          <Button sx={{ m: 1 }} color="primary" variant="contained" onClick={saveFile}>
-            descargar
-          </Button>
+          {!errorLoading && (
+            <Button sx={{ m: 1 }} color="primary" variant="contained" onClick={saveFile}>
+              descargar
+            </Button>
+          )}
 
           <Button sx={{ m: 1 }} color="inherit" variant="contained" onClick={onCloseModal}>
             Cerrar

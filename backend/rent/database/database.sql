@@ -52,7 +52,7 @@ CREATE TABLE "Observation"(
 	"id" BIGSERIAL NOT NULL,
 	"description" TEXT NOT NULL,
 	"date" TIMESTAMPTZ NOT NULL,
-	"solved" BOOLEAN NOT NULL,
+	"read" BOOLEAN NOT NULL,
 	"idRent" BIGINT NOT NULL,
 	"idUser" BIGINT NOT NULL,
 	CONSTRAINT "Observation_pkey" PRIMARY KEY ("id"),

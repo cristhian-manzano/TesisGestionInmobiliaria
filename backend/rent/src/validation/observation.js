@@ -4,7 +4,6 @@ const observationCreateValidation = (data) => {
   const scheme = Joi.object({
     description: Joi.string().max(300).required(),
     idRent: Joi.number().required()
-    // solved: Joi.boolean().required(),
   });
 
   return scheme.validate(data);
@@ -12,8 +11,7 @@ const observationCreateValidation = (data) => {
 
 const observationUpdateValidation = (data) => {
   const scheme = Joi.object({
-    description: Joi.string().max(300),
-    solved: Joi.boolean()
+    description: Joi.string().max(300)
   });
 
   return scheme.validate(data);

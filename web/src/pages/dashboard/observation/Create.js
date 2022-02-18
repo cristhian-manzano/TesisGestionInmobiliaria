@@ -60,6 +60,7 @@ export const Create = () => {
   const onSubmitForm = async (dataForm) => {
     await api.create(dataForm);
 
+    // ! Handle error -  change variable
     if (error) {
       handleOpenSnackbar('error', 'No se pudo crear la observación.');
     } else {
