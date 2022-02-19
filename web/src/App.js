@@ -10,6 +10,8 @@ import { ThemeConfig } from './theme';
 import { DashboardLayout } from './layouts/dashboard/Layout';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
+import { ForgotPassword } from './pages/ForgotPassword';
+import { ResetPassword } from './pages/ResetPassword';
 import { Home } from './pages/dashboard/Home';
 import { Observation } from './pages/dashboard/observation/index';
 import { Property } from './pages/dashboard/property/index';
@@ -58,6 +60,8 @@ const App = () => {
                 <Route path="/search-property" element={<SearchProperty />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="*" element={<NotFound />} />
 
                 <Route path="/dashboard" element={<ProtectedRoutes />}>

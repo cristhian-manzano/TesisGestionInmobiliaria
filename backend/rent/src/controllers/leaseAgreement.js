@@ -204,16 +204,20 @@ const destroy = async (req, res) => {
         .status(responseStatusCodes.NOT_FOUND)
         .json(errorResponse(res.statusCode, 'leaseAgreement not found!'));
 
-    // ! Delete S3 files!!!! --> Que pasa si se borra el file, ¿pero falla el destroyEntity?
+    let result;
+
     if (leaseAgreement.contractFile) {
-      await deleteFiles([leaseAgreement.contractFile]);
+      result = await ContractFile.destroy({ where: { id: leaseAgreement.idContractFile } }); // Lease agrement destroy not necessary, cause is in CASCADE ()
+      if (result > 0) await deleteFiles([leaseAgreement.contractFile]);
+    } else {
+      result = await leaseAgreement.destroy();
     }
 
-    const destroyed = await leaseAgreement.destroy();
+    if (result === 0) throw new Error('Cannot delete contract');
 
     return res
       .status(responseStatusCodes.OK)
-      .json(successResponse(res.statusCode, 'Deleted!', destroyed));
+      .json(successResponse(res.statusCode, 'Deleted!', result));
   } catch (e) {
     Logger.error(e.message);
     return res
