@@ -14,7 +14,7 @@ const LeaseAgrement = require('../models/leaseAgreement');
 const Rent = require('../models/rent');
 const ContractFile = require('../models/ContractFile');
 const { leaseAgreementCreateValidation } = require('../validation/leaseAgreement');
-const { uploadFile } = require('../services/awsService');
+const { uploadFile, deleteFiles } = require('../services/awsService');
 
 const create = async (req, res) => {
   try {
@@ -27,15 +27,20 @@ const create = async (req, res) => {
 
     const result = await sequelize.transaction(async (t) => {
       // Valida en caso de que no se suba
-      const imageUploaded = await uploadFile(req.file);
 
-      const contractFileUploaded = await ContractFile.create(
-        {
-          url: imageUploaded.Location,
-          key: imageUploaded.Key || imageUploaded.key
-        },
-        { transaction: t }
-      );
+      const imageUploaded = req.file && (await uploadFile(req.file));
+
+      let contractFileUploaded;
+
+      if (imageUploaded) {
+        contractFileUploaded = await ContractFile.create(
+          {
+            url: imageUploaded.Location,
+            key: imageUploaded.Key || imageUploaded.key
+          },
+          { transaction: t }
+        );
+      }
 
       return LeaseAgrement.create(
         { ...value, idContractFile: contractFileUploaded?.id || null },
@@ -183,6 +188,10 @@ const destroy = async (req, res) => {
           as: 'rent',
           where: { idOwner },
           attributes: []
+        },
+        {
+          model: ContractFile,
+          as: 'contractFile'
         }
       ],
       attributes: {
@@ -195,9 +204,12 @@ const destroy = async (req, res) => {
         .status(responseStatusCodes.NOT_FOUND)
         .json(errorResponse(res.statusCode, 'leaseAgreement not found!'));
 
-    const destroyed = await leaseAgreement.destroy();
+    // ! Delete S3 files!!!! --> Que pasa si se borra el file, ¿pero falla el destroyEntity?
+    if (leaseAgreement.contractFile) {
+      await deleteFiles([leaseAgreement.contractFile]);
+    }
 
-    // ! Delete S3 files!!!!
+    const destroyed = await leaseAgreement.destroy();
 
     return res
       .status(responseStatusCodes.OK)
