@@ -1,4 +1,10 @@
 import { useState } from 'react';
+
+import {
+  useSearchParams
+  // useNavigate
+} from 'react-router-dom';
+
 import {
   Box,
   Typography,
@@ -16,6 +22,9 @@ import {
 import { Lock } from '@mui/icons-material';
 
 export const ResetPassword = () => {
+  const [searchParams] = useSearchParams();
+  // Redirect to login after submit---> const navigate = useNavigate();
+
   const [password, setPassword] = useState('');
   const [repeatPassword, setRepeatPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -23,6 +32,11 @@ export const ResetPassword = () => {
   const handleChangePassword = (event) => setPassword(event.target.value);
   const handleChangeRepeatPassword = (event) => setRepeatPassword(event.target.value);
   const handleShowPassword = (event) => setShowPassword(event.target.checked);
+
+  const onSubmit = () => {
+    // eslint-disable-next-line no-console
+    console.log(searchParams.get('token'));
+  };
 
   return (
     <Box
@@ -80,7 +94,7 @@ export const ResetPassword = () => {
             label="Mostrar contraseñas"
           />
 
-          <Button sx={{ my: 2 }} fullWidth variant="contained">
+          <Button sx={{ my: 2 }} onClick={onSubmit} fullWidth variant="contained">
             Enviar
           </Button>
         </Box>
