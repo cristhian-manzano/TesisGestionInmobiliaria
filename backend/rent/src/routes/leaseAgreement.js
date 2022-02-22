@@ -7,7 +7,7 @@ const { multerMiddleware } = require('../middlewares/multerMiddleware');
 routes.use(validateToken);
 
 routes.get('/', getAll);
-routes.post('/', multerMiddleware, create);
+routes.post('/', multerMiddleware('contractFile'), create);
 routes.get('/:id', get);
 routes.delete('/:id', destroy);
 

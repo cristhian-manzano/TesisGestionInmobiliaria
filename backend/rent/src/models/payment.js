@@ -1,6 +1,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('./index');
 const Rent = require('./rent');
+const PaymentFile = require('./PaymentFile');
 
 const Payment = sequelize.define(
   'Payment',
@@ -24,7 +25,8 @@ const Payment = sequelize.define(
 
     validated: {
       type: DataTypes.BOOLEAN,
-      allowNull: false
+      allowNull: false,
+      defaultValue: false
     },
 
     paymentDate: {
@@ -37,9 +39,13 @@ const Payment = sequelize.define(
       allowNull: false
     },
 
-    proofOfPayment: {
-      type: DataTypes.TEXT,
-      allowNull: false
+    idPaymentFile: {
+      type: DataTypes.BIGINT,
+      allowNull: true,
+      references: {
+        model: PaymentFile,
+        key: 'id'
+      }
     },
 
     dateRegister: {
@@ -60,5 +66,25 @@ const Payment = sequelize.define(
     timestamps: false
   }
 );
+
+Payment.belongsTo(PaymentFile, {
+  as: 'paymentFile',
+  foreignKey: 'idPaymentFile'
+});
+
+PaymentFile.hasOne(Payment, {
+  as: 'payment',
+  foreignKey: 'idPaymentFile'
+});
+
+Payment.belongsTo(Rent, {
+  as: 'rent',
+  foreignKey: 'idRent'
+});
+
+Rent.hasMany(Payment, {
+  as: 'payments',
+  foreignKey: 'idRent'
+});
 
 module.exports = Payment;

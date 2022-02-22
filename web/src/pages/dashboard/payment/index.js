@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 
 import {
@@ -26,6 +26,12 @@ import { Search, Visibility, Edit, Delete } from '@mui/icons-material';
 import { Alert } from '../../../components/Alert';
 import { TableMoreMenu } from '../../../components/TableMoreMenu';
 
+import { AuthContext } from '../../../store/context/authContext';
+import { LoadingContext } from '../../../store/context/LoadingGlobal';
+import { SnackbarContext } from '../../../store/context/SnackbarGlobal';
+
+import { sendRequest } from '../../../helpers/utils';
+
 export const Payment = () => {
   const navigate = useNavigate();
 
@@ -35,11 +41,33 @@ export const Payment = () => {
   const [page, setPage] = useState(2);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
+  // Context
+  const { authSession } = useContext(AuthContext);
+  const { handleLoading } = useContext(LoadingContext);
+  const { handleOpenSnackbar } = useContext(SnackbarContext);
+
   const onView = (id) => navigate(`${id}`);
   const onUpdate = (id) => navigate(`update/${id}`);
 
+  const fetchPayments = async () => {
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/payment`,
+      token: authSession.user?.token,
+      method: 'GET'
+    });
+    handleLoading(false);
+
+    if (response.error) {
+      handleOpenSnackbar('error', 'Hubo un error al obtener los pagos');
+    } else {
+      setPayments(response.data.data);
+    }
+  };
+
   useEffect(() => {
-    setPayments([]);
+    fetchPayments();
+    // setPayments([]);
   }, []);
 
   const openDeleteAlert = (payment) => {
@@ -105,10 +133,11 @@ export const Payment = () => {
                 <TableRow>
                   <TableCell>Código de comprobrante</TableCell>
                   <TableCell>Fecha de pago</TableCell>
-                  <TableCell>Fecha pagada</TableCell>
+                  <TableCell>Mes pagado</TableCell>
                   <TableCell>Cantidad</TableCell>
                   <TableCell>Departamento</TableCell>
                   <TableCell>Inquilino</TableCell>
+                  <TableCell>Validada</TableCell>
                   <TableCell />
                 </TableRow>
               </TableHead>
@@ -117,12 +146,24 @@ export const Payment = () => {
                   payments.map((payment) => (
                     <TableRow
                       hover
-                      key={payment?.x ?? ''}
+                      key={payment.id}
                       sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                      <TableCell>{payment?.x ?? ''}</TableCell>
-                      <TableCell>{payment?.x ?? ''}</TableCell>
-                      <TableCell>{payment?.x ?? ''}</TableCell>
-                      <TableCell>{payment?.x ?? ''}</TableCell>
+                      <TableCell>{payment.code ?? ''}</TableCell>
+                      <TableCell>
+                        {new Date(payment?.paymentDate).toLocaleDateString('es-ES') ?? ''}
+                      </TableCell>
+                      <TableCell>
+                        {new Date(payment?.datePaid).toLocaleDateString('es-ES', {
+                          year: 'numeric',
+                          month: 'numeric'
+                        }) ?? ''}
+                      </TableCell>
+                      <TableCell>$ {payment.amount ?? '-'}</TableCell>
+                      <TableCell>{payment.property?.tagName ?? ''}</TableCell>
+                      <TableCell>{`${payment.tenant?.firstName ?? ''} ${
+                        payment.tenant?.lastName ?? ''
+                      }`}</TableCell>
+                      <TableCell>{payment.validated ? 'Si' : 'No'}</TableCell>
 
                       <TableCell>
                         <TableMoreMenu>
@@ -136,7 +177,7 @@ export const Payment = () => {
                             />
                           </MenuItem>
 
-                          <MenuItem onClick={() => onUpdate(payment?.x ?? '')}>
+                          <MenuItem onClick={() => onUpdate(payment?.id ?? '')}>
                             <ListItemIcon>
                               <Edit sx={{ fontSize: 25 }} />
                             </ListItemIcon>
@@ -146,7 +187,7 @@ export const Payment = () => {
                             />
                           </MenuItem>
 
-                          <MenuItem onClick={() => openDeleteAlert(payment?.x ?? '')}>
+                          <MenuItem onClick={() => openDeleteAlert(payment)}>
                             <ListItemIcon>
                               <Delete sx={{ fontSize: 25 }} />
                             </ListItemIcon>

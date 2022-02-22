@@ -15,7 +15,7 @@ CREATE TABLE "ContractFile"(
 	"id" BIGSERIAL NOT NULL,
 	"key" VARCHAR(255) NOT NULL,
 	"url" TEXT NOT NULL,
-	CONSTRAINT "Image_pkey" PRIMARY KEY ("id")
+	CONSTRAINT "ContractFile_pkey" PRIMARY KEY ("id")
 );
 
 
@@ -33,6 +33,14 @@ CREATE TABLE "LeaseAgreement"(
 );
 
 
+CREATE TABLE "PaymentFile"(
+	"id" BIGSERIAL NOT NULL,
+	"key" VARCHAR(255) NOT NULL,
+	"url" TEXT NOT NULL,
+	CONSTRAINT "PaymentFile_pkey" PRIMARY KEY ("id")
+);
+
+
 CREATE TABLE "Payment"(
 	"id" BIGSERIAL NOT NULL,
 	"code" VARCHAR(75) NULL,
@@ -40,11 +48,12 @@ CREATE TABLE "Payment"(
 	"paymentDate"  TIMESTAMPTZ NOT NULL,
 	"datePaid"  TIMESTAMPTZ NOT NULL,
 	"validated" BOOLEAN NOT NULL,
-	"proofOfPayment" TEXT NOT NULL,
 	"dateRegister" TIMESTAMPTZ NOT NULL,
+	"idPaymentFile" BIGINT NULL,
 	"idRent" BIGINT NOT NULL,
 	CONSTRAINT "Payment_pkey" PRIMARY KEY ("id"),
-	CONSTRAINT "Payment_idRent_fkey" FOREIGN KEY ("idRent") REFERENCES "Rent"("id") ON DELETE CASCADE ON UPDATE CASCADE
+	CONSTRAINT "Payment_idRent_fkey" FOREIGN KEY ("idRent") REFERENCES "Rent"("id") ON DELETE CASCADE ON UPDATE CASCADE,
+	CONSTRAINT "Payment_idPaymentFile_fkey" FOREIGN KEY ("idPaymentFile") REFERENCES "PaymentFile"("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 

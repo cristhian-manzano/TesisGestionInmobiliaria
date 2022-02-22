@@ -22,16 +22,14 @@ import {
 } from '@mui/material';
 
 import { ArrowBack, Add, Delete } from '@mui/icons-material/';
-
 import { LoadingContext } from '../../../store/context/LoadingGlobal';
 import { SnackbarContext } from '../../../store/context/SnackbarGlobal';
 import { AuthContext } from '../../../store/context/authContext';
-
 import { useTenantRent } from '../tenant/useTenantRent';
 import { sendRequest } from '../../../helpers/utils';
 
 export const Create = () => {
-  const [paymentFile, setPaymentFile] = useState(null);
+  const [contractFile, setContractFile] = useState(null);
   const { handleLoading } = useContext(LoadingContext);
   const { handleOpenSnackbar } = useContext(SnackbarContext);
   const { authSession } = useContext(AuthContext);
@@ -59,7 +57,7 @@ export const Create = () => {
   const onSubmit = async (dataForm) => {
     const dataToSend = {
       ...dataForm,
-      ...(paymentFile && { contractFile: paymentFile.file })
+      ...(contractFile && { contractFile: contractFile.file })
     };
     const formData = new FormData();
     Object.keys(dataToSend).forEach((key) => formData.append(key, dataToSend[key]));
@@ -77,14 +75,14 @@ export const Create = () => {
     } else {
       handleOpenSnackbar('success', 'Contrato creado exitosamente!');
       reset();
-      setPaymentFile(null);
+      setContractFile(null);
     }
   };
 
   const uploadFile = (e) => {
     const file = e.target.files[0];
 
-    setPaymentFile({
+    setContractFile({
       id: `${file.name}-${Date.now()}`,
       url: URL.createObjectURL(file),
       file
@@ -93,8 +91,8 @@ export const Create = () => {
     e.target.value = null;
   };
 
-  const onDeletPaymentFile = () => {
-    setPaymentFile(null);
+  const onDeleteContractFile = () => {
+    setContractFile(null);
   };
 
   return (
@@ -222,7 +220,7 @@ export const Create = () => {
                   </label>
                 </Box>
 
-                {paymentFile && (
+                {contractFile && (
                   <Box
                     sx={{
                       display: 'flex',
@@ -230,10 +228,10 @@ export const Create = () => {
                       alignItems: 'center',
                       p: 1
                     }}>
-                    <Link href={paymentFile?.url} target="_blank" rel="noopener">
-                      {paymentFile?.file.name}
+                    <Link href={contractFile?.url} target="_blank" rel="noopener">
+                      {contractFile?.file.name}
                     </Link>
-                    <IconButton color="error" aria-label="delete" onClick={onDeletPaymentFile}>
+                    <IconButton color="error" aria-label="delete" onClick={onDeleteContractFile}>
                       <Delete />
                     </IconButton>
                   </Box>

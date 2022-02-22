@@ -1,14 +1,14 @@
 require('dotenv').config();
 const S3 = require('../config/awsConfig');
 
-const uploadFile = async (file) => {
-  if (file === undefined) throw Error('file parameter indefined');
+const uploadFile = async (file, folder) => {
+  if (!file || !folder) throw Error('file and folder - parameters indefined');
 
   return S3.upload({
     Bucket: process.env.AWS_BUCKET_NAME,
     ContentType: file.mimetype,
     Body: file.buffer,
-    Key: `contracts/${Date.now()}-${file.originalname}`
+    Key: `${folder}/${Date.now()}-${file.originalname}`
   }).promise();
 };
 

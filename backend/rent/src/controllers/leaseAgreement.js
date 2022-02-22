@@ -28,7 +28,7 @@ const create = async (req, res) => {
     const result = await sequelize.transaction(async (t) => {
       // Valida en caso de que no se suba
 
-      const imageUploaded = req.file && (await uploadFile(req.file));
+      const imageUploaded = req.file && (await uploadFile(req.file, 'contracts'));
 
       let contractFileUploaded;
 

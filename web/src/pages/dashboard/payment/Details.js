@@ -1,66 +1,135 @@
-import { useState, useEffect } from 'react';
-
-import { Link as RouterLink } from 'react-router-dom';
-import { Box, Typography, Card, Button, Grid, Link as MuiLink } from '@mui/material';
+import { useState, useEffect, useContext } from 'react';
+import { Link as RouterLink, useParams } from 'react-router-dom';
+import { Box, Typography, Card, Button, Grid } from '@mui/material';
 import { ArrowBack } from '@mui/icons-material/';
 
-const paymentData = {
-  code: 2334,
-  amount: 200,
-  paymentDate: '2020-01-01',
-  datePaid: '2020-01-01',
-  filePayment:
-    'https://s3-ap-southeast-2.amazonaws.com/wc-prod-pim/JPEG_1000x1000/KEFLATFIL6_keji_flat_file_a4_assorted_colours_6_pack.jpg'
-};
+import { AuthContext } from '../../../store/context/authContext';
+import { LoadingContext } from '../../../store/context/LoadingGlobal';
+import { SnackbarContext } from '../../../store/context/SnackbarGlobal';
+import { sendRequest } from '../../../helpers/utils';
+import { ModalIframe } from '../../../components/ModalIframe';
 
 export const Details = () => {
+  const { id } = useParams();
   const [payment, setPayment] = useState({});
 
-  useEffect(() => setPayment(paymentData), []);
+  const { authSession } = useContext(AuthContext);
+  const { handleLoading } = useContext(LoadingContext);
+  const { handleOpenSnackbar } = useContext(SnackbarContext);
+
+  const [modalFile, setModalFile] = useState({
+    open: false,
+    url: ''
+  });
+
+  const fetchPayment = async () => {
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/payment/${id}`,
+      token: authSession.user?.token,
+      method: 'GET'
+    });
+    handleLoading(false);
+
+    if (response.error) {
+      handleOpenSnackbar('error', 'Cannot get payment');
+    } else {
+      setPayment(response.data.data);
+    }
+  };
+
+  useEffect(() => {
+    fetchPayment();
+  }, [id]);
+
+  const openModalFile = (urlFile) => {
+    setModalFile({ open: true, url: urlFile });
+  };
+
+  const closeModalFile = () => setModalFile({ open: false, url: '' });
 
   return (
-    <Box>
-      <Button
-        component={RouterLink}
-        to="../"
-        color="inherit"
-        sx={{ opacity: 0.7, my: 1 }}
-        aria-label="Example">
-        <ArrowBack /> regresar
-      </Button>
+    <>
+      <Box>
+        <Button
+          component={RouterLink}
+          to="../"
+          color="inherit"
+          sx={{ opacity: 0.7, my: 1 }}
+          aria-label="Example">
+          <ArrowBack /> regresar
+        </Button>
 
-      <Card sx={{ p: 3 }}>
-        <Typography variant="h4">Detalles de inquilino</Typography>
-        <Box sx={{ my: 3 }}>
-          <Grid container spacing={2} rowSpacing={5}>
-            <Grid item xs={12} sm={6}>
-              <Typography variant="subtitle1">Código comprobante</Typography>
-              <Typography variant="body1">{payment?.code || '-'}</Typography>
-            </Grid>
+        <Card sx={{ p: 3 }}>
+          <Typography variant="h4">Detalles de pago</Typography>
+          <Box sx={{ my: 3 }}>
+            <Grid container spacing={2} rowSpacing={5}>
+              <Grid item xs={12} sm={6}>
+                <Typography variant="subtitle1">Código comprobante</Typography>
+                <Typography variant="body1">{payment?.code || '-'}</Typography>
+              </Grid>
 
-            <Grid item xs={12} sm={6}>
-              <Typography variant="subtitle1">Cantidad</Typography>
-              <Typography variant="body1">{payment?.amount || '-'}</Typography>
-            </Grid>
+              <Grid item xs={12} sm={6}>
+                <Typography variant="subtitle1">Cantidad</Typography>
+                <Typography variant="body1">${payment?.amount || '-'}</Typography>
+              </Grid>
 
-            <Grid item xs={12} sm={6}>
-              <Typography variant="subtitle1">Fecha de pago</Typography>
-              <Typography variant="body1">{payment?.paymentDate || '-'}</Typography>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Typography variant="subtitle1">Fecha pagada</Typography>
-              <Typography variant="body1">{payment?.datePaid || '-'}</Typography>
-            </Grid>
+              <Grid item xs={12} sm={6}>
+                <Typography variant="subtitle1">Fecha de pago</Typography>
+                <Typography variant="body1">
+                  {new Date(payment?.paymentDate).toLocaleDateString('es-ES') ?? ''}
+                </Typography>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Typography variant="subtitle1">Mes pagado</Typography>
+                <Typography variant="body1">
+                  {new Date(payment?.datePaid).toLocaleDateString('es-ES', {
+                    year: 'numeric',
+                    month: 'numeric'
+                  }) ?? ''}
+                </Typography>
+              </Grid>
 
-            <Grid item xs={12} sm={6}>
-              <Typography variant="subtitle1">Comprobante</Typography>
-              <MuiLink href={payment?.filePayment} target="_blank" rel="noopener">
-                <Typography variant="body1">{payment?.filePayment || '-'}</Typography>
-              </MuiLink>
+              <Grid item xs={12} sm={6}>
+                <Typography variant="subtitle1">Validado</Typography>
+                <Typography variant="body1">{payment?.validated ? 'SI' : 'NO'}</Typography>
+              </Grid>
+
+              <Grid item xs={12} sm={6}>
+                <Typography variant="subtitle1">Propiedad</Typography>
+                <Typography variant="body1">{payment?.property?.tagName || '-'}</Typography>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Typography variant="subtitle1">Propietario</Typography>
+                <Typography variant="body1">
+                  {`${payment?.owner?.firstName ?? ''} ${payment?.owner?.lastName ?? ''}` || '-'}
+                </Typography>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Typography variant="subtitle1">Inquilino</Typography>
+                <Typography variant="body1">
+                  {`${payment?.tenant?.firstName ?? ''} ${payment?.tenant?.lastName ?? ''}` || '-'}
+                </Typography>
+              </Grid>
+
+              <Grid item xs={12} sm={12}>
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    onClick={() => openModalFile(payment?.paymentFile.url)}>
+                    ver comprobante
+                  </Button>
+                </Box>
+              </Grid>
             </Grid>
-          </Grid>
-        </Box>
-      </Card>
-    </Box>
+          </Box>
+        </Card>
+      </Box>
+
+      {modalFile.open && (
+        <ModalIframe opened={modalFile.open} url={modalFile.url} onCloseModal={closeModalFile} />
+      )}
+    </>
   );
 };
