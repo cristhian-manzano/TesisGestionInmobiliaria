@@ -17,7 +17,11 @@ const getAll = async (req, res) => {
   try {
     const idOwner = req.user.id;
     const rents = await Rent.findAll({
-      where: { idOwner }
+      where: { idOwner },
+      order: [
+        ['endDate', 'DESC'],
+        ['startDate', 'DESC']
+      ]
     });
 
     const lists = rents.reduce(
@@ -34,7 +38,7 @@ const getAll = async (req, res) => {
     const tenants =
       lists.tenants &&
       (await axios.post(`${process.env.API_USER_URL}/user/list`, {
-        tenants: lists.tenants
+        users: lists.tenants
       }));
 
     const properties =
@@ -190,7 +194,7 @@ const get = async (req, res) => {
     const tenant =
       rent.idTenant &&
       (await axios.post(`${process.env.API_USER_URL}/user/list`, {
-        tenants: [rent.idTenant]
+        users: [rent.idTenant]
       }));
 
     // Temporaal

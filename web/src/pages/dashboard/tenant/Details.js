@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 
 import { Link as RouterLink, useParams } from 'react-router-dom';
-import { Box, Typography, Card, Button, Grid } from '@mui/material';
+import { Box, Typography, Card, Button, Grid, Chip } from '@mui/material';
 import { ArrowBack } from '@mui/icons-material/';
 import { sendRequest } from '../../../helpers/utils';
 import { AuthContext } from '../../../store/context/authContext';
@@ -75,10 +75,6 @@ export const Details = () => {
             </Grid>
 
             <Grid item xs={12} sm={6}>
-              <Typography variant="subtitle1">Fecha de inicio de alquiler</Typography>
-              <Typography variant="body1">{tenantRent?.startDate || '-'}</Typography>
-            </Grid>
-            <Grid item xs={12} sm={6}>
               <Typography variant="subtitle1">Propiedad</Typography>
               <Typography variant="body1">{tenantRent?.property?.tagName || '-'}</Typography>
             </Grid>
@@ -91,6 +87,32 @@ export const Details = () => {
               <Typography variant="body1">
                 {(tenantRent?.securityDeposit && `$${tenantRent?.securityDeposit}`) || '-'}
               </Typography>
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <Typography variant="subtitle1">Fecha de inicio de alquiler</Typography>
+              <Typography variant="body1">
+                {new Date(tenantRent.startDate).toLocaleDateString('es-ES')}{' '}
+              </Typography>
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <Typography variant="subtitle1">Fecha de fin de alquiler</Typography>
+              <Typography variant="body1">
+                {tenantRent?.endDate !== null
+                  ? new Date(tenantRent?.endDate).toLocaleDateString('es-ES')
+                  : '-'}
+              </Typography>
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <Typography variant="subtitle1">Estado</Typography>
+
+              {tenantRent?.endDate === null ? (
+                <Chip size="small" label="Activo" color="primary" />
+              ) : (
+                <Chip size="small" label="Inactivo" color="error" />
+              )}
             </Grid>
           </Grid>
         </Box>

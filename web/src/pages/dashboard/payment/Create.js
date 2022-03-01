@@ -23,11 +23,9 @@ import {
   MenuItem
 } from '@mui/material';
 import { ArrowBack, Add, Delete } from '@mui/icons-material/';
-
 import { LoadingContext } from '../../../store/context/LoadingGlobal';
 import { SnackbarContext } from '../../../store/context/SnackbarGlobal';
 import { AuthContext } from '../../../store/context/authContext';
-
 import { sendRequest } from '../../../helpers/utils';
 
 export const Create = () => {
@@ -56,7 +54,7 @@ export const Create = () => {
     handleLoading(false);
 
     if (response.error) {
-      handleOpenSnackbar('errror', 'Cannot get rents');
+      handleOpenSnackbar('error', 'Cannot get rents');
     } else {
       setTenantsRent(response.data.data);
     }

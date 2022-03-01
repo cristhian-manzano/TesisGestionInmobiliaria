@@ -19,7 +19,8 @@ import {
   IconButton,
   MenuItem,
   ListItemIcon,
-  ListItemText
+  ListItemText,
+  Chip
 } from '@mui/material';
 
 import { Search, Visibility, Edit, Delete } from '@mui/icons-material';
@@ -135,10 +136,12 @@ export const Tenant = () => {
             <Table sx={{ minWidth: 800 }} aria-label="simple table">
               <TableHead sx={{ backgroundColor: '#e9e9e9' }}>
                 <TableRow>
-                  <TableCell>Nombre</TableCell>
+                  <TableCell>Inmueble</TableCell>
+                  <TableCell>Fecha de inicio</TableCell>
+                  <TableCell>Inquilino</TableCell>
                   <TableCell>Email</TableCell>
                   <TableCell>Teléfono</TableCell>
-                  <TableCell>Inmueble</TableCell>
+                  <TableCell>Estado</TableCell>
                   <TableCell />
                 </TableRow>
               </TableHead>
@@ -149,10 +152,20 @@ export const Tenant = () => {
                       hover
                       key={rent?.id}
                       sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                      <TableCell>{rent?.tenant?.firstName}</TableCell>
+                      <TableCell>{rent?.property?.tagName}</TableCell>
+                      <TableCell>{new Date(rent.startDate).toLocaleDateString('es-ES')}</TableCell>
+                      <TableCell>
+                        {rent?.tenant?.firstName ?? ''} {rent?.tenant?.lastName ?? ''}
+                      </TableCell>
                       <TableCell>{rent?.tenant?.email}</TableCell>
                       <TableCell>{rent?.tenant?.phone}</TableCell>
-                      <TableCell>{rent?.property?.tagName}</TableCell>
+                      <TableCell>
+                        {rent?.endDate === null ? (
+                          <Chip size="small" label="Activo" color="primary" />
+                        ) : (
+                          <Chip size="small" label="Inactivo" color="error" />
+                        )}
+                      </TableCell>
 
                       <TableCell>
                         <TableMoreMenu>
