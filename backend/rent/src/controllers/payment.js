@@ -12,7 +12,6 @@ const Payment = require('../models/payment');
 const PaymentFile = require('../models/PaymentFile');
 const Rent = require('../models/rent');
 const { uploadFile, deleteFiles } = require('../services/awsService');
-
 const { paymentCreateValidation } = require('../validation/payment');
 
 const create = async (req, res) => {

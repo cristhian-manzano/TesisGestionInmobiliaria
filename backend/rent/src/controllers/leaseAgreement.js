@@ -48,7 +48,6 @@ const create = async (req, res) => {
       );
     });
 
-    // Result property and result tenant
     return res
       .status(responseStatusCodes.OK)
       .json(successResponse(res.statusCode, 'Got it!', result));
@@ -231,5 +230,4 @@ module.exports = {
   get,
   destroy,
   create
-  // update,
 };

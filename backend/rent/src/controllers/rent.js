@@ -33,7 +33,7 @@ const getAll = async (req, res) => {
 
     const tenants =
       lists.tenants &&
-      (await axios.post(`${process.env.API_USER_URL}/user/tenant/list`, {
+      (await axios.post(`${process.env.API_USER_URL}/user/list`, {
         tenants: lists.tenants
       }));
 
@@ -119,7 +119,7 @@ const create = async (req, res) => {
 
     // Validate if property and tenant exists
     await axios.get(`${process.env.API_PROPERTY_URL}/property/${value.idProperty}`);
-    await axios.get(`${process.env.API_USER_URL}/user/tenant/${value.idTenant}`);
+    await axios.get(`${process.env.API_USER_URL}/user/${value.idTenant}`);
 
     const createdRent = await Rent.create({
       ...value,
@@ -177,15 +177,10 @@ const update = async (req, res) => {
 
 const get = async (req, res) => {
   try {
-    // const authUserId = req.user?.id;
+    // valida que solo pueda ver el usuario correspondiente
     const { id: idRent } = req.params;
 
-    const rent = await Rent.findOne({
-      where: {
-        id: idRent
-        // [Op.and]: [{ id: idRent }, { idOwner: authUserId }] valida que solo pueda ver el usuario correspondiente
-      }
-    });
+    const rent = await Rent.findOne({ where: { id: idRent } });
 
     if (!rent)
       return res
@@ -194,7 +189,7 @@ const get = async (req, res) => {
 
     const tenant =
       rent.idTenant &&
-      (await axios.post(`${process.env.API_USER_URL}/user/tenant/list`, {
+      (await axios.post(`${process.env.API_USER_URL}/user/list`, {
         tenants: [rent.idTenant]
       }));
 

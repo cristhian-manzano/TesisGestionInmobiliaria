@@ -10,24 +10,15 @@ const {
 } = require('../helpers/responsesFormat');
 const Comment = require('../models/comment');
 
-// const Observation = require('../models/observation');
-
 const { commentCreateValidation } = require('../validation/comment');
 
 const getByObservation = async (req, res) => {
   try {
-    // const idOwner = req.user?.id;
+    // Validate, you can only get comments of YOUR APARMENT, OR RENTS
     const { id: idObservation } = req.params;
 
-    // Validate, you can only get comments of YOUR APARMENT, OR RENTS
     const comments = await Comment.findAll({
       where: { idObservation }
-      // include: [
-      //   {
-      //     model: Observation,
-      //     as: 'observation'
-      //   }
-      // ]
     });
 
     const usersList = comments.reduce((prev, cur) => {
