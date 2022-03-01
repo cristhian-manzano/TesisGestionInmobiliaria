@@ -50,8 +50,7 @@ const getByFilter = async (req, res) => {
         as: 'roles',
         attributes: [],
         where: {
-          // Move it to a variable
-          id: 2
+          name: 'Arrendatario'
         }
       },
       attributes: {
