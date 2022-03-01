@@ -47,8 +47,25 @@ export const Create = () => {
     }
   };
 
+  const fetchTenantsRentByTenant = async () => {
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/rent/tenant`,
+      token: authSession.user?.token,
+      method: 'GET'
+    });
+    handleLoading(false);
+
+    if (response.error) {
+      handleOpenSnackbar('error', 'Hubo un error al obtener las rentas');
+    } else {
+      setTenantsRent(response.data.data);
+    }
+  };
+
   useEffect(() => {
-    fetchTenantsRent();
+    if (authSession.user?.roles.includes('Arrendador')) fetchTenantsRent();
+    if (authSession.user?.roles.includes('Arrendatario')) fetchTenantsRentByTenant();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -104,9 +121,9 @@ export const Create = () => {
 
                           {tenantsRent.map((rent) => (
                             <MenuItem key={rent.id} value={rent.id}>
-                              {`${rent.property?.tagName ?? ''} - ${rent.tenant?.firstName ?? ''} ${
-                                rent.tenant?.lastName ?? ''
-                              }`}
+                              {`${rent.property?.tagName ?? ''}  ${
+                                rent.property?.address ?? ''
+                              } - ${rent.tenant?.firstName ?? ''} ${rent.tenant?.lastName ?? ''}`}
                             </MenuItem>
                           ))}
                         </Select>

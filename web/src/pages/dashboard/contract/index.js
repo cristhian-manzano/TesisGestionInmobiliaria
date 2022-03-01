@@ -27,6 +27,7 @@ import { Alert } from '../../../components/Alert';
 import { TableMoreMenu } from '../../../components/TableMoreMenu';
 import { LoadingContext } from '../../../store/context/LoadingGlobal';
 import { SnackbarContext } from '../../../store/context/SnackbarGlobal';
+import { AuthContext } from '../../../store/context/authContext';
 import { useContract } from './useContract';
 
 import { ModalIframe } from '../../../components/ModalIframe';
@@ -38,6 +39,9 @@ export const Contract = () => {
   const [alert, setAlert] = useState({ open: false, title: '', description: '' });
   const { handleLoading } = useContext(LoadingContext);
   const { handleOpenSnackbar } = useContext(SnackbarContext);
+
+  const { authSession } = useContext(AuthContext);
+
   const [page, setPage] = useState(2);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const { api, data, error, loading } = useContract();
@@ -110,9 +114,11 @@ export const Contract = () => {
       <Box>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', p: 2 }}>
           <Typography variant="h4">Contratos</Typography>
-          <Button component={RouterLink} to="create" variant="contained">
-            Agregar
-          </Button>
+          {authSession.user?.roles.includes('Arrendador') && (
+            <Button component={RouterLink} to="create" variant="contained">
+              Agregar
+            </Button>
+          )}
         </Box>
         <Card>
           <Box sx={{ py: 2 }}>
@@ -187,15 +193,17 @@ export const Contract = () => {
                             />
                           </MenuItem>
 
-                          <MenuItem onClick={() => openDeleteAlert(contract)}>
-                            <ListItemIcon>
-                              <Delete sx={{ fontSize: 25 }} />
-                            </ListItemIcon>
-                            <ListItemText
-                              primary="Eliminar"
-                              primaryTypographyProps={{ variant: 'body2' }}
-                            />
-                          </MenuItem>
+                          {authSession.user?.roles.includes('Arrendador') && (
+                            <MenuItem onClick={() => openDeleteAlert(contract)}>
+                              <ListItemIcon>
+                                <Delete sx={{ fontSize: 25 }} />
+                              </ListItemIcon>
+                              <ListItemText
+                                primary="Eliminar"
+                                primaryTypographyProps={{ variant: 'body2' }}
+                              />
+                            </MenuItem>
+                          )}
                         </TableMoreMenu>
                       </TableCell>
                     </TableRow>

@@ -60,6 +60,53 @@ const getAll = async (req, res) => {
   }
 };
 
+const getAllByTenant = async (req, res) => {
+  try {
+    const idTenant = req.user.id;
+    const rents = await Rent.findAll({
+      where: { idTenant }
+    });
+
+    const lists = rents.reduce(
+      (prev, cur) => ({
+        properties: prev.properties ? [...prev.properties, cur.idProperty] : [cur.idProperty],
+        owners: prev.owners ? [...prev.owners, cur.idOwner] : [cur.idOwner]
+      }),
+      {}
+    );
+
+    // ! Que pasa si hay usuarios o propiedades eliminad@s, [vendrian datos incompletos] - Manejalo
+    // ! Solución temporal
+
+    const owners =
+      lists.owners &&
+      (await axios.post(`${process.env.API_USER_URL}/user/list`, {
+        users: lists.owners
+      }));
+
+    const properties =
+      lists.properties &&
+      (await axios.post(`${process.env.API_PROPERTY_URL}/property/list`, {
+        properties: lists.properties
+      }));
+
+    const rentsData = rents.map((rent) => ({
+      ...rent.dataValues,
+      owner: owners.data.data.find((owner) => rent.idOwner === owner.id),
+      property: properties.data.data.find((property) => rent.idProperty === property.id)
+    }));
+
+    return res
+      .status(responseStatusCodes.OK)
+      .json(successResponse(res.statusCode, 'Got it!', rentsData));
+  } catch (e) {
+    Logger.error(e.message);
+    return res
+      .status(responseStatusCodes.INTERNAL_SERVER_ERROR)
+      .json(errorResponse(res.statusCode, e.message));
+  }
+};
+
 const create = async (req, res) => {
   try {
     const authUserId = req.user?.id;
@@ -130,12 +177,13 @@ const update = async (req, res) => {
 
 const get = async (req, res) => {
   try {
-    const authUserId = req.user?.id;
+    // const authUserId = req.user?.id;
     const { id: idRent } = req.params;
 
     const rent = await Rent.findOne({
       where: {
-        [Op.and]: [{ id: idRent }, { idOwner: authUserId }]
+        id: idRent
+        // [Op.and]: [{ id: idRent }, { idOwner: authUserId }] valida que solo pueda ver el usuario correspondiente
       }
     });
 
@@ -150,6 +198,13 @@ const get = async (req, res) => {
         tenants: [rent.idTenant]
       }));
 
+    // Temporaal
+    const owner =
+      rent.idOwner &&
+      (await axios.post(`${process.env.API_USER_URL}/user/list`, {
+        users: [rent.idOwner]
+      }));
+
     const property =
       rent.idProperty &&
       (await axios.post(`${process.env.API_PROPERTY_URL}/property/list`, {
@@ -159,6 +214,7 @@ const get = async (req, res) => {
     const rentsData = {
       ...rent.dataValues,
       tenant: tenant.data.data[0],
+      owner: owner.data.data[0],
       property: property.data.data[0]
     };
 
@@ -200,5 +256,6 @@ module.exports = {
   create,
   destroy,
   get,
-  update
+  update,
+  getAllByTenant
 };

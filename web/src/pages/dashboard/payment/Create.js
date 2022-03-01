@@ -49,7 +49,7 @@ export const Create = () => {
   const fetchRents = async () => {
     handleLoading(true);
     const response = await sendRequest({
-      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/rent`,
+      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/rent/tenant`,
       token: authSession.user?.token,
       method: 'GET'
     });
@@ -145,9 +145,9 @@ export const Create = () => {
 
                           {tenantsRent?.map((rent) => (
                             <MenuItem key={rent.id} value={rent.id}>
-                              {`${rent.property?.tagName ?? ''} - ${rent.tenant?.firstName ?? ''} ${
-                                rent.tenant?.lastName ?? ''
-                              }`}
+                              {`${rent.property?.tagName ?? ''} ${rent.tenant?.firstName ?? ''} - ${
+                                rent.property?.address ?? ''
+                              } - ${rent.tenant?.lastName ?? ''} `}
                             </MenuItem>
                           ))}
                         </Select>

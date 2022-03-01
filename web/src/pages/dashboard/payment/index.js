@@ -107,9 +107,12 @@ export const Payment = () => {
       <Box>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', p: 2 }}>
           <Typography variant="h4">Pagos</Typography>
-          <Button component={RouterLink} to="create" variant="contained">
-            Agregar
-          </Button>
+
+          {authSession.user?.roles.includes('Arrendatario') && (
+            <Button component={RouterLink} to="create" variant="contained">
+              Agregar
+            </Button>
+          )}
         </Box>
         <Card>
           <Box sx={{ py: 2 }}>
@@ -177,7 +180,7 @@ export const Payment = () => {
                             />
                           </MenuItem>
 
-                          <MenuItem onClick={() => onUpdate(payment?.id ?? '')}>
+                          {/* <MenuItem onClick={() => onUpdate(payment?.id ?? '')}>
                             <ListItemIcon>
                               <Edit sx={{ fontSize: 25 }} />
                             </ListItemIcon>
@@ -195,7 +198,7 @@ export const Payment = () => {
                               primary="Eliminar"
                               primaryTypographyProps={{ variant: 'body2' }}
                             />
-                          </MenuItem>
+                          </MenuItem> */}
                         </TableMoreMenu>
                       </TableCell>
                     </TableRow>

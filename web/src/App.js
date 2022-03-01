@@ -13,9 +13,6 @@ import { Register } from './pages/Register';
 import { ForgotPassword } from './pages/ForgotPassword';
 import { ResetPassword } from './pages/ResetPassword';
 import { Home } from './pages/dashboard/Home';
-import { Observation } from './pages/dashboard/observation/index';
-import { Property } from './pages/dashboard/property/index';
-import { Tenant } from './pages/dashboard/tenant/index';
 import { NotFound } from './pages/NotFound';
 import { HomePage } from './pages/HomePage';
 import { SearchProperty } from './pages/SearchProperty';
@@ -26,14 +23,17 @@ import { AuthContextProvider } from './store/context/authContext';
 import { Profile } from './pages/dashboard/Profile';
 
 // new
+import { Property } from './pages/dashboard/property/index';
 import { Create as CreateProperty } from './pages/dashboard/property/Create';
 import { Update as UpdateProperty } from './pages/dashboard/property/Update';
 import { Details as DetailsProperty } from './pages/dashboard/property/Details';
 
+import { Tenant } from './pages/dashboard/tenant/index';
 import { Create as CreateTenant } from './pages/dashboard/tenant/Create';
 import { Update as UpdateTenant } from './pages/dashboard/tenant/Update';
 import { Details as DetailsTenant } from './pages/dashboard/tenant/Details';
 
+import { Observation } from './pages/dashboard/observation/index';
 import { Create as CreateObservation } from './pages/dashboard/observation/Create';
 import { Details as DetailsObservation } from './pages/dashboard/observation/Details';
 
@@ -44,6 +44,9 @@ import { Details as DetailsPayment } from './pages/dashboard/payment/Details';
 import { Contract } from './pages/dashboard/contract/index';
 import { Create as CreateContract } from './pages/dashboard/contract/Create';
 import { Details as DetailsContract } from './pages/dashboard/contract/Details';
+
+import { TenantRent } from './pages/dashboard/tenantRent/index';
+import { Details as DetailsTenantRent } from './pages/dashboard/tenantRent/details';
 
 // Testing
 import { ProtectedRoutes } from './ProtectedRoutes';
@@ -87,6 +90,13 @@ const App = () => {
                       <Route path=":id" element={<DetailsTenant />} />
                       <Route path="create" element={<CreateTenant />} />
                       <Route path="update/:id" element={<UpdateTenant />} />
+                    </Route>
+
+                    <Route path="rents" element={<Outlet />}>
+                      <Route path="" element={<TenantRent />} />
+                      <Route path=":id" element={<DetailsTenantRent />} />
+                      {/* <Route path="create" element={<CreateTenant />} />
+                      <Route path="update/:id" element={<UpdateTenant />} /> */}
                     </Route>
 
                     <Route path="payments" element={<Outlet />}>
