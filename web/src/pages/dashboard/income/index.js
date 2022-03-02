@@ -1,7 +1,6 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LocalizationProvider, DatePicker } from '@mui/lab';
-
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
 import { es } from 'date-fns/locale';
 
@@ -25,16 +24,15 @@ import {
   ListItemText,
   Grid,
   TextField,
-  Button
+  Button,
+  Divider
 } from '@mui/material';
+
+import { Bar } from 'react-chartjs-2';
+import { Chart } from 'chart.js/auto';
 
 import { Search, Visibility } from '@mui/icons-material';
 import { TableMoreMenu } from '../../../components/TableMoreMenu';
-import { sendRequest } from '../../../helpers/utils';
-
-import { AuthContext } from '../../../store/context/authContext';
-import { LoadingContext } from '../../../store/context/LoadingGlobal';
-import { SnackbarContext } from '../../../store/context/SnackbarGlobal';
 
 export const Income = () => {
   const navigate = useNavigate();
@@ -45,35 +43,9 @@ export const Income = () => {
 
   // Test
   const [value, setValue] = useState(null);
-
   const [age, setAge] = useState('');
 
-  // Context
-  const { authSession } = useContext(AuthContext);
-  const { handleLoading } = useContext(LoadingContext);
-  const { handleOpenSnackbar } = useContext(SnackbarContext);
-
   const onView = (id) => navigate(`${id}`);
-
-  const fetchPayments = async () => {
-    handleLoading(true);
-    const response = await sendRequest({
-      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/payment`,
-      token: authSession.user?.token,
-      method: 'GET'
-    });
-    handleLoading(false);
-
-    if (response.error) {
-      handleOpenSnackbar('error', 'Hubo un error al obtener los pagos');
-    } else {
-      setPayments(response.data.data);
-    }
-  };
-
-  useEffect(() => {
-    fetchPayments();
-  }, []);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -91,10 +63,10 @@ export const Income = () => {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', p: 2 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', my: 2 }}>
         <Typography variant="h4">Ingresos</Typography>
       </Box>
-      <Card>
+      <Card sx={{ p: 3 }}>
         <Box sx={{ py: 2 }}>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={4}>
@@ -191,7 +163,7 @@ export const Income = () => {
                         justifyContent: 'center'
                       }}>
                       <Typography variant="h5" sx={{ opacity: 0.5 }}>
-                        Aún no hay pagos registrados
+                        No hay pagos registrados
                       </Typography>
                     </Box>
                   </TableCell>
@@ -208,6 +180,56 @@ export const Income = () => {
           rowsPerPage={rowsPerPage}
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
+      </Card>
+
+      <Card sx={{ my: 3, p: 3 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+          <Typography variant="h4">Por año</Typography>
+
+          <FormControl>
+            <LocalizationProvider dateAdapter={AdapterDateFns} locale={es}>
+              <DatePicker
+                disableFuture
+                label="Año"
+                views={['year']}
+                value={value}
+                onChange={(newValue) => {
+                  setValue(newValue);
+                }}
+                renderInput={(params) => <TextField {...params} />}
+              />
+            </LocalizationProvider>
+          </FormControl>
+        </Box>
+
+        <Box>
+          <Bar
+            height={70}
+            data={{
+              labels: [
+                'Enero',
+                'Febrero',
+                'Marzo',
+                'Abri',
+                'Mayo',
+                'Junio',
+                'Julio',
+                'Agosto',
+                'Septiembre',
+                'Octubre',
+                'Noviembre',
+                'Diciembre'
+              ],
+              datasets: [
+                {
+                  label: 'Ingresos ($)',
+                  data: [100, 200, 400],
+                  backgroundColor: ['rgba(75, 192, 192, 1)', '#2a71d0', '#50AF95', '#f3ba2f']
+                }
+              ]
+            }}
+          />
+        </Box>
       </Card>
     </Box>
   );

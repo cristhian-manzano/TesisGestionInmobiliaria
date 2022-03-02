@@ -73,7 +73,7 @@ export const TenantRent = () => {
       <Box sx={{ display: 'flex', justifyContent: 'space-between', p: 2 }}>
         <Typography variant="h4">Alquileres</Typography>
       </Box>
-      <Card>
+      <Card sx={{ p: 3 }}>
         <Box sx={{ py: 2 }}>
           <TextField
             placeholder="search"

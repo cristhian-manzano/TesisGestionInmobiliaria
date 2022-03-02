@@ -119,7 +119,7 @@ export const Property = () => {
             Agregar
           </Button>
         </Box>
-        <Card>
+        <Card sx={{ p: 3 }}>
           <Box sx={{ py: 2 }}>
             <TextField
               placeholder="search"

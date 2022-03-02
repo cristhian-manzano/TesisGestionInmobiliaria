@@ -8,6 +8,7 @@ import { DashboardSidebar } from './Sidebar';
 const DashboardLayoutRoot = styled('div')(({ theme }) => ({
   display: 'flex',
   flex: '1 1 auto',
+  height: '100vh',
   maxWidth: '100%',
   paddingTop: 64,
   [theme.breakpoints.up('lg')]: {
@@ -27,7 +28,8 @@ export const DashboardLayout = () => {
             flex: '1 1 auto',
             flexDirection: 'column',
             width: '100%',
-            p: { sm: 3 }
+            p: 2,
+            backgroundColor: '#00000012'
           }}>
           <Outlet />
         </Box>
