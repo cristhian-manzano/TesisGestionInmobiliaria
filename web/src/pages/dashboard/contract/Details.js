@@ -28,13 +28,11 @@ export const Details = () => {
 
   useEffect(() => {
     handleLoading(loading);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading]);
 
   useEffect(() => {
     api.get(id);
     if (error) handleOpenSnackbar('error', 'Cannot get contracts');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   return (

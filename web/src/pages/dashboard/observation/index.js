@@ -47,13 +47,11 @@ export const Observation = () => {
 
   useEffect(() => {
     handleLoading(loading);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading]);
 
   useEffect(() => {
     api.list();
     if (error) handleOpenSnackbar('error', 'Cannot get observations');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const openDeleteAlert = (observation) => {

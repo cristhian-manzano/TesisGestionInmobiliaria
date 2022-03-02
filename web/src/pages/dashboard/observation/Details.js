@@ -32,13 +32,11 @@ export const Details = () => {
 
   useEffect(() => {
     handleLoading(loading);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading]);
 
   useEffect(() => {
     api.details(id);
     if (error) handleOpenSnackbar('error', 'Cannot get observation');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

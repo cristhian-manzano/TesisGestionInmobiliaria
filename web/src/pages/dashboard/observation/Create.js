@@ -66,12 +66,10 @@ export const Create = () => {
   useEffect(() => {
     if (authSession.user?.roles.includes('Arrendador')) fetchTenantsRent();
     if (authSession.user?.roles.includes('Arrendatario')) fetchTenantsRentByTenant();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     handleLoading(loading);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading]);
 
   const onSubmitForm = async (dataForm) => {

@@ -61,13 +61,11 @@ export const Contract = () => {
 
   useEffect(() => {
     handleLoading(loading);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading]);
 
   useEffect(() => {
     api.list();
     if (error) handleOpenSnackbar('error', 'Cannot get contracts');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const openDeleteAlert = (contract) => {

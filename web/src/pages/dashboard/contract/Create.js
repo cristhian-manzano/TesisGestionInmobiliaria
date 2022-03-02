@@ -38,13 +38,11 @@ export const Create = () => {
 
   useEffect(() => {
     handleLoading(loading);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading]);
 
   useEffect(() => {
     api.getAll();
     if (error) handleOpenSnackbar('error', 'Cannot get rents');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const {

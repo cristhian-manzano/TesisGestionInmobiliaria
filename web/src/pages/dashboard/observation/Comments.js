@@ -54,7 +54,6 @@ export const Comments = ({ observation, openComments }) => {
       api.list(observation?.id);
       if (error) handleOpenSnackbar('error', 'Cannot get comments');
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [observation]);
 
   const handleSubmitComment = async (dataForm) => {
