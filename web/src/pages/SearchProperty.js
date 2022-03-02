@@ -1,5 +1,9 @@
 import React from 'react';
 
+import Slider from 'react-slick';
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
+
 import {
   Box,
   Grid,
@@ -15,13 +19,28 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  TextField
+  TextField,
+  Pagination
 } from '@mui/material';
 import { Link } from 'react-router-dom';
 
-import { WhatsApp, Search, FilterAlt, CompareArrows } from '@mui/icons-material/';
+import {
+  WhatsApp,
+  Search
+  // FilterAlt,
+  // CompareArrows
+} from '@mui/icons-material/';
 
 import LogoImage from '../assets/img/logo.png';
+
+const settings = {
+  infinite: true,
+  dots: true,
+  arrows: true,
+  slidesToShow: 1,
+  slidesToScroll: 1,
+  lazyLoad: true
+};
 
 const dataProperties = [
   {
@@ -208,7 +227,7 @@ export const SearchProperty = () => {
             <Typography variant="h5" sx={{ mr: 2 }}>
               Resultados encontrados {dataProperties.length}
             </Typography>
-            <Stack direction="row" spacing={1}>
+            {/* <Stack direction="row" spacing={1}>
               <Button>
                 <CompareArrows sx={{ transform: 'rotate(90deg)' }} />
                 Ordenar
@@ -217,19 +236,38 @@ export const SearchProperty = () => {
                 <FilterAlt />
                 Filtrar
               </Button>
-            </Stack>
+            </Stack> */}
           </Box>
 
           <Grid container spacing={2}>
             {dataProperties.map((property) => (
               <Grid key={property.id} xs={12} sm={6} md={4} lg={3} item>
                 <Card>
-                  <CardMedia
-                    component="img"
-                    height="150"
-                    image={property.image}
-                    alt="Paella dish"
-                  />
+                  <CardMedia>
+                    {true ? (
+                      <Slider {...settings}>
+                        <img
+                          height={160}
+                          src="https://images.unsplash.com/photo-1480074568708-e7b720bb3f09?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=874&q=80"
+                          alt=""
+                        />
+                        <img
+                          height={160}
+                          src="https://images.unsplash.com/photo-1507089947368-19c1da9775ae?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=876&q=80"
+                          alt=""
+                        />
+                      </Slider>
+                    ) : (
+                      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                        <img
+                          height={160}
+                          src="http://mediawestrealty.com/wp-content/uploads/2017/06/no-property-photo-2.jpg"
+                          alt=""
+                        />
+                      </Box>
+                    )}
+                  </CardMedia>
+
                   <Box sx={{ p: 3 }}>
                     <Stack spacing={1}>
                       <Typography variant="h5">{`$${property.price}`}</Typography>
@@ -255,11 +293,15 @@ export const SearchProperty = () => {
                         <Typography variant="subtitle1">1 bañ.</Typography>
                       </Stack>
 
+                      <Button fullWidth size="small" color="secondary" variant="outlined">
+                        Ver detalles
+                      </Button>
                       <Button
                         href={`https://wa.me/${property.owner.phone}?text=Hola`}
                         target="_blank"
                         rel="noopener"
                         fullWidth
+                        size="small"
                         variant="outlined">
                         <WhatsApp />
                         Contactar
@@ -270,6 +312,10 @@ export const SearchProperty = () => {
               </Grid>
             ))}
           </Grid>
+        </Box>
+
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', my: 5 }}>
+          <Pagination count={10} color="primary" size="small" />
         </Box>
       </Box>
     </Box>
