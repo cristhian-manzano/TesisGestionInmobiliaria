@@ -5,7 +5,8 @@ import {
   HomeWork,
   AddBusiness,
   Receipt,
-  Paid
+  Paid,
+  Payments
 } from '@mui/icons-material';
 
 import { ROLES } from '../../helpers/constants';
@@ -31,7 +32,7 @@ export const sidebarConfig = [
   },
   {
     href: '/dashboard/payments',
-    icon: <Paid fontSize="small" />,
+    icon: <Payments fontSize="small" />,
     title: 'Pagos',
     roles: [ROLES.ARRENDADOR, ROLES.ARRENDATARIO]
   },
@@ -46,6 +47,12 @@ export const sidebarConfig = [
     icon: <Receipt fontSize="small" />,
     title: 'Contratos',
     roles: [ROLES.ARRENDADOR, ROLES.ARRENDATARIO]
+  },
+  {
+    href: '/dashboard/income',
+    icon: <Paid fontSize="small" />,
+    title: 'Ingresos',
+    roles: [ROLES.ARRENDADOR]
   },
   {
     href: '/dashboard/observations',

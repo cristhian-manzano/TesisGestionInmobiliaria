@@ -48,6 +48,8 @@ import { Details as DetailsContract } from './pages/dashboard/contract/Details';
 import { TenantRent } from './pages/dashboard/tenantRent/index';
 import { Details as DetailsTenantRent } from './pages/dashboard/tenantRent/details';
 
+import { Income } from './pages/dashboard/income/index';
+
 // Testing
 import { ProtectedRoutes } from './ProtectedRoutes';
 
@@ -109,6 +111,10 @@ const App = () => {
                       <Route path="" element={<Contract />} />
                       <Route path="create" element={<CreateContract />} />
                       <Route path=":id" element={<DetailsContract />} />
+                    </Route>
+
+                    <Route path="income" element={<Outlet />}>
+                      <Route path="" element={<Income />} />
                     </Route>
 
                     <Route path="*" element={<h1>Página no encontrada</h1>} />
