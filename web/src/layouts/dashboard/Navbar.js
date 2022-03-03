@@ -4,7 +4,7 @@ import { AppBar, Box, IconButton, Toolbar } from '@mui/material';
 import { Menu } from '@mui/icons-material';
 
 import { AccountMenu } from '../../components/dashboard/AccountMenu';
-// import NotificationMenu from './NotificationMenu';
+import { NotificationMenu } from '../../components/dashboard/NotificationMenu';
 
 const DashboardNavbarRoot = styled(AppBar)(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
@@ -42,7 +42,7 @@ export const DashboardNavbar = ({ onSidebarOpen }) => {
 
         <Box sx={{ flexGrow: 1 }} />
 
-        {/* <NotificationMenu /> */}
+        <NotificationMenu />
         <AccountMenu />
       </Toolbar>
     </DashboardNavbarRoot>

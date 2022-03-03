@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
 import { Link as RouterLink, useParams } from 'react-router-dom';
-import { Box, Typography, Card, Button, Grid } from '@mui/material';
+import { Box, Typography, Card, Button, Grid, Chip } from '@mui/material';
 import { ArrowBack } from '@mui/icons-material/';
 
 import { AuthContext } from '../../../store/context/authContext';
@@ -35,6 +35,22 @@ export const Details = () => {
       handleOpenSnackbar('error', 'Cannot get payment');
     } else {
       setPayment(response.data.data);
+    }
+  };
+
+  const validatePayment = async () => {
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/payment/validate/${id}`,
+      token: authSession.user?.token,
+      method: 'POST'
+    });
+    handleLoading(false);
+    if (response.error) {
+      handleOpenSnackbar('error', 'Cannot validate payment');
+    } else {
+      handleOpenSnackbar('success', 'Validado');
+      fetchPayment();
     }
   };
 
@@ -91,8 +107,15 @@ export const Details = () => {
               </Grid>
 
               <Grid item xs={12} sm={6}>
-                <Typography variant="subtitle1">Validado</Typography>
-                <Typography variant="body1">{payment?.validated ? 'SI' : 'NO'}</Typography>
+                <Typography variant="subtitle1">Estado</Typography>
+
+                {payment.validated ? (
+                  <Chip size="small" label="Validado" color="primary" />
+                ) : (
+                  <Chip size="small" label="No validado" color="error" />
+                )}
+
+                {/* <Typography variant="body1">{payment?.validated ? 'SI' : 'NO'}</Typography> */}
               </Grid>
 
               <Grid item xs={12} sm={6}>
@@ -113,14 +136,24 @@ export const Details = () => {
               </Grid>
 
               <Grid item xs={12} sm={12}>
-                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <Button
+                  fullWidth
+                  sx={{ my: 1 }}
+                  variant="contained"
+                  onClick={() => openModalFile(payment?.paymentFile.url)}>
+                  ver comprobante
+                </Button>
+
+                {!payment.validated && (
                   <Button
                     fullWidth
+                    color="secondary"
+                    sx={{ my: 1 }}
                     variant="contained"
-                    onClick={() => openModalFile(payment?.paymentFile.url)}>
-                    ver comprobante
+                    onClick={() => validatePayment()}>
+                    Validar pago
                   </Button>
-                </Box>
+                )}
               </Grid>
             </Grid>
           </Box>

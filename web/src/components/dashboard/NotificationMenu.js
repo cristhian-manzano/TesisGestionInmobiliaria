@@ -81,7 +81,9 @@ export const NotificationMenu = () => {
 
         <Divider sx={{ my: 1 }} />
 
-        <MenuItem onClick={handleClose}>Item 1</MenuItem>
+        <MenuItem onClick={handleClose}> - </MenuItem>
+        <MenuItem onClick={handleClose}> - </MenuItem>
+        <MenuItem onClick={handleClose}> - </MenuItem>
       </Menu>
     </>
   );

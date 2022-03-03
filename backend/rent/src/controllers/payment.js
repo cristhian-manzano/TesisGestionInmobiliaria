@@ -222,9 +222,45 @@ const destroy = async (req, res) => {
   }
 };
 
+const validatePayment = async (req, res) => {
+  try {
+    const idUser = req.user?.id;
+    const { id } = req.params;
+
+    const payment = await Payment.findByPk(id, {
+      include: [
+        {
+          model: Rent,
+          as: 'rent',
+          where: { idOwner: idUser },
+          attributes: []
+        }
+      ]
+    });
+
+    if (!payment)
+      return res
+        .status(responseStatusCodes.NOT_FOUND)
+        .json(errorResponse(res.statusCode, 'payment not found!'));
+
+    // Valida en caso que update falle
+    await payment.update({ validated: true });
+
+    return res
+      .status(responseStatusCodes.OK)
+      .json(successResponse(res.statusCode, 'Payment validated!', null));
+  } catch (e) {
+    Logger.error(e.message);
+    return res
+      .status(responseStatusCodes.INTERNAL_SERVER_ERROR)
+      .json(errorResponse(res.statusCode, e.message));
+  }
+};
+
 module.exports = {
   getAll,
   create,
   get,
-  destroy
+  destroy,
+  validatePayment
 };

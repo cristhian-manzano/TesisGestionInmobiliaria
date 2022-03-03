@@ -19,7 +19,8 @@ import {
   IconButton,
   MenuItem,
   ListItemIcon,
-  ListItemText
+  ListItemText,
+  Chip
 } from '@mui/material';
 
 import { Search, Visibility, Edit, Delete } from '@mui/icons-material';
@@ -140,7 +141,7 @@ export const Payment = () => {
                   <TableCell>Cantidad</TableCell>
                   <TableCell>Departamento</TableCell>
                   <TableCell>Inquilino</TableCell>
-                  <TableCell>Validada</TableCell>
+                  <TableCell>Estado</TableCell>
                   <TableCell />
                 </TableRow>
               </TableHead>
@@ -166,7 +167,14 @@ export const Payment = () => {
                       <TableCell>{`${payment.tenant?.firstName ?? ''} ${
                         payment.tenant?.lastName ?? ''
                       }`}</TableCell>
-                      <TableCell>{payment.validated ? 'Si' : 'No'}</TableCell>
+
+                      <TableCell>
+                        {payment.validated ? (
+                          <Chip size="small" label="Validado" color="primary" />
+                        ) : (
+                          <Chip size="small" label="No validado" color="error" />
+                        )}
+                      </TableCell>
 
                       <TableCell>
                         <TableMoreMenu>
