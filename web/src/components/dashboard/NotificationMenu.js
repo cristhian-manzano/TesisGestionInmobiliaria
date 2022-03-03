@@ -1,16 +1,21 @@
-import { NotificationsNone } from '@mui/icons-material';
+import { NotificationsNone, Visibility, WatchLater } from '@mui/icons-material';
 import {
   Badge,
   Divider,
   IconButton,
   Menu,
-  MenuItem,
   Tooltip,
   Typography,
-  Box
+  Box,
+  Avatar,
+  ListItemText,
+  Button,
+  ListItemAvatar,
+  ListItemButton,
+  List,
+  Chip
 } from '@mui/material';
 import { useState } from 'react';
-// import PropTypes from 'prop-types';
 
 export const NotificationMenu = () => {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -33,7 +38,7 @@ export const NotificationMenu = () => {
           aria-controls={open ? 'notification-menu' : undefined}
           aria-haspopup="true"
           aria-expanded={open ? 'true' : undefined}>
-          <Badge badgeContent={4} color="primary" variant="dot">
+          <Badge badgeContent={4} color="primary">
             <NotificationsNone />
           </Badge>
         </IconButton>
@@ -49,6 +54,7 @@ export const NotificationMenu = () => {
           sx: {
             overflow: 'visible',
             filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+            width: 380,
             mt: 1.5,
             '&:before': {
               content: '""',
@@ -68,22 +74,82 @@ export const NotificationMenu = () => {
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}>
         <Box
           sx={{
-            px: 2,
             display: 'flex',
             alignItems: 'center',
-            maxWidth: 350,
-            width: 350
+            py: 1,
+            px: 2.5
           }}>
-          <Typography noWrap variant="h5">
-            Notificaciones
-          </Typography>
+          <Box sx={{ flexGrow: 1 }}>
+            <Typography noWrap variant="h5">
+              Notificaciones
+            </Typography>
+            <Typography variant="subtitle1" sx={{ color: 'text.secondary' }}>
+              {10} notificaciones nuevas
+            </Typography>
+          </Box>
+
+          {10 > 0 && (
+            <Tooltip title=" Marcar como leídas">
+              <IconButton color="primary" onClick={() => console.log('Read!')}>
+                <Visibility />
+              </IconButton>
+            </Tooltip>
+          )}
         </Box>
 
         <Divider sx={{ my: 1 }} />
 
-        <MenuItem onClick={handleClose}> - </MenuItem>
-        <MenuItem onClick={handleClose}> - </MenuItem>
-        <MenuItem onClick={handleClose}> - </MenuItem>
+        <List disablePadding sx={{ maxHeight: 310, overflow: 'scroll' }}>
+          {[1, 2, 3, 4].map((e) => (
+            <ListItemButton
+              key={e}
+              disableGutters
+              sx={{
+                py: 1.5,
+                px: 2.5,
+                mt: '1px',
+                ...(true && {
+                  bgcolor: 'action.selected'
+                })
+              }}>
+              <ListItemAvatar>
+                <Avatar sx={{ bgcolor: 'background.neutral' }}>P</Avatar>
+              </ListItemAvatar>
+              <ListItemText
+                primary={
+                  <Typography variant="subtitle1">
+                    Nueva observación
+                    <Typography component="span" variant="body1" sx={{ color: 'text.secondary' }}>
+                      &nbsp; Esta es una observación importante
+                    </Typography>
+                  </Typography>
+                }
+                secondary={
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      mt: 0.5,
+                      display: 'flex',
+                      alignItems: 'center',
+                      color: 'text.disabled'
+                    }}>
+                    <WatchLater sx={{ fontSize: 18, mr: 0.5 }} />
+                    {`2020-01-${1}`}
+                    <Chip sx={{ ml: 1 }} label="Nueva" color="warning" size="small" />
+                  </Typography>
+                }
+              />
+            </ListItemButton>
+          ))}
+        </List>
+
+        <Divider />
+
+        <Box>
+          <Button fullWidth disableRipple to="#">
+            Ver todas
+          </Button>
+        </Box>
       </Menu>
     </>
   );
