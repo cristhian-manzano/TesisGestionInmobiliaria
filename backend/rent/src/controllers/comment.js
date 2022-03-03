@@ -15,11 +15,26 @@ const { commentCreateValidation } = require('../validation/comment');
 const getByObservation = async (req, res) => {
   try {
     // Validate, you can only get comments of YOUR APARMENT, OR RENTS
+    const idUser = req.user?.id;
+
     const { id: idObservation } = req.params;
 
     const comments = await Comment.findAll({
-      where: { idObservation }
+      where: { idObservation },
+      order: [['date', 'ASC']]
     });
+
+    // Update read state
+    if (comments?.length > 0) {
+      await Comment.update(
+        { read: true },
+        {
+          where: {
+            [Op.and]: [{ idObservation }, { idUser: { [Op.ne]: idUser } }]
+          }
+        }
+      );
+    }
 
     const usersList = comments.reduce((prev, cur) => {
       if (!prev.includes(cur.idUser)) return [...prev, cur.idUser];

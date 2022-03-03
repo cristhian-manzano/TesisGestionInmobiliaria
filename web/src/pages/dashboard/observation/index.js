@@ -19,10 +19,11 @@ import {
   MenuItem,
   ListItemIcon,
   ListItemText,
-  Chip
+  Chip,
+  Badge
 } from '@mui/material';
 
-import { Search, Delete, Visibility } from '@mui/icons-material';
+import { Search, Delete, Visibility, NotificationsNone } from '@mui/icons-material';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import { TableMoreMenu } from '../../../components/TableMoreMenu';
 import { Alert } from '../../../components/Alert';
@@ -96,7 +97,7 @@ export const Observation = () => {
   return (
     <>
       <Box>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', p: 2 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', p: 2 }}>
           <Typography variant="h4">Observaciones</Typography>
           <Button component={RouterLink} to="create" variant="contained">
             Agregar
@@ -143,7 +144,17 @@ export const Observation = () => {
                         </Typography>
                       </TableCell>
 
-                      <TableCell>{observation.comments ?? ''}</TableCell>
+                      <TableCell>
+                        {observation.comments?.amount ?? ''}
+                        {observation.comments?.unread > 0 && (
+                          <Badge
+                            badgeContent={observation.comments?.unread ?? 0}
+                            color="secondary"
+                            sx={{ ml: 2, userSelect: 'none' }}>
+                            <NotificationsNone sx={{ opacity: 0.6 }} />
+                          </Badge>
+                        )}
+                      </TableCell>
                       <TableCell>{new Date(observation.date).toLocaleString()}</TableCell>
                       <TableCell>
                         {authSession.user?.email === observation.user?.email
@@ -155,7 +166,14 @@ export const Observation = () => {
                       <TableCell>{observation.property?.tagName}</TableCell>
                       <TableCell>
                         {authSession.user?.email !== observation.user?.email &&
-                          !observation.read && <Chip color="warning" label="No leída" />}
+                          !observation.read && (
+                            <Chip
+                              color="warning"
+                              label="No leída"
+                              size="small"
+                              sx={{ userSelect: 'none' }}
+                            />
+                          )}
                       </TableCell>
 
                       <TableCell>

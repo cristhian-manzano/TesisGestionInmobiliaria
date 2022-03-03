@@ -22,6 +22,12 @@ const Comment = sequelize.define(
       allowNull: false
     },
 
+    read: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false
+    },
+
     idObservation: {
       type: DataTypes.BIGINT,
       allowNull: false,

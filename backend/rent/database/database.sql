@@ -74,6 +74,7 @@ CREATE TABLE "Comment"(
 	"description" TEXT NOT NULL,
 	"date" TIMESTAMPTZ NOT NULL,
 	"idObservation" BIGINT NOT NULL,
+	"read" BOOLEAN NOT NULL,
 	"idUser" BIGINT NOT NULL,
 	CONSTRAINT "Comment_pkey" PRIMARY KEY ("id"),
 	CONSTRAINT "Comment_idObservation_fkey" FOREIGN KEY ("idObservation") REFERENCES "Observation"("id") ON DELETE CASCADE ON UPDATE CASCADE

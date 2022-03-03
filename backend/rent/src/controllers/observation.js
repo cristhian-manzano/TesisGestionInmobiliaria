@@ -61,7 +61,11 @@ const getAll = async (req, res) => {
 
     const observationsData = observations.map((observation) => ({
       ...observation.dataValues,
-      comments: observation.comments?.length,
+      comments: {
+        amount: observation.comments?.length,
+        unread: observation.comments.filter((comment) => !comment.read && comment.idUser !== idUser)
+          ?.length
+      },
       user: usersData.data.data.find((user) => observation.idUser === user.id),
       property: propertiesData.data.data.find(
         (property) => observation.rent.idProperty === property.id
@@ -108,10 +112,9 @@ const get = async (req, res) => {
         .status(responseStatusCodes.NOT_FOUND)
         .json(errorResponse(res.statusCode, 'Observation not found!'));
 
-    if (!observation.read && observation.idUser !== idUser) {
-      // Update state (read)
+    // Update state (read)
+    if (!observation.read && observation.idUser !== idUser)
       await observation.update({ read: true });
-    }
 
     const user = await axios.post(`${process.env.API_USER_URL}/user/list`, {
       users: [observation.idUser]
