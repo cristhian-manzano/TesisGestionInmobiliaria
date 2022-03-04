@@ -18,10 +18,10 @@ const { validateToken } = require('../middlewares/AuthMiddleare');
 
 // Routes
 routes.get('/', getAll);
-routes.get('/:id', get);
-routes.post('/get-by-owner', validateToken, getByOwner);
-routes.post('/list', getlistProperties);
+routes.get('/get-by-owner', validateToken, getByOwner);
 routes.post('/', validateToken, multerMiddleware, create);
+routes.post('/list', getlistProperties);
+routes.get('/:id', get);
 routes.put('/:id', validateToken, multerMiddleware, update);
 routes.delete('/:id', validateToken, destroy);
 

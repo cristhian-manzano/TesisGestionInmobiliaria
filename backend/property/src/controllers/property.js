@@ -16,6 +16,7 @@ const {
 } = require('../helpers/responsesFormat');
 
 const Logger = require('../config/logger');
+const { getPagination, getPagingData } = require('../helpers/pagination');
 
 const getAll = async (req, res) => {
   try {
@@ -59,7 +60,7 @@ const getByOwner = async (req, res) => {
   try {
     const ownerId = req.user?.id;
 
-    const properties = await Property.findAll({
+    let properties = await Property.findAll({
       attributes: { exclude: ['idTypeProperty', 'idSector'] },
 
       include: [
@@ -86,6 +87,30 @@ const getByOwner = async (req, res) => {
         idOwner: ownerId
       }
     });
+
+    //  Filter
+    const { page, size, search } = req.query;
+
+    if (search) {
+      properties = properties.filter(
+        (property) =>
+          property.tagName.includes(search) ||
+          +property.price === +search ||
+          property.typeProperty.name.includes(search)
+      );
+    }
+
+    if (page || size) {
+      const { limit, offset } = getPagination(page, size);
+      const pagination = getPagingData(properties.length, page, limit);
+      properties = properties.slice(offset, offset + limit);
+      return res.status(responseStatusCodes.OK).json(
+        successResponse(res.statusCode, 'Successfull request!', {
+          pagination,
+          results: properties
+        })
+      );
+    }
 
     return res
       .status(responseStatusCodes.OK)
