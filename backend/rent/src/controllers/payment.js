@@ -2,6 +2,7 @@ const axios = require('axios');
 const { Op } = require('sequelize');
 const Logger = require('../config/logger');
 const { responseStatusCodes } = require('../helpers/constants');
+const { getPagination, getPagingData } = require('../helpers/pagination');
 
 const {
   errorResponse,
@@ -93,7 +94,7 @@ const getAll = async (req, res) => {
         properties: paymentDetails.properties
       }));
 
-    const Data = payments.map((payment) => {
+    let data = payments.map((payment) => {
       const owner = usersResponse.data?.find((user) => user.id === payment.rent.idOwner);
       const tenant = usersResponse.data?.find((user) => user.id === payment.rent.idTenant);
       const property = propertiesResponse.data?.find((prop) => prop.id === payment.rent.idProperty);
@@ -106,9 +107,26 @@ const getAll = async (req, res) => {
       };
     });
 
+    // Filterand pagination
+    const { search, page, size } = req.query;
+
+    if (search) {
+      data = data.filter(
+        (d) =>
+          d.tenant.firstName.includes(search) ||
+          d.tenant.lastName.includes(search) ||
+          d.property.tagName.includes(search) ||
+          d.code.includes(search)
+      );
+    }
+
+    const { limit, offset } = getPagination(page, size);
+    const pagination = getPagingData(data.length, page, limit);
+    data = data.slice(offset, offset + limit);
+
     return res
       .status(responseStatusCodes.OK)
-      .json(successResponse(res.statusCode, 'Got it!', Data));
+      .json(successResponse(res.statusCode, 'Got it!', { pagination, results: data }));
   } catch (e) {
     Logger.error(e.message);
     return res
