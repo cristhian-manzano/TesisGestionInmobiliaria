@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 
 import {
   Box,
@@ -9,16 +9,23 @@ import {
   FormControl,
   Grid,
   IconButton,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
   Link,
-  Avatar
+  Avatar,
+  FormHelperText
+  // Dialog,
+  // DialogActions,
+  // DialogContent,
+  // DialogContentText,
+  // DialogTitle,
 } from '@mui/material';
 
+import { useForm } from 'react-hook-form';
 import { Visibility, VisibilityOff, Delete, Upload } from '@mui/icons-material';
+
+import { AuthContext } from '../../store/context/authContext';
+import { LoadingContext } from '../../store/context/LoadingGlobal';
+import { SnackbarContext } from '../../store/context/SnackbarGlobal';
+import { sendRequest } from '../../helpers/utils';
 
 const profileData = {
   email: 'cri@gmail.com',
@@ -32,23 +39,42 @@ const profileData = {
 };
 
 export const Profile = () => {
-  const palabraClaveEliminarcuenta = 'confirmar-eliminación';
+  // const palabraClaveEliminarcuenta = 'confirmar-eliminación'; --> Implement
+  // const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  // const [textDeleteAccount, setTextDeleteAccount] = useState('');
 
-  const [user, setUser] = useState(null);
   const [showPassword, setShowPassoword] = useState(false);
-  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-  const [textDeleteAccount, setTextDeleteAccount] = useState('');
   const [imageProfile, setImageProfile] = useState(null);
 
+  // Contexts
+  const { handleLoading } = useContext(LoadingContext);
+  const { handleOpenSnackbar } = useContext(SnackbarContext);
+  const { authSession } = useContext(AuthContext);
+
   const handleClickShowPassword = () => setShowPassoword((previous) => !previous);
-  const handleclickDeleteDialog = (condition) => setOpenDeleteDialog(condition);
-  const handleChangeDeleteText = ({ target: { value } }) => setTextDeleteAccount(value);
+
+  const {
+    register,
+    reset,
+    handleSubmit,
+    formState: { dirtyFields, errors, isDirty }
+  } = useForm();
+
+  const fetchProfile = () => {
+    reset({
+      email: profileData?.email,
+      idCard: profileData?.idCard,
+      firstName: profileData?.firstName,
+      lastName: profileData?.lastName,
+      dateOfBirth: profileData?.dateOfBirth,
+      phone: profileData?.phone,
+      password: ''
+    });
+    setImageProfile({ url: profileData?.profileImage });
+  };
 
   useEffect(() => {
-    // Load user Data
-    setUser(profileData);
-    // Load image
-    setImageProfile({ url: profileData.profileImage });
+    fetchProfile();
   }, []);
 
   const handleClickProfileUpload = (e) => {
@@ -70,6 +96,41 @@ export const Profile = () => {
     e.target.value = null;
   };
 
+  const onSubmit = async (data) => {
+    const dataToSend = {
+      ...(dirtyFields?.phone && { phone: data.phone }),
+      ...(dirtyFields?.password && { password: data.password })
+    };
+
+    const formData = new FormData();
+    Object.keys(dataToSend).forEach((key) => formData.append(key, dataToSend[key]));
+
+    // Adding images to formdata
+    if (imageProfile.file) {
+      formData.append('propertyImages', imageProfile.file);
+    }
+
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_PROPERTY_SERVICE_URL}/profile`,
+      method: 'PUT',
+      token: authSession.user?.token,
+      data: formData,
+      isFormData: true
+    });
+    handleLoading(false);
+
+    if (response.error) {
+      handleOpenSnackbar('error', 'No se pudo actualizar el perfil!');
+    } else {
+      handleOpenSnackbar('success', 'profile actualizado exitosamente!');
+      // fetch profile
+    }
+  };
+
+  // const handleclickDeleteDialog = (condition) => setOpenDeleteDialog(condition);
+  // const handleChangeDeleteText = ({ target: { value } }) => setTextDeleteAccount(value);
+
   return (
     <Box>
       <Card sx={{ p: 4 }}>
@@ -77,117 +138,118 @@ export const Profile = () => {
           Perfil de usuario
         </Typography>
 
-        <Grid container spacing={3}>
-          <Grid item xs={12} sm={12}>
-            <Box
-              sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                m: 1
-              }}>
-              <Link href={imageProfile?.url} target="_blank" rel="noopener">
-                <Avatar
-                  alt="Remy Sharp"
-                  src={imageProfile?.url || ''}
-                  sx={{ width: 120, height: 120, m: 1 }}
+        <Box component="form" onSubmit={handleSubmit(onSubmit)}>
+          <Grid container spacing={3}>
+            <Grid item xs={12} sm={12}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  m: 1
+                }}>
+                <Link href={imageProfile?.url} target="_blank" rel="noopener">
+                  <Avatar
+                    alt="Remy Sharp"
+                    src={imageProfile?.url || ''}
+                    sx={{ width: 120, height: 120, m: 1 }}
+                  />
+                </Link>
+                <input
+                  accept="image/*"
+                  hidden
+                  id="avatar-image-upload"
+                  type="file"
+                  onChange={handleChangeProfileUpload}
                 />
-              </Link>
-
-              <input
-                accept="image/*"
-                hidden
-                id="avatar-image-upload"
-                type="file"
-                onChange={handleChangeProfileUpload}
-              />
-              <label htmlFor="avatar-image-upload">
-                <Button
-                  variant="outlined"
-                  component="span"
-                  mb={2}
-                  onClick={handleClickProfileUpload}>
-                  {imageProfile?.url ? <Delete mr={2} /> : <Upload mr={2} />}
-                  {imageProfile?.url ? 'Limpiar' : 'Subir'}
-                </Button>
-              </label>
-            </Box>
+                <label htmlFor="avatar-image-upload">
+                  <Button
+                    variant="outlined"
+                    component="span"
+                    mb={2}
+                    onClick={handleClickProfileUpload}>
+                    {imageProfile?.url ? <Delete mr={2} /> : <Upload mr={2} />}
+                    {imageProfile?.url ? 'Limpiar' : 'Subir'}
+                  </Button>
+                </label>
+              </Box>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                <TextField label="Email" {...register('email')} disabled />
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                <TextField label="Cédula" {...register('idCard')} disabled />
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                <TextField label="Nombres" {...register('firstName')} disabled />
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                <TextField label="Apellidos" {...register('lastName')} disabled />
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                <TextField label="Fecha de nacimiento" {...register('dateOfBirth')} disabled />
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                <TextField label="Teléfono" {...register('phone')} />
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                <TextField
+                  label="Nueva contraseña"
+                  {...register('password', { minLength: 6 })}
+                  type={showPassword ? 'text' : 'password'}
+                  InputProps={{
+                    endAdornment: (
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={handleClickShowPassword}
+                        position="end">
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    )
+                  }}
+                />
+                <FormHelperText error>
+                  {errors.password?.type === 'minLength' && 'Debe tener mínimo 6 caracteres.'}
+                </FormHelperText>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={12}>
+              <Button
+                type="submit"
+                color="primary"
+                fullWidth
+                variant="contained"
+                disabled={!imageProfile?.file && !isDirty}>
+                Actualizar
+              </Button>
+            </Grid>
+            {/* <Grid item xs={12} sm={12}>
+              <Button
+                variant="outlined"
+                color="error"
+                fullWidth
+                onClick={() => handleclickDeleteDialog(true)}>
+                Eliminar cuenta
+              </Button>
+            </Grid> */}
           </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <FormControl fullWidth>
-              <TextField label="Email" value={user?.email ?? '-'} disabled />
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <FormControl fullWidth>
-              <TextField label="Cédula" value={user?.idCard ?? '-'} disabled />
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <FormControl fullWidth>
-              <TextField label="Nombres" value={user?.firstName ?? '-'} disabled />
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <FormControl fullWidth>
-              <TextField label="Apellidos" value={user?.lastName ?? '-'} disabled />
-            </FormControl>
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <FormControl fullWidth>
-              <TextField label="Fecha de nacimiento" value={user?.dateOfBirth ?? '-'} disabled />
-            </FormControl>
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <FormControl fullWidth>
-              <TextField label="Teléfono" value="0987654321" />
-            </FormControl>
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <FormControl fullWidth>
-              <TextField
-                required
-                label="Nueva contraseña"
-                id="password"
-                autoComplete="current-password"
-                type={showPassword ? 'text' : 'password'}
-                InputProps={{
-                  endAdornment: (
-                    <IconButton
-                      aria-label="toggle password visibility"
-                      onClick={handleClickShowPassword}
-                      position="end">
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  )
-                }}
-              />
-            </FormControl>
-          </Grid>
-
-          <Grid item xs={12} sm={12}>
-            <Button type="submit" color="primary" fullWidth variant="contained" disabled>
-              Actualizar
-            </Button>
-          </Grid>
-
-          <Grid item xs={12} sm={12}>
-            <Button
-              variant="outlined"
-              color="error"
-              fullWidth
-              onClick={() => handleclickDeleteDialog(true)}>
-              Eliminar cuenta
-            </Button>
-          </Grid>
-        </Grid>
+        </Box>
       </Card>
 
-      <Dialog open={openDeleteDialog} onClose={() => handleclickDeleteDialog(false)}>
+      {/* <Dialog open={openDeleteDialog} onClose={() => handleclickDeleteDialog(false)}>
         <DialogTitle>Eliminar cuenta</DialogTitle>
         <DialogContent>
           <DialogContentText>
@@ -216,7 +278,7 @@ export const Profile = () => {
             Confirmar
           </Button>
         </DialogActions>
-      </Dialog>
+      </Dialog> */}
     </Box>
   );
 };

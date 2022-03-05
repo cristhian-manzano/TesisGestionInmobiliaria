@@ -222,7 +222,7 @@ export const Property = () => {
                           justifyContent: 'center'
                         }}>
                         <Typography variant="h5" sx={{ opacity: 0.5 }}>
-                          Aún no ha registrado propiedades.
+                          No se encontraron propiedades.
                         </Typography>
                       </Box>
                     </TableCell>

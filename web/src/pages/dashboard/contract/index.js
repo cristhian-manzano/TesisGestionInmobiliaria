@@ -234,7 +234,7 @@ export const Contract = () => {
                 ) : (
                   // Valida - que no salga esto si esta cargando...
                   <TableRow>
-                    <TableCell colSpan={5}>
+                    <TableCell colSpan={7}>
                       <Box
                         sx={{
                           p: 4,
@@ -243,7 +243,7 @@ export const Contract = () => {
                           justifyContent: 'center'
                         }}>
                         <Typography variant="h5" sx={{ opacity: 0.5 }}>
-                          Aún no hay contratos registrados
+                          No se encontraron contratos.
                         </Typography>
                       </Box>
                     </TableCell>

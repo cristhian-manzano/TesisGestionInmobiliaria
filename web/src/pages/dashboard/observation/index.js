@@ -230,7 +230,7 @@ export const Observation = () => {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={5}>
+                    <TableCell colSpan={7}>
                       <Box
                         sx={{
                           p: 4,
@@ -239,7 +239,7 @@ export const Observation = () => {
                           justifyContent: 'center'
                         }}>
                         <Typography variant="h5" sx={{ opacity: 0.5 }}>
-                          Aún no se han registrado observaciones.
+                          No se encontraron observaciones.
                         </Typography>
                       </Box>
                     </TableCell>

@@ -111,6 +111,7 @@ export const Income = () => {
             <TableHead sx={{ backgroundColor: '#e9e9e9' }}>
               <TableRow>
                 <TableCell>Departamento</TableCell>
+                <TableCell>Inquilino</TableCell>
                 <TableCell>Fecha de pago</TableCell>
                 <TableCell>Mes pagado</TableCell>
                 <TableCell>Cantidad</TableCell>
@@ -154,7 +155,7 @@ export const Income = () => {
               ) : (
                 // Valida - que no salga esto si esta cargando...
                 <TableRow>
-                  <TableCell colSpan={5}>
+                  <TableCell colSpan={6}>
                     <Box
                       sx={{
                         p: 4,
@@ -163,7 +164,7 @@ export const Income = () => {
                         justifyContent: 'center'
                       }}>
                       <Typography variant="h5" sx={{ opacity: 0.5 }}>
-                        No hay pagos registrados
+                        No se encontraron pagos
                       </Typography>
                     </Box>
                   </TableCell>

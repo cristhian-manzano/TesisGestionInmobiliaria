@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import {
   Box,
@@ -12,7 +12,6 @@ import {
   TableRow,
   TableCell,
   Paper,
-  Button,
   TablePagination,
   TextField,
   InputAdornment,
@@ -23,7 +22,6 @@ import {
 } from '@mui/material';
 
 import { Search, Visibility } from '@mui/icons-material';
-import { Alert } from '../../../components/Alert';
 import { TableMoreMenu } from '../../../components/TableMoreMenu';
 import { sendRequest } from '../../../helpers/utils';
 import { AuthContext } from '../../../store/context/authContext';
@@ -36,15 +34,19 @@ export const TenantRent = () => {
   const { handleLoading } = useContext(LoadingContext);
   const { handleOpenSnackbar } = useContext(SnackbarContext);
   const [tenantsRent, setTenantsRent] = useState([]);
-  const [page, setPage] = useState(2);
+  const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  const [searchInput, setSearchInput] = useState('');
 
   const onView = (id) => navigate(`${id}`);
 
   const fetchTenantsRent = async () => {
+    const condition = searchInput ? `&search=${searchInput}` : '';
+
     handleLoading(true);
     const response = await sendRequest({
-      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/rent/tenant`,
+      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/rent/tenant?page=${page}&size=${rowsPerPage}${condition}`,
       token: authSession.user?.token,
       method: 'GET'
     });
@@ -57,7 +59,7 @@ export const TenantRent = () => {
     }
   };
 
-  useEffect(() => fetchTenantsRent(), []);
+  useEffect(() => fetchTenantsRent(), [page, rowsPerPage]);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -68,6 +70,10 @@ export const TenantRent = () => {
     setPage(0);
   };
 
+  const onChangeSearchInput = (e) => setSearchInput(e.target.value);
+
+  const onSearch = () => fetchTenantsRent();
+
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', p: 2 }}>
@@ -76,11 +82,12 @@ export const TenantRent = () => {
       <Card sx={{ p: 3 }}>
         <Box sx={{ py: 2 }}>
           <TextField
+            onChange={onChangeSearchInput}
             placeholder="search"
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
-                  <IconButton>
+                  <IconButton onClick={onSearch}>
                     <Search />
                   </IconButton>
                 </InputAdornment>
@@ -102,8 +109,8 @@ export const TenantRent = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {tenantsRent.length > 0 ? (
-                tenantsRent.map((rent) => (
+              {tenantsRent.results?.length > 0 ? (
+                tenantsRent.results?.map((rent) => (
                   <TableRow
                     hover
                     key={rent?.id}
@@ -134,7 +141,7 @@ export const TenantRent = () => {
               ) : (
                 // Valida - que no salga esto si esta cargando...
                 <TableRow>
-                  <TableCell colSpan={5}>
+                  <TableCell colSpan={6}>
                     <Box
                       sx={{
                         p: 4,
@@ -143,7 +150,7 @@ export const TenantRent = () => {
                         justifyContent: 'center'
                       }}>
                       <Typography variant="h5" sx={{ opacity: 0.5 }}>
-                        Aún no ha registrado inquilinos.
+                        No se encontraron alquileres.
                       </Typography>
                     </Box>
                   </TableCell>
@@ -154,11 +161,14 @@ export const TenantRent = () => {
         </TableContainer>
         <TablePagination
           component="div"
-          count={100}
+          count={tenantsRent.pagination?.totalItems ?? 0}
           page={page}
           onPageChange={handleChangePage}
           rowsPerPage={rowsPerPage}
           onRowsPerPageChange={handleChangeRowsPerPage}
+          labelRowsPerPage="Filas por página"
+          labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
+          rowsPerPageOptions={[5, 10, 20]}
         />
       </Card>
     </Box>

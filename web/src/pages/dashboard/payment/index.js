@@ -206,7 +206,7 @@ export const Payment = () => {
                         justifyContent: 'center'
                       }}>
                       <Typography variant="h5" sx={{ opacity: 0.5 }}>
-                        Aún no hay pagos registrados
+                        No se encontraron pagos.
                       </Typography>
                     </Box>
                   </TableCell>

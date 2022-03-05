@@ -125,11 +125,36 @@ const getAllByTenant = async (req, res) => {
         properties: lists.properties
       }));
 
-    const rentsData = rents.map((rent) => ({
+    let rentsData = rents.map((rent) => ({
       ...rent.dataValues,
       owner: owners.data.data.find((owner) => rent.idOwner === owner.id),
       property: properties.data.data.find((property) => rent.idProperty === property.id)
     }));
+
+    //  Filter
+    const { page, size, search } = req.query;
+
+    if (search) {
+      rentsData = rentsData.filter(
+        (rent) =>
+          rent.property.tagName.includes(search) ||
+          rent.owner.firstName.includes(search) ||
+          rent.owner.lastName.includes(search) ||
+          rent.owner.email.includes(search)
+      );
+    }
+
+    if (page || size) {
+      const { limit, offset } = getPagination(page, size);
+      const pagination = getPagingData(rentsData.length, page, limit);
+      rentsData = rentsData.slice(offset, offset + limit);
+      return res.status(responseStatusCodes.OK).json(
+        successResponse(res.statusCode, 'Successfull request!', {
+          pagination,
+          results: rentsData
+        })
+      );
+    }
 
     return res
       .status(responseStatusCodes.OK)

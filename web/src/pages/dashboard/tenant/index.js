@@ -214,7 +214,7 @@ export const Tenant = () => {
                 ) : (
                   // Valida - que no salga esto si esta cargando...
                   <TableRow>
-                    <TableCell colSpan={5}>
+                    <TableCell colSpan={7}>
                       <Box
                         sx={{
                           p: 4,
@@ -223,7 +223,7 @@ export const Tenant = () => {
                           justifyContent: 'center'
                         }}>
                         <Typography variant="h5" sx={{ opacity: 0.5 }}>
-                          Aún no ha registrado inquilinos.
+                          No se encontraron inquilinos.
                         </Typography>
                       </Box>
                     </TableCell>
