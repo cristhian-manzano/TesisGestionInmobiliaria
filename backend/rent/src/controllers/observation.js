@@ -17,6 +17,8 @@ const {
   observationUpdateValidation
 } = require('../validation/observation');
 
+const { getPagination, getPagingData } = require('../helpers/pagination');
+
 const getAll = async (req, res) => {
   try {
     const idUser = req.user?.id;
@@ -59,7 +61,7 @@ const getAll = async (req, res) => {
         properties: lists.properties
       }));
 
-    const observationsData = observations.map((observation) => ({
+    let observationsData = observations.map((observation) => ({
       ...observation.dataValues,
       comments: {
         amount: observation.comments?.length,
@@ -71,6 +73,30 @@ const getAll = async (req, res) => {
         (property) => observation.rent.idProperty === property.id
       )
     }));
+
+    //  Filter
+    const { page, size, search } = req.query;
+
+    if (search) {
+      observationsData = observationsData.filter(
+        (observation) =>
+          observation.user.firstName.includes(search) ||
+          observation.user.lastName.includes(search) ||
+          observation.description.includes(search)
+      );
+    }
+
+    if (page || size) {
+      const { limit, offset } = getPagination(page, size);
+      const pagination = getPagingData(observationsData.length, page, limit);
+      observationsData = observationsData.slice(offset, offset + limit);
+      return res.status(responseStatusCodes.OK).json(
+        successResponse(res.statusCode, 'Successfull request!', {
+          pagination,
+          results: observationsData
+        })
+      );
+    }
 
     return res
       .status(responseStatusCodes.OK)

@@ -17,7 +17,7 @@ import { AuthContext } from '../../../store/context/authContext';
 import { LoadingContext } from '../../../store/context/LoadingGlobal';
 import { SnackbarContext } from '../../../store/context/SnackbarGlobal';
 import { Comments } from './Comments';
-import { useObservation } from './useObservation';
+import { sendRequest } from '../../../helpers/utils';
 
 export const Details = () => {
   const { id } = useParams();
@@ -26,17 +26,29 @@ export const Details = () => {
   const { authSession } = useContext(AuthContext);
   const { handleLoading } = useContext(LoadingContext);
   const { handleOpenSnackbar } = useContext(SnackbarContext);
-  const { api, data, error, loading } = useObservation();
+
+  const [observation, setObservation] = useState(null);
 
   const handleOpenComments = () => setOpenComments((previous) => !previous);
 
-  useEffect(() => {
-    handleLoading(loading);
-  }, [loading]);
+  const fetchObservation = async () => {
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/observation/${id}`,
+      method: 'GET',
+      token: `${authSession?.user?.token}`
+    });
+    handleLoading(false);
+
+    if (response.error) {
+      handleOpenSnackbar('error', 'No se pudo obtener el contrato!');
+    } else {
+      setObservation(response.data?.data || {});
+    }
+  };
 
   useEffect(() => {
-    api.details(id);
-    if (error) handleOpenSnackbar('error', 'Cannot get observation');
+    fetchObservation();
   }, []);
 
   return (
@@ -50,25 +62,25 @@ export const Details = () => {
         <ArrowBack /> regresar
       </Button>
 
-      {data && (
+      {observation && (
         <Box>
           <Card sx={{ p: 3, my: 1 }}>
             <CardHeader
               avatar={<Avatar aria-label="recipe">R</Avatar>}
               title={
-                data.user?.email === authSession.user?.email
+                observation.user?.email === authSession.user?.email
                   ? 'Yo'
-                  : `${data?.user?.firstName ?? ''} ${data?.user?.lastName ?? ''}`
+                  : `${observation?.user?.firstName ?? ''} ${observation?.user?.lastName ?? ''}`
               }
-              subheader={new Date(data?.date).toLocaleString()}
+              subheader={new Date(observation?.date).toLocaleString()}
             />
             <CardContent>
               <Box sx={{ maxWidth: '100vw', overflow: 'hidden' }}>
                 <Typography variant="h5" sx={{ mb: 2 }}>
-                  {data?.property?.tagName ?? ''}
+                  {observation?.property?.tagName ?? ''}
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 2 }}>
-                  {data?.description}
+                  {observation?.description}
                 </Typography>
               </Box>
             </CardContent>
@@ -82,7 +94,7 @@ export const Details = () => {
               </Button>
             </Divider>
 
-            <Comments observation={data} openComments={openComments} />
+            <Comments observation={observation} openComments={openComments} />
           </Box>
         </Box>
       )}

@@ -15,6 +15,7 @@ const Rent = require('../models/rent');
 const ContractFile = require('../models/ContractFile');
 const { leaseAgreementCreateValidation } = require('../validation/leaseAgreement');
 const { uploadFile, deleteFiles } = require('../services/awsService');
+const { getPagination, getPagingData } = require('../helpers/pagination');
 
 const create = async (req, res) => {
   try {
@@ -98,7 +99,7 @@ const getAll = async (req, res) => {
         properties: LeasesDetails.properties
       }));
 
-    const Data = Leases.map((lease) => {
+    let Data = Leases.map((lease) => {
       const owner = usersResponse.data?.find((user) => user.id === lease.rent.idOwner);
       const tenant = usersResponse.data?.find((user) => user.id === lease.rent.idTenant);
       const property = propertiesResponse.data?.find((prop) => prop.id === lease.rent.idProperty);
@@ -110,6 +111,30 @@ const getAll = async (req, res) => {
         property
       };
     });
+
+    //  Filter
+    const { page, size, search } = req.query;
+
+    if (search) {
+      Data = Data.filter(
+        (lease) =>
+          lease.property.tagName.includes(search) ||
+          lease.tenant.firstName.includes(search) ||
+          lease.tenant.lastName.includes(search)
+      );
+    }
+
+    if (page || size) {
+      const { limit, offset } = getPagination(page, size);
+      const pagination = getPagingData(Data.length, page, limit);
+      Data = Data.slice(offset, offset + limit);
+      return res.status(responseStatusCodes.OK).json(
+        successResponse(res.statusCode, 'Successfull request!', {
+          pagination,
+          results: Data
+        })
+      );
+    }
 
     return res
       .status(responseStatusCodes.OK)

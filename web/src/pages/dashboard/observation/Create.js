@@ -21,7 +21,6 @@ import { sendRequest } from '../../../helpers/utils';
 import { AuthContext } from '../../../store/context/authContext';
 import { LoadingContext } from '../../../store/context/LoadingGlobal';
 import { SnackbarContext } from '../../../store/context/SnackbarGlobal';
-import { useObservation } from './useObservation';
 
 export const Create = () => {
   const { authSession } = useContext(AuthContext);
@@ -29,7 +28,6 @@ export const Create = () => {
   const { handleOpenSnackbar } = useContext(SnackbarContext);
   const [tenantsRent, setTenantsRent] = useState([]);
   const { register, handleSubmit, control, reset, formState } = useForm();
-  const { api, error, loading } = useObservation();
 
   const fetchTenantsRent = async () => {
     handleLoading(true);
@@ -68,18 +66,19 @@ export const Create = () => {
     if (authSession.user?.roles.includes('Arrendatario')) fetchTenantsRentByTenant();
   }, []);
 
-  useEffect(() => {
-    handleLoading(loading);
-  }, [loading]);
-
   const onSubmitForm = async (dataForm) => {
-    await api.create(dataForm);
-
-    // ! Handle error -  change variable
-    if (error) {
-      handleOpenSnackbar('error', 'No se pudo crear la observación.');
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/observation`,
+      method: 'POST',
+      token: authSession.user?.token,
+      data: dataForm
+    });
+    handleLoading(false);
+    if (response.error) {
+      handleOpenSnackbar('error', 'No se pudo crear la observación!');
     } else {
-      handleOpenSnackbar('success', 'Observación creada.');
+      handleOpenSnackbar('success', 'Observación creada exitosamente!');
       reset();
     }
   };

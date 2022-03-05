@@ -25,7 +25,6 @@ import { ArrowBack, Add, Delete } from '@mui/icons-material/';
 import { LoadingContext } from '../../../store/context/LoadingGlobal';
 import { SnackbarContext } from '../../../store/context/SnackbarGlobal';
 import { AuthContext } from '../../../store/context/authContext';
-import { useTenantRent } from '../tenant/useTenantRent';
 import { sendRequest } from '../../../helpers/utils';
 
 export const Create = () => {
@@ -34,15 +33,26 @@ export const Create = () => {
   const { handleOpenSnackbar } = useContext(SnackbarContext);
   const { authSession } = useContext(AuthContext);
 
-  const { api, data: tenantsRent, error, loading } = useTenantRent();
+  const [tenantsRent, setTenantsRent] = useState([]);
+
+  const fetchTenantsRent = async () => {
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/rent`,
+      token: authSession.user?.token,
+      method: 'GET'
+    });
+    handleLoading(false);
+
+    if (response.error) {
+      handleOpenSnackbar('error', 'Hubo un error al obtener los inquilinos');
+    } else {
+      setTenantsRent(response.data.data);
+    }
+  };
 
   useEffect(() => {
-    handleLoading(loading);
-  }, [loading]);
-
-  useEffect(() => {
-    api.getAll();
-    if (error) handleOpenSnackbar('error', 'Cannot get rents');
+    fetchTenantsRent();
   }, []);
 
   const {

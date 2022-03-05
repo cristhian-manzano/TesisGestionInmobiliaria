@@ -39,8 +39,10 @@ export const Tenant = () => {
   const [selectedTenant, setSelectedTenant] = useState(null);
   const [alert, setAlert] = useState({ open: false, title: '', description: '' });
   const [tenantsRent, setTenantsRent] = useState([]);
-  const [page, setPage] = useState(2);
+  const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  const [searchInput, setSearchInput] = useState('');
 
   const onView = (id) => navigate(`${id}`);
   const onUpdate = (id) => navigate(`update/${id}`);
@@ -57,9 +59,11 @@ export const Tenant = () => {
   };
 
   const fetchTenantsRent = async () => {
+    const condition = searchInput ? `&search=${searchInput}` : '';
+
     handleLoading(true);
     const response = await sendRequest({
-      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/rent`,
+      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/rent?page=${page}&size=${rowsPerPage}${condition}`,
       token: authSession.user?.token,
       method: 'GET'
     });
@@ -72,7 +76,7 @@ export const Tenant = () => {
     }
   };
 
-  useEffect(() => fetchTenantsRent(), []);
+  useEffect(() => fetchTenantsRent(), [page, rowsPerPage]);
 
   const closeDeleteAlert = () => {
     setSelectedTenant(null);
@@ -107,6 +111,10 @@ export const Tenant = () => {
     setPage(0);
   };
 
+  const onChangeSearchInput = (e) => setSearchInput(e.target.value);
+
+  const onSearch = () => fetchTenantsRent();
+
   return (
     <>
       <Box>
@@ -120,10 +128,11 @@ export const Tenant = () => {
           <Box sx={{ py: 2 }}>
             <TextField
               placeholder="search"
+              onChange={onChangeSearchInput}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
-                    <IconButton>
+                    <IconButton onClick={onSearch}>
                       <Search />
                     </IconButton>
                   </InputAdornment>
@@ -146,8 +155,8 @@ export const Tenant = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {tenantsRent.length > 0 ? (
-                  tenantsRent.map((rent) => (
+                {tenantsRent.results?.length > 0 ? (
+                  tenantsRent.results?.map((rent) => (
                     <TableRow
                       hover
                       key={rent?.id}
@@ -225,11 +234,14 @@ export const Tenant = () => {
           </TableContainer>
           <TablePagination
             component="div"
-            count={100}
+            count={tenantsRent.pagination?.totalItems ?? 0}
             page={page}
             onPageChange={handleChangePage}
             rowsPerPage={rowsPerPage}
             onRowsPerPageChange={handleChangeRowsPerPage}
+            labelRowsPerPage="Filas por página"
+            labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
+            rowsPerPageOptions={[5, 10, 20]}
           />
         </Card>
       </Box>

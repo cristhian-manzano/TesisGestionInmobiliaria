@@ -12,6 +12,7 @@ const {
   errorResponse,
   successResponse
 } = require('../helpers/responsesFormat');
+const { getPagination, getPagingData } = require('../helpers/pagination');
 
 const getAll = async (req, res) => {
   try {
@@ -47,11 +48,41 @@ const getAll = async (req, res) => {
         properties: lists.properties
       }));
 
-    const rentsData = rents.map((rent) => ({
-      ...rent.dataValues,
-      tenant: tenants.data.data.find((tenant) => rent.idTenant === tenant.id),
-      property: properties.data.data.find((property) => rent.idProperty === property.id)
-    }));
+    let rentsData = rents.map((rent) => {
+      const tenant = tenants.data.data.find((t) => rent.idTenant === t.id);
+      const property = properties.data.data.find((p) => rent.idProperty === p.id);
+
+      return {
+        ...rent.dataValues,
+        tenant,
+        property
+      };
+    });
+
+    //  Filter
+    const { page, size, search } = req.query;
+
+    if (search) {
+      rentsData = rentsData.filter(
+        (rent) =>
+          rent.property.tagName.includes(search) ||
+          rent.tenant.firstName.includes(search) ||
+          rent.tenant.lastName.includes(search) ||
+          rent.tenant.email.includes(search)
+      );
+    }
+
+    if (page || size) {
+      const { limit, offset } = getPagination(page, size);
+      const pagination = getPagingData(rentsData.length, page, limit);
+      rentsData = rentsData.slice(offset, offset + limit);
+      return res.status(responseStatusCodes.OK).json(
+        successResponse(res.statusCode, 'Successfull request!', {
+          pagination,
+          results: rentsData
+        })
+      );
+    }
 
     return res
       .status(responseStatusCodes.OK)

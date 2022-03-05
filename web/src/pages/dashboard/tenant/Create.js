@@ -50,7 +50,7 @@ export const Create = () => {
     handleLoading(true);
     const response = await sendRequest({
       urlPath: `${process.env.REACT_APP_PROPERTY_SERVICE_URL}/property/get-by-owner`,
-      method: 'POST',
+      method: 'GET',
       token: `${authSession.user?.token}`
     });
     handleLoading(false);

@@ -19,7 +19,8 @@ import {
   IconButton,
   MenuItem,
   ListItemIcon,
-  ListItemText
+  ListItemText,
+  Chip
 } from '@mui/material';
 
 import { Search, Visibility, Delete, FileOpen } from '@mui/icons-material';
@@ -28,9 +29,9 @@ import { TableMoreMenu } from '../../../components/TableMoreMenu';
 import { LoadingContext } from '../../../store/context/LoadingGlobal';
 import { SnackbarContext } from '../../../store/context/SnackbarGlobal';
 import { AuthContext } from '../../../store/context/authContext';
-import { useContract } from './useContract';
 
 import { ModalIframe } from '../../../components/ModalIframe';
+import { sendRequest } from '../../../helpers/utils';
 
 export const Contract = () => {
   const navigate = useNavigate();
@@ -39,34 +40,45 @@ export const Contract = () => {
   const [alert, setAlert] = useState({ open: false, title: '', description: '' });
   const { handleLoading } = useContext(LoadingContext);
   const { handleOpenSnackbar } = useContext(SnackbarContext);
-
   const { authSession } = useContext(AuthContext);
+  const [contracts, setContracts] = useState([]);
 
-  const [page, setPage] = useState(2);
+  const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const { api, data, error, loading } = useContract();
+  const [searchInput, setSearchInput] = useState('');
 
   const [modalFile, setModalFile] = useState({
     open: false,
     url: ''
   });
 
-  const openModalFile = (urlFile) => {
-    setModalFile({ open: true, url: urlFile });
-  };
-
-  const closeModalFile = () => setModalFile({ open: false, url: '' });
-
   const onView = (id) => navigate(`${id}`);
 
-  useEffect(() => {
-    handleLoading(loading);
-  }, [loading]);
+  // Modal
+  const openModalFile = (urlFile) => setModalFile({ open: true, url: urlFile });
+  const closeModalFile = () => setModalFile({ open: false, url: '' });
+
+  const fetchContracts = async () => {
+    const condition = searchInput ? `&search=${searchInput}` : '';
+
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/contracts?page=${page}&size=${rowsPerPage}${condition}`,
+      token: authSession.user?.token,
+      method: 'GET'
+    });
+    handleLoading(false);
+
+    if (response.error) {
+      handleOpenSnackbar('error', 'Hubo un error al obtener propiedades');
+    } else {
+      setContracts(response.data.data);
+    }
+  };
 
   useEffect(() => {
-    api.list();
-    if (error) handleOpenSnackbar('error', 'Cannot get contracts');
-  }, []);
+    fetchContracts();
+  }, [page, rowsPerPage]);
 
   const openDeleteAlert = (contract) => {
     setSelectedContract(contract);
@@ -88,19 +100,25 @@ export const Contract = () => {
   };
 
   const onDelete = async () => {
-    await api.remove(selectedContract?.id);
-
-    if (error) {
-      handleOpenSnackbar('error', 'No se pudo elimnar el contrato!');
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/contracts/${selectedContract?.id}`,
+      token: authSession.user?.token,
+      method: 'DELETE'
+    });
+    handleLoading(false);
+    if (response.error) {
+      handleOpenSnackbar('error', 'No se pudo elimnar la propiedad!');
     } else {
-      await api.list();
-      handleOpenSnackbar('success', 'contrato eliminado exitosamente!');
+      await fetchContracts();
+      handleOpenSnackbar('success', 'Propiedad eliminada exitosamente!');
     }
   };
 
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
+  const onChangeSearchInput = (e) => setSearchInput(e.target.value);
+  const onSearch = () => fetchContracts();
+
+  const handleChangePage = (event, newPage) => setPage(newPage);
 
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
@@ -122,10 +140,11 @@ export const Contract = () => {
           <Box sx={{ py: 2 }}>
             <TextField
               placeholder="search"
+              onChange={onChangeSearchInput}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
-                    <IconButton>
+                    <IconButton onClick={onSearch}>
                       <Search />
                     </IconButton>
                   </InputAdornment>
@@ -144,13 +163,13 @@ export const Contract = () => {
                   {/* <TableCell>Archivo</TableCell> */}
                   <TableCell>Propiedad</TableCell>
                   <TableCell>Inquilino</TableCell>
-                  <TableCell>Activo</TableCell>
+                  <TableCell>Estado</TableCell>
                   <TableCell />
                 </TableRow>
               </TableHead>
               <TableBody>
-                {data?.length > 0 ? (
-                  data?.map((contract) => (
+                {contracts.results?.length > 0 ? (
+                  contracts.results?.map((contract) => (
                     <TableRow
                       hover
                       key={contract.id ?? ''}
@@ -167,7 +186,13 @@ export const Contract = () => {
                       <TableCell>
                         {`${contract.tenant?.firstName ?? ''} ${contract.tenant?.lastName ?? ''}`}
                       </TableCell>
-                      <TableCell>{contract.active ? 'Activo' : 'Inactivo'}</TableCell>
+                      <TableCell>
+                        {contract.active ? (
+                          <Chip label="Activo" size="small" color="success" />
+                        ) : (
+                          <Chip label="Inactivo" size="small" color="error" />
+                        )}
+                      </TableCell>
 
                       <TableCell>
                         <TableMoreMenu>
@@ -229,11 +254,14 @@ export const Contract = () => {
           </TableContainer>
           <TablePagination
             component="div"
-            count={100}
+            count={contracts.pagination?.totalItems ?? 0}
             page={page}
             onPageChange={handleChangePage}
             rowsPerPage={rowsPerPage}
             onRowsPerPageChange={handleChangeRowsPerPage}
+            labelRowsPerPage="Filas por página"
+            labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
+            rowsPerPageOptions={[5, 10, 20]}
           />
         </Card>
       </Box>

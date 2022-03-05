@@ -19,7 +19,8 @@ import {
   IconButton,
   MenuItem,
   ListItemIcon,
-  ListItemText
+  ListItemText,
+  Chip
 } from '@mui/material';
 
 import { Search, Visibility, Edit, Delete } from '@mui/icons-material';
@@ -41,8 +42,11 @@ export const Property = () => {
   const [properties, setProperties] = useState([]);
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [alert, setAlert] = useState({ open: false, title: '', description: '' });
-  const [page, setPage] = useState(2);
+
+  const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  const [searchInput, setSearchInput] = useState('');
 
   const openDeleteAlert = (property) => {
     setSelectedProperty(property);
@@ -64,11 +68,13 @@ export const Property = () => {
   };
 
   const fetchProperties = async () => {
+    const condition = searchInput ? `&search=${searchInput}` : '';
+
     handleLoading(true);
     const response = await sendRequest({
-      urlPath: `${process.env.REACT_APP_PROPERTY_SERVICE_URL}/property/get-by-owner`,
+      urlPath: `${process.env.REACT_APP_PROPERTY_SERVICE_URL}/property/get-by-owner?page=${page}&size=${rowsPerPage}${condition}`,
       token: authSession.user?.token,
-      method: 'POST'
+      method: 'GET'
     });
     handleLoading(false);
 
@@ -81,7 +87,7 @@ export const Property = () => {
 
   useEffect(() => {
     fetchProperties();
-  }, []);
+  }, [page, rowsPerPage]);
 
   const onView = (id) => navigate(`${id}`);
   const onUpdate = (id) => navigate(`update/${id}`);
@@ -101,6 +107,10 @@ export const Property = () => {
       handleOpenSnackbar('success', 'Propiedad eliminada exitosamente!');
     }
   };
+
+  const onChangeSearchInput = (e) => setSearchInput(e.target.value);
+
+  const onSearch = () => fetchProperties();
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -123,10 +133,11 @@ export const Property = () => {
           <Box sx={{ py: 2 }}>
             <TextField
               placeholder="search"
+              onChange={onChangeSearchInput}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
-                    <IconButton>
+                    <IconButton onClick={onSearch}>
                       <Search />
                     </IconButton>
                   </InputAdornment>
@@ -141,22 +152,28 @@ export const Property = () => {
                 <TableRow>
                   <TableCell>Nombre</TableCell>
                   <TableCell>Tipo de inmueble</TableCell>
-                  <TableCell>Disponible</TableCell>
+                  <TableCell>Estado</TableCell>
                   <TableCell>Precio</TableCell>
                   <TableCell />
                 </TableRow>
               </TableHead>
               <TableBody>
-                {properties?.length > 0 ? (
-                  properties.map((row) => (
+                {properties.results?.length > 0 ? (
+                  properties.results?.map((row) => (
                     <TableRow
                       hover
                       key={row.id}
                       sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                       <TableCell>{row.tagName}</TableCell>
                       <TableCell>{row.typeProperty?.name}</TableCell>
-                      <TableCell>{row.available ?? 'Si'}</TableCell>
-                      <TableCell>{row.price}</TableCell>
+                      <TableCell>
+                        {row.available ? (
+                          <Chip label="Disponible" size="small" color="success" />
+                        ) : (
+                          <Chip label="Ocupado" size="small" color="error" />
+                        )}
+                      </TableCell>
+                      <TableCell>$ {row.price}</TableCell>
 
                       <TableCell>
                         <TableMoreMenu>
@@ -216,11 +233,14 @@ export const Property = () => {
           </TableContainer>
           <TablePagination
             component="div"
-            count={100}
+            count={properties.pagination?.totalItems ?? 0}
             page={page}
             onPageChange={handleChangePage}
             rowsPerPage={rowsPerPage}
             onRowsPerPageChange={handleChangeRowsPerPage}
+            labelRowsPerPage="Filas por página"
+            labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
+            rowsPerPageOptions={[5, 10, 20]}
           />
         </Card>
       </Box>

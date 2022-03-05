@@ -3,17 +3,22 @@ import { Link as RouterLink, useParams } from 'react-router-dom';
 import { Box, Typography, Card, Button, Grid } from '@mui/material';
 import { ArrowBack } from '@mui/icons-material/';
 
+import { AuthContext } from '../../../store/context/authContext';
 import { LoadingContext } from '../../../store/context/LoadingGlobal';
 import { SnackbarContext } from '../../../store/context/SnackbarGlobal';
-import { useContract } from './useContract';
+
 import { ModalIframe } from '../../../components/ModalIframe';
+import { sendRequest } from '../../../helpers/utils';
 
 export const Details = () => {
   const { id } = useParams();
 
+  const { authSession } = useContext(AuthContext);
+
   const { handleLoading } = useContext(LoadingContext);
   const { handleOpenSnackbar } = useContext(SnackbarContext);
-  const { api, data, error, loading } = useContract();
+
+  const [contract, setContract] = useState({});
 
   const [modalFile, setModalFile] = useState({
     open: false,
@@ -26,14 +31,25 @@ export const Details = () => {
 
   const closeModalFile = () => setModalFile({ open: false, url: '' });
 
-  useEffect(() => {
-    handleLoading(loading);
-  }, [loading]);
+  const fetchContract = async () => {
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/contracts/${id}`,
+      token: authSession.user?.token,
+      method: 'GET'
+    });
+    handleLoading(false);
+
+    if (response.error) {
+      handleOpenSnackbar('error', 'No se pudo obtener el contrato!');
+    } else {
+      setContract(response.data?.data || {});
+    }
+  };
 
   useEffect(() => {
-    api.get(id);
-    if (error) handleOpenSnackbar('error', 'Cannot get contracts');
-  }, [id]);
+    fetchContract();
+  }, []);
 
   return (
     <>
@@ -52,30 +68,31 @@ export const Details = () => {
             <Grid container spacing={2} rowSpacing={5}>
               <Grid item xs={12} sm={6}>
                 <Typography variant="subtitle1">Fecha de inicio</Typography>
-                <Typography variant="body1">{data?.startDate || '-'}</Typography>
+                <Typography variant="body1">{contract?.startDate || '-'}</Typography>
               </Grid>
               <Grid item xs={12} sm={6}>
                 <Typography variant="subtitle1">Fecha de fin</Typography>
-                <Typography variant="body1">{data?.endDate || '-'}</Typography>
+                <Typography variant="body1">{contract?.endDate || '-'}</Typography>
               </Grid>
               <Grid item xs={12} sm={6}>
                 <Typography variant="subtitle1">Estado</Typography>
-                <Typography variant="body1">{data?.active ? 'Activo' : 'Inactivo'}</Typography>
+                <Typography variant="body1">{contract?.active ? 'Activo' : 'Inactivo'}</Typography>
               </Grid>
               <Grid item xs={12} sm={6}>
                 <Typography variant="subtitle1">Propiedad</Typography>
-                <Typography variant="body1">{data?.property?.tagName || '-'}</Typography>
+                <Typography variant="body1">{contract?.property?.tagName || '-'}</Typography>
               </Grid>
               <Grid item xs={12} sm={6}>
                 <Typography variant="subtitle1">Propietario</Typography>
                 <Typography variant="body1">
-                  {`${data?.owner?.firstName ?? ''} ${data?.owner?.lastName ?? ''}` || '-'}
+                  {`${contract?.owner?.firstName ?? ''} ${contract?.owner?.lastName ?? ''}` || '-'}
                 </Typography>
               </Grid>
               <Grid item xs={12} sm={6}>
                 <Typography variant="subtitle1">Inquilino</Typography>
                 <Typography variant="body1">
-                  {`${data?.tenant?.firstName ?? ''} ${data?.tenant?.lastName ?? ''}` || '-'}
+                  {`${contract?.tenant?.firstName ?? ''} ${contract?.tenant?.lastName ?? ''}` ||
+                    '-'}
                 </Typography>
               </Grid>
               <Grid item xs={12} sm={12}>
@@ -83,7 +100,7 @@ export const Details = () => {
                   <Button
                     fullWidth
                     variant="contained"
-                    onClick={() => openModalFile(data?.contractFile.url)}>
+                    onClick={() => openModalFile(contract?.contractFile.url)}>
                     ver contrato
                   </Button>
                 </Box>

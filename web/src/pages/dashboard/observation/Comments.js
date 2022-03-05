@@ -25,7 +25,7 @@ import { Alert } from '../../../components/Alert';
 import { AuthContext } from '../../../store/context/authContext';
 import { LoadingContext } from '../../../store/context/LoadingGlobal';
 import { SnackbarContext } from '../../../store/context/SnackbarGlobal';
-import { useComment } from './useComment';
+import { sendRequest } from '../../../helpers/utils';
 
 export const Comments = ({ observation, openComments }) => {
   const [open, setOpen] = useState(false);
@@ -36,37 +36,54 @@ export const Comments = ({ observation, openComments }) => {
   const [selectedComment, setSelectedComment] = useState(null);
   const [alert, setAlert] = useState({ open: false, title: '', description: '' });
 
-  const { api, data, error, loading } = useComment();
+  const [comments, setComments] = useState([]);
 
   const { register, handleSubmit, reset, formState } = useForm();
-
-  useEffect(() => {
-    handleLoading(loading);
-  }, [loading]);
 
   const handleOpenDialog = (condition) => {
     setOpen(condition);
     reset(); // Clear Form
   };
 
+  const fetchComments = async (observationId) => {
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/comment/${observationId}`,
+      method: 'GET',
+      token: `${authSession?.user?.token}`
+    });
+    handleLoading(false);
+
+    if (response.error) {
+      handleOpenSnackbar('error', 'Hubo un error al obtener los comentarios');
+    } else {
+      setComments(response.data.data);
+    }
+  };
+
   useEffect(() => {
     if (observation?.id) {
-      api.list(observation?.id);
-      if (error) handleOpenSnackbar('error', 'Cannot get comments');
+      fetchComments(observation?.id);
     }
   }, [observation]);
 
   const handleSubmitComment = async (dataForm) => {
     const dataToSend = { ...dataForm, idObservation: observation?.id };
 
-    await api.create(dataToSend);
-
-    if (error) {
-      handleOpenSnackbar('error', 'No se pudo crear!');
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/comment`,
+      method: 'POST',
+      token: authSession.user?.token,
+      data: dataToSend
+    });
+    handleLoading(false);
+    if (response.error) {
+      handleOpenSnackbar('error', 'No se pudo crear el Commentario!');
     } else {
-      handleOpenSnackbar('success', 'Creado exitosamente!');
+      handleOpenSnackbar('success', 'Commentario creado exitosamente!');
       handleOpenDialog(false);
-      await api.list(observation?.id);
+      await fetchComments(observation?.id);
     }
   };
 
@@ -90,13 +107,18 @@ export const Comments = ({ observation, openComments }) => {
   };
 
   const onDelete = async () => {
-    await api.remove(selectedComment?.id);
-
-    if (error) {
-      handleOpenSnackbar('error', 'No se pudo elimnar el comentario!');
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/comment/${selectedComment?.id}`,
+      token: authSession.user?.token,
+      method: 'DELETE'
+    });
+    handleLoading(false);
+    if (response.error) {
+      handleOpenSnackbar('error', 'No se pudo elimnar el Commentario!');
     } else {
-      await api.list(observation?.id);
-      handleOpenSnackbar('success', 'Comentario eliminado exitosamente!');
+      await fetchComments(observation?.id);
+      handleOpenSnackbar('success', 'Commentario eliminado exitosamente!');
     }
   };
 
@@ -153,7 +175,7 @@ export const Comments = ({ observation, openComments }) => {
 
         <Box>
           {openComments &&
-            data?.map((comment) => (
+            comments?.map((comment) => (
               <Card key={comment?.id} sx={{ p: 3, my: 1 }}>
                 <CardHeader
                   avatar={<Avatar aria-label="recipe">{comment.user?.firstName[0]}</Avatar>}
