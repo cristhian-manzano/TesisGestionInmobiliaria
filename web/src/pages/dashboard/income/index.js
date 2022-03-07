@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useContext } from 'react';
 import { LocalizationProvider, DatePicker } from '@mui/lab';
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
 import { es } from 'date-fns/locale';
@@ -16,36 +15,134 @@ import {
   TableCell,
   Paper,
   TablePagination,
-  Select,
-  InputLabel,
+  Autocomplete,
   FormControl,
-  MenuItem,
-  ListItemIcon,
-  ListItemText,
   Grid,
   TextField,
-  Button,
-  Divider
+  Button
 } from '@mui/material';
 
 import { Bar } from 'react-chartjs-2';
-import { Chart } from 'chart.js/auto';
-
-import { Search, Visibility } from '@mui/icons-material';
-import { TableMoreMenu } from '../../../components/TableMoreMenu';
+import { Chart } from 'chart.js/auto'; // This is necessary for chart visualization
+import { Search } from '@mui/icons-material';
+import { LoadingContext } from '../../../store/context/LoadingGlobal';
+import { SnackbarContext } from '../../../store/context/SnackbarGlobal';
+import { AuthContext } from '../../../store/context/authContext';
+import { sendRequest } from '../../../helpers/utils';
 
 export const Income = () => {
-  const navigate = useNavigate();
+  const { handleLoading } = useContext(LoadingContext);
+  const { handleOpenSnackbar } = useContext(SnackbarContext);
+  const { authSession } = useContext(AuthContext);
 
   const [payments, setPayments] = useState([]);
-  const [page, setPage] = useState(2);
+  const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [properties, setProperties] = useState([]);
 
-  // Test
-  const [value, setValue] = useState(null);
-  const [age, setAge] = useState('');
+  const [chartIncomeByYear, setChartIncomeByYear] = useState({
+    data: [],
+    totalIncome: null
+  });
 
-  const onView = (id) => navigate(`${id}`);
+  // Filters
+  const [selectedProperty, setSelectedProperty] = useState(null);
+  const [selectedMonth, setSelectedMonth] = useState(null);
+  const [chartSelectedYear, setChartSelectedYear] = useState(null);
+
+  const fetchProperties = async () => {
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_PROPERTY_SERVICE_URL}/property/get-by-owner`,
+      method: 'GET',
+      token: `${authSession.user?.token}`
+    });
+    handleLoading(false);
+
+    if (!response.error) {
+      setProperties(
+        response.data?.data.map((property) => ({ id: property.id, name: property.tagName }))
+      );
+    } else {
+      handleOpenSnackbar('error', 'Cannot get properties!');
+    }
+  };
+
+  useEffect(() => {
+    fetchProperties();
+  }, []);
+
+  const onFetchPayments = async () => {
+    const url = new URL(
+      `${process.env.REACT_APP_RENT_SERVICE_URL}/payment/income?page=${page}&size=${rowsPerPage}`
+    );
+
+    if (selectedProperty && selectedProperty.id) {
+      url.searchParams.append('idProperty', selectedProperty?.id);
+    }
+
+    if (selectedMonth) {
+      const dateSelected = new Date(selectedMonth);
+      url.searchParams.append('month', dateSelected.getMonth() + 1);
+      url.searchParams.append('year', dateSelected.getFullYear());
+    }
+
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: url,
+      token: authSession.user?.token,
+      method: 'GET'
+    });
+    handleLoading(false);
+
+    if (response.error) {
+      handleOpenSnackbar('error', 'Hubo un error al obtener los pagos');
+    } else {
+      setPayments(response.data.data);
+    }
+  };
+
+  useEffect(() => {
+    onFetchPayments();
+  }, [page, rowsPerPage]);
+
+  const fetchIncomeByYear = async () => {
+    // Get data
+    const dateSelected = new Date(chartSelectedYear);
+
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `${
+        process.env.REACT_APP_RENT_SERVICE_URL
+      }/payment/income?year=${dateSelected.getFullYear()}`,
+      token: authSession.user?.token,
+      method: 'GET'
+    });
+    handleLoading(false);
+
+    if (response.error) {
+      handleOpenSnackbar('error', 'Hubo un error');
+    } else {
+      const { results } = response.data?.data ?? [];
+
+      const dataFinal = results.reduce((previous, current) => {
+        const monthPaid = new Date(current.datePaid).getMonth();
+        const temp = previous;
+        temp[monthPaid] += +current.amount;
+        return temp;
+      }, new Array(12).fill(0));
+
+      setChartIncomeByYear({ data: dataFinal, totalIncome: response.data?.data?.totalIncome });
+    }
+  };
+
+  useEffect(() => {
+    fetchIncomeByYear();
+  }, [chartSelectedYear]);
+
+  const onChangeProperty = (event, newValue) => {
+    setSelectedProperty(newValue);
+  };
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -56,9 +153,8 @@ export const Income = () => {
     setPage(0);
   };
 
-  // Test
-  const handleChange = (event) => {
-    setAge(event.target.value);
+  const onChangeChartIncome = async (newValue) => {
+    setChartSelectedYear(newValue);
   };
 
   return (
@@ -71,15 +167,15 @@ export const Income = () => {
           <Grid container spacing={2}>
             <Grid item xs={12} sm={4}>
               <FormControl fullWidth>
-                <InputLabel id="demo-simple-select-label">Propiedad</InputLabel>
-                <Select
-                  labelId="demo-simple-select-label"
-                  id="demo-simple-select"
-                  value={age}
-                  label="Propiedad"
-                  onChange={handleChange}>
-                  <MenuItem value={10}>Casa norte</MenuItem>
-                </Select>
+                <Autocomplete
+                  disablePortal
+                  value={selectedProperty}
+                  onChange={onChangeProperty}
+                  options={properties}
+                  getOptionLabel={(option) => option.name}
+                  isOptionEqualToValue={(option, valueSelected) => option.id === valueSelected.id}
+                  renderInput={(params) => <TextField {...params} label="Inmueble" />}
+                />
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={4}>
@@ -89,9 +185,9 @@ export const Income = () => {
                     disableFuture
                     label="Mes"
                     views={['year', 'month']}
-                    value={value}
+                    value={selectedMonth}
                     onChange={(newValue) => {
-                      setValue(newValue);
+                      setSelectedMonth(newValue);
                     }}
                     renderInput={(params) => <TextField {...params} />}
                   />
@@ -99,7 +195,7 @@ export const Income = () => {
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={1} sx={{ display: 'flex', alignItems: 'center' }}>
-              <Button fullWidth size="large" variant="contained">
+              <Button fullWidth size="large" variant="contained" onClick={onFetchPayments}>
                 <Search />
               </Button>
             </Grid>
@@ -115,17 +211,21 @@ export const Income = () => {
                 <TableCell>Fecha de pago</TableCell>
                 <TableCell>Mes pagado</TableCell>
                 <TableCell>Cantidad</TableCell>
-                <TableCell />
               </TableRow>
             </TableHead>
             <TableBody>
-              {payments.length > 0 ? (
-                payments.map((payment) => (
+              {payments.results?.length > 0 ? (
+                payments.results?.map((payment) => (
                   <TableRow
                     hover
                     key={payment.id}
                     sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                     <TableCell>{payment.property?.tagName ?? ''}</TableCell>
+
+                    <TableCell>{`${payment.tenant?.firstName ?? ''} ${
+                      payment.tenant?.lastName ?? ''
+                    }`}</TableCell>
+
                     <TableCell>
                       {new Date(payment?.paymentDate).toLocaleDateString('es-ES') ?? ''}
                     </TableCell>
@@ -136,20 +236,6 @@ export const Income = () => {
                       }) ?? ''}
                     </TableCell>
                     <TableCell>$ {payment.amount ?? '-'}</TableCell>
-
-                    <TableCell>
-                      <TableMoreMenu>
-                        <MenuItem onClick={() => onView(payment.id)}>
-                          <ListItemIcon>
-                            <Visibility sx={{ fontSize: 25 }} />
-                          </ListItemIcon>
-                          <ListItemText
-                            primary="Ver mas"
-                            primaryTypographyProps={{ variant: 'body2' }}
-                          />
-                        </MenuItem>
-                      </TableMoreMenu>
-                    </TableCell>
                   </TableRow>
                 ))
               ) : (
@@ -175,12 +261,21 @@ export const Income = () => {
         </TableContainer>
         <TablePagination
           component="div"
-          count={100}
+          count={payments.pagination?.totalItems ?? 0}
           page={page}
           onPageChange={handleChangePage}
           rowsPerPage={rowsPerPage}
           onRowsPerPageChange={handleChangeRowsPerPage}
+          labelRowsPerPage="Filas por página"
+          labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
+          rowsPerPageOptions={[5, 10, 20]}
         />
+
+        {payments?.totalIncome !== null && (
+          <Typography variant="h6" sx={{ textAlign: 'right', m: 3 }}>
+            Total: ${payments?.totalIncome}
+          </Typography>
+        )}
       </Card>
 
       <Card sx={{ my: 3, p: 3 }}>
@@ -193,19 +288,17 @@ export const Income = () => {
                 disableFuture
                 label="Año"
                 views={['year']}
-                value={value}
-                onChange={(newValue) => {
-                  setValue(newValue);
-                }}
-                renderInput={(params) => <TextField {...params} />}
+                value={chartSelectedYear}
+                onChange={onChangeChartIncome}
+                renderInput={(params) => <TextField {...params} disabled />}
               />
             </LocalizationProvider>
           </FormControl>
         </Box>
 
-        <Box>
+        <Box sx={{ height: 400 }}>
           <Bar
-            height={70}
+            height={115}
             data={{
               labels: [
                 'Enero',
@@ -224,12 +317,18 @@ export const Income = () => {
               datasets: [
                 {
                   label: 'Ingresos ($)',
-                  data: [100, 200, 400],
-                  backgroundColor: ['rgba(75, 192, 192, 1)', '#2a71d0', '#50AF95', '#f3ba2f']
+                  data: chartIncomeByYear.data,
+                  backgroundColor: ['#f3ba2f', 'rgba(75, 192, 192, 1)', '#2a71d0', '#50AF95']
                 }
               ]
             }}
           />
+
+          {chartIncomeByYear.totalIncome !== null && (
+            <Typography variant="h6" sx={{ textAlign: 'right', m: 3 }}>
+              Total: ${chartIncomeByYear.totalIncome}
+            </Typography>
+          )}
         </Box>
       </Card>
     </Box>

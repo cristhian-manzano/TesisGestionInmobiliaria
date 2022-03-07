@@ -12,6 +12,7 @@ const {
 const Payment = require('../models/payment');
 const PaymentFile = require('../models/PaymentFile');
 const Rent = require('../models/rent');
+const sequelize = require('../models/index');
 const { uploadFile, deleteFiles } = require('../services/awsService');
 const { paymentCreateValidation } = require('../validation/payment');
 
@@ -120,13 +121,110 @@ const getAll = async (req, res) => {
       );
     }
 
-    const { limit, offset } = getPagination(page, size);
-    const pagination = getPagingData(data.length, page, limit);
-    data = data.slice(offset, offset + limit);
+    if (page || size) {
+      const { limit, offset } = getPagination(page, size);
+      const pagination = getPagingData(data.length, page, limit);
+      data = data.slice(offset, offset + limit);
+      return res.status(responseStatusCodes.OK).json(
+        successResponse(res.statusCode, 'Successfull request!', {
+          pagination,
+          results: data
+        })
+      );
+    }
 
     return res
       .status(responseStatusCodes.OK)
-      .json(successResponse(res.statusCode, 'Got it!', { pagination, results: data }));
+      .json(successResponse(res.statusCode, 'Got it!', data));
+  } catch (e) {
+    Logger.error(e.message);
+    return res
+      .status(responseStatusCodes.INTERNAL_SERVER_ERROR)
+      .json(errorResponse(res.statusCode, e.message));
+  }
+};
+
+const getIncomeByFilter = async (req, res) => {
+  try {
+    const idUser = req.user.id;
+    const { page, size, idProperty, month, year } = req.query;
+
+    const conditions = [
+      month ? [sequelize.where(sequelize.literal(`extract(MONTH FROM "datePaid")`), month)] : null,
+      year ? [sequelize.where(sequelize.literal(`extract(YEAR FROM "datePaid")`), year)] : null
+    ].filter(Boolean);
+
+    const payments = await Payment.findAll({
+      where: {
+        [Op.and]: [{ validated: true }, ...conditions]
+      },
+      include: [
+        {
+          model: Rent,
+          as: 'rent',
+          where: {
+            idOwner: idUser,
+            ...(idProperty && { idProperty })
+          }
+        },
+        {
+          model: PaymentFile,
+          as: 'paymentFile'
+        }
+      ]
+    });
+
+    // Get ids of users and properties - for request to service
+    const paymentDetails = payments.reduce(
+      ({ tenants, properties }, { rent }) => ({
+        tenants: tenants.concat(tenants.includes(rent.idTenant) ? [] : rent.idTenant),
+        properties: properties.concat(properties.includes(rent.idProperty) ? [] : rent.idProperty)
+      }),
+      { properties: [], tenants: [] }
+    );
+
+    // Refactor this
+    const { data: usersResponse } =
+      paymentDetails.tenants.length > 0 &&
+      (await axios.post(`${process.env.API_USER_URL}/user/list`, {
+        users: paymentDetails.tenants
+      }));
+
+    const { data: propertiesResponse } =
+      paymentDetails.properties &&
+      (await axios.post(`${process.env.API_PROPERTY_URL}/property/list`, {
+        properties: paymentDetails.properties
+      }));
+
+    let data = payments.map((payment) => {
+      const tenant = usersResponse.data?.find((user) => user.id === payment.rent.idTenant);
+      const property = propertiesResponse.data?.find((prop) => prop.id === payment.rent.idProperty);
+      return { ...payment.dataValues, tenant, property };
+    });
+
+    // Get total
+    const totalIncome = payments.reduce(
+      (previous, current) => previous + Number(current.amount),
+      0
+    );
+
+    // Filter and pagination
+    if (page || size) {
+      const { limit, offset } = getPagination(page, size);
+      const pagination = getPagingData(data.length, page, limit);
+      data = data.slice(offset, offset + limit);
+      return res.status(responseStatusCodes.OK).json(
+        successResponse(res.statusCode, 'Successfull request!', {
+          pagination,
+          results: data,
+          totalIncome
+        })
+      );
+    }
+
+    return res
+      .status(responseStatusCodes.OK)
+      .json(successResponse(res.statusCode, 'Got it!', { results: data, totalIncome }));
   } catch (e) {
     Logger.error(e.message);
     return res
@@ -280,5 +378,6 @@ module.exports = {
   create,
   get,
   destroy,
-  validatePayment
+  validatePayment,
+  getIncomeByFilter
 };
