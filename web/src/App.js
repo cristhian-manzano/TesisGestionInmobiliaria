@@ -72,6 +72,7 @@ const App = () => {
                 <Route path="/dashboard" element={<ProtectedRoutes />}>
                   <Route path="" element={<DashboardLayout />}>
                     <Route index element={<Home />} />
+
                     <Route path="profile" element={<Profile />} />
 
                     <Route path="observations" element={<Outlet />}>

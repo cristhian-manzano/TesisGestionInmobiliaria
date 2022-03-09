@@ -12,12 +12,12 @@ import {
 import { ROLES } from '../../helpers/constants';
 
 export const sidebarConfig = [
-  {
-    href: '/dashboard',
-    icon: <Dashboard fontSize="small" />,
-    title: 'Inicio',
-    roles: [ROLES.ADMINISTRADOR, ROLES.ARRENDADOR, ROLES.ARRENDATARIO]
-  },
+  // {
+  //   href: '/dashboard',
+  //   icon: <Dashboard fontSize="small" />,
+  //   title: 'Inicio',
+  //   roles: [ROLES.ADMINISTRADOR, ROLES.ARRENDADOR, ROLES.ARRENDATARIO]
+  // },
   {
     href: '/dashboard/tenants',
     icon: <Group fontSize="small" />,
@@ -31,16 +31,16 @@ export const sidebarConfig = [
     roles: [ROLES.ARRENDADOR]
   },
   {
-    href: '/dashboard/payments',
-    icon: <Payments fontSize="small" />,
-    title: 'Pagos',
-    roles: [ROLES.ARRENDADOR, ROLES.ARRENDATARIO]
-  },
-  {
     href: '/dashboard/rents',
     icon: <AddBusiness fontSize="small" />,
     title: 'Alquileres',
     roles: [ROLES.ARRENDATARIO]
+  },
+  {
+    href: '/dashboard/payments',
+    icon: <Payments fontSize="small" />,
+    title: 'Pagos',
+    roles: [ROLES.ARRENDADOR, ROLES.ARRENDATARIO]
   },
   {
     href: '/dashboard/contracts',

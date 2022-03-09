@@ -1,4 +1,4 @@
-import { NotificationsNone, Visibility, WatchLater } from '@mui/icons-material';
+import { NotificationsNone, Visibility, WatchLater, RateReview, Chat } from '@mui/icons-material';
 import {
   Badge,
   Divider,
@@ -15,11 +15,69 @@ import {
   List,
   Chip
 } from '@mui/material';
-import { useState } from 'react';
+import { useState, useEffect, useContext } from 'react';
+import { sendRequest } from '../../helpers/utils';
+
+import { AuthContext } from '../../store/context/authContext';
+import { LoadingContext } from '../../store/context/LoadingGlobal';
+import { SnackbarContext } from '../../store/context/SnackbarGlobal';
 
 export const NotificationMenu = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+
+  // ! Start - Experimental
+
+  const { authSession } = useContext(AuthContext);
+  const { handleLoading } = useContext(LoadingContext);
+  const { handleOpenSnackbar } = useContext(SnackbarContext);
+
+  const [notifications, setNotifications] = useState({ data: [], newNotifications: 0 });
+
+  const fetchNotifications = async () => {
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/notification`,
+      token: authSession.user?.token,
+      method: 'GET'
+    });
+    handleLoading(false);
+
+    if (response.error) {
+      handleOpenSnackbar('error', 'Hubo un error al obtener las notificaciones.');
+    } else {
+      const newNotifications = response.data.data?.reduce((prev, cur) => {
+        if (!cur.read) {
+          return prev + 1;
+        }
+        return prev;
+      }, 0);
+
+      setNotifications({ data: response.data.data, newNotifications });
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  const readAll = async () => {
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/notification`,
+      token: authSession.user?.token,
+      method: 'PUT'
+    });
+    handleLoading(false);
+
+    if (response.error) {
+      // handleOpenSnackbar('error', 'Hubo un error al obtener las notificaciones.');
+    } else {
+      fetchNotifications();
+    }
+  };
+
+  // ! End - Experimental
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -38,7 +96,7 @@ export const NotificationMenu = () => {
           aria-controls={open ? 'notification-menu' : undefined}
           aria-haspopup="true"
           aria-expanded={open ? 'true' : undefined}>
-          <Badge badgeContent={4} color="primary">
+          <Badge badgeContent={notifications?.newNotifications ?? 0} color="primary">
             <NotificationsNone />
           </Badge>
         </IconButton>
@@ -84,13 +142,15 @@ export const NotificationMenu = () => {
               Notificaciones
             </Typography>
             <Typography variant="subtitle1" sx={{ color: 'text.secondary' }}>
-              {10} notificaciones nuevas
+              {notifications.newNotifications > 0
+                ? `${notifications.newNotifications} notificaciones nuevas`
+                : `No hay notificaciones nuevas.`}
             </Typography>
           </Box>
 
-          {10 > 0 && (
+          {notifications.newNotifications > 0 && (
             <Tooltip title=" Marcar como leídas">
-              <IconButton color="primary" onClick={() => console.log('Read!')}>
+              <IconButton color="primary" onClick={readAll}>
                 <Visibility />
               </IconButton>
             </Tooltip>
@@ -100,27 +160,31 @@ export const NotificationMenu = () => {
         <Divider sx={{ my: 1 }} />
 
         <List disablePadding sx={{ maxHeight: 310, overflow: 'scroll' }}>
-          {[1, 2, 3, 4].map((e) => (
+          {notifications.data?.map((notification) => (
             <ListItemButton
-              key={e}
+              key={notification.id}
               disableGutters
               sx={{
                 py: 1.5,
                 px: 2.5,
                 mt: '1px',
-                ...(true && {
+                ...(!notification.read && {
                   bgcolor: 'action.selected'
                 })
               }}>
               <ListItemAvatar>
-                <Avatar sx={{ bgcolor: 'background.neutral' }}>P</Avatar>
+                <Avatar sx={{ bgcolor: 'background.neutral' }}>
+                  {notification.entity === 'Observation' && <RateReview />}
+                  {notification.entity === 'Comment' && <Chat />}
+                </Avatar>
               </ListItemAvatar>
               <ListItemText
                 primary={
                   <Typography variant="subtitle1">
-                    Nueva observación
+                    {notification.entity === 'Observation' && 'Nueva observación'}
+                    {notification.entity === 'Comment' && 'Nuevo comentario'}
                     <Typography component="span" variant="body1" sx={{ color: 'text.secondary' }}>
-                      &nbsp; Esta es una observación importante
+                      &nbsp; {notification.description}
                     </Typography>
                   </Typography>
                 }
@@ -134,8 +198,11 @@ export const NotificationMenu = () => {
                       color: 'text.disabled'
                     }}>
                     <WatchLater sx={{ fontSize: 18, mr: 0.5 }} />
-                    {`2020-01-${1}`}
-                    <Chip sx={{ ml: 1 }} label="Nueva" color="warning" size="small" />
+                    {new Date(notification?.date).toLocaleString('es-ES')}
+
+                    {!notification.read && (
+                      <Chip sx={{ ml: 1 }} label="Nueva" color="warning" size="small" />
+                    )}
                   </Typography>
                 }
               />
@@ -146,9 +213,9 @@ export const NotificationMenu = () => {
         <Divider />
 
         <Box>
-          <Button fullWidth disableRipple to="#">
+          {/* <Button fullWidth disableRipple to="#">
             Ver todas
-          </Button>
+          </Button> */}
         </Box>
       </Menu>
     </>

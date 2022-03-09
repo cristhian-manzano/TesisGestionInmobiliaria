@@ -12,6 +12,9 @@ const Observation = require('../models/observation');
 const Comment = require('../models/comment');
 const Rent = require('../models/rent');
 
+// Experimental
+const Notification = require('../models/notification');
+
 const {
   observationCreateValidation,
   observationUpdateValidation
@@ -38,7 +41,8 @@ const getAll = async (req, res) => {
           as: 'comments'
         }
       ],
-      attributes: { exclude: ['idRent'] }
+      attributes: { exclude: ['idRent'] },
+      order: [['date', 'DESC']]
     });
 
     const lists = observations.reduce(
@@ -182,6 +186,40 @@ const create = async (req, res) => {
       idUser: idOwner,
       date: new Date()
     });
+
+    // ! start - Experimental
+
+    try {
+      const observation = await Observation.findByPk(createdObservation?.id, {
+        include: [
+          {
+            model: Rent,
+            as: 'rent'
+          }
+        ]
+      });
+
+      const userData = await axios.post(`${process.env.API_USER_URL}/user/list`, {
+        users: [idOwner]
+      });
+
+      const receiverId =
+        observation.rent?.idTenant !== idOwner
+          ? observation.rent?.idTenant
+          : observation.rent?.idOwner;
+
+      await Notification.create({
+        description: `${userData.data.data[0].lastName} ha creado una observación.`,
+        entity: 'Observation',
+        idEntity: createdObservation?.id,
+        idSender: idOwner,
+        idReceiver: receiverId
+      });
+    } catch (e) {
+      console.log(e);
+    }
+
+    // ! End - Experimental
 
     return res
       .status(responseStatusCodes.OK)

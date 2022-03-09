@@ -140,7 +140,7 @@ export const Profile = () => {
 
         <Box component="form" onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3}>
-            <Grid item xs={12} sm={12}>
+            {/* <Grid item xs={12} sm={12}>
               <Box
                 sx={{
                   display: 'flex',
@@ -173,7 +173,7 @@ export const Profile = () => {
                   </Button>
                 </label>
               </Box>
-            </Grid>
+            </Grid> */}
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
                 <TextField label="Email" {...register('email')} disabled />

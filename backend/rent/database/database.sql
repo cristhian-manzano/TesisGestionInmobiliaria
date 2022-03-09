@@ -79,3 +79,17 @@ CREATE TABLE "Comment"(
 	CONSTRAINT "Comment_pkey" PRIMARY KEY ("id"),
 	CONSTRAINT "Comment_idObservation_fkey" FOREIGN KEY ("idObservation") REFERENCES "Observation"("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+/* Experimental*/
+
+CREATE TABLE "Notification"(
+	"id" BIGSERIAL NOT NULL,
+	"description" VARCHAR(75) NOT NULL,
+	"entity" VARCHAR(75) NOT NULL,
+	"idEntity" BIGINT NULL,
+	"date" TIMESTAMPTZ NOT NULL,
+	"read" BOOLEAN NOT NULL,
+	"idSender" BIGINT NOT NULL,
+	"idReceiver" BIGINT NOT NULL,
+	CONSTRAINT "Notification_pkey" PRIMARY KEY ("id")
+);

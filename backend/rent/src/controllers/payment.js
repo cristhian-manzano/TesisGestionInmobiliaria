@@ -69,6 +69,10 @@ const getAll = async (req, res) => {
           model: PaymentFile,
           as: 'paymentFile'
         }
+      ],
+      order: [
+        ['validated', 'ASC'],
+        ['paymentDate', 'ASC']
       ]
     });
 

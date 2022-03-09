@@ -8,7 +8,11 @@ const {
   successResponse,
   validationResponse
 } = require('../helpers/responsesFormat');
+
 const Comment = require('../models/comment');
+const Observation = require('../models/observation');
+const Rent = require('../models/rent');
+const Notification = require('../models/notification');
 
 const { commentCreateValidation } = require('../validation/comment');
 
@@ -76,6 +80,42 @@ const create = async (req, res) => {
       idUser: idOwner,
       date: new Date()
     });
+
+    // ! Start - Experimental
+
+    try {
+      const observation = await Observation.findByPk(createdComment.idObservation, {
+        include: [
+          {
+            model: Rent,
+            as: 'rent'
+          }
+        ]
+      });
+
+      const userData = await axios.post(`${process.env.API_USER_URL}/user/list`, {
+        users: [idOwner]
+      });
+
+      const receiverId =
+        observation.rent?.idTenant !== idOwner
+          ? observation.rent?.idTenant
+          : observation.rent?.idOwner;
+
+      await Notification.create({
+        description: `${userData.data.data[0].lastName} ha comentado la observación "${
+          observation.description?.slice(0, 10) ?? ''
+        }"...`,
+        entity: 'Comment',
+        idEntity: createdComment?.id,
+        idSender: idOwner,
+        idReceiver: receiverId
+      });
+    } catch (e) {
+      console.log(e);
+    }
+
+    // ! End - Experimental
 
     return res
       .status(responseStatusCodes.OK)
