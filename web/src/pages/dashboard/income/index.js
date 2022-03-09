@@ -125,6 +125,9 @@ export const Income = () => {
     } else {
       const { results } = response.data?.data ?? [];
 
+      console.log('RESULTS: ', results);
+      console.log('RESULTS: ', response.data?.data);
+
       const dataFinal = results.reduce((previous, current) => {
         const monthPaid = new Date(current.datePaid).getMonth();
         const temp = previous;

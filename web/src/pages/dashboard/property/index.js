@@ -152,7 +152,8 @@ export const Property = () => {
                 <TableRow>
                   <TableCell>Nombre</TableCell>
                   <TableCell>Tipo de inmueble</TableCell>
-                  <TableCell>Estado</TableCell>
+                  <TableCell>Sector</TableCell>
+                  {/* <TableCell>Estado</TableCell> */}
                   <TableCell>Precio</TableCell>
                   <TableCell />
                 </TableRow>
@@ -166,13 +167,14 @@ export const Property = () => {
                       sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                       <TableCell>{row.tagName}</TableCell>
                       <TableCell>{row.typeProperty?.name}</TableCell>
-                      <TableCell>
+                      <TableCell>{row.sector?.name}</TableCell>
+                      {/* <TableCell>
                         {row.available ? (
                           <Chip label="Disponible" size="small" color="success" />
                         ) : (
                           <Chip label="Ocupado" size="small" color="error" />
                         )}
-                      </TableCell>
+                      </TableCell> */}
                       <TableCell>$ {row.price}</TableCell>
 
                       <TableCell>
