@@ -1,4 +1,4 @@
-import React from 'react';
+import { useEffect, useState, useContext } from 'react';
 
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
@@ -15,6 +15,7 @@ import {
   CardMedia,
   Stack,
   Divider,
+  Autocomplete,
   FormControl,
   InputLabel,
   Select,
@@ -31,7 +32,11 @@ import {
   // CompareArrows
 } from '@mui/icons-material/';
 
+import { LoadingContext } from '../store/context/LoadingGlobal';
+import { SnackbarContext } from '../store/context/SnackbarGlobal';
+
 import LogoImage from '../assets/img/logo.png';
+import { sendRequest } from '../helpers/utils';
 
 const settings = {
   infinite: true,
@@ -42,100 +47,73 @@ const settings = {
   lazyLoad: true
 };
 
-const dataProperties = [
-  {
-    id: 1,
-    name: 'Casa norte',
-    description: `Ubicado en Villas del Bosque, Km 20 Vía a la Costa, 4to retorno. Amoblado completamente. Cuenta con 3 dormitorios, sala-comedor amplios, cocina independiente, 1 cuarto de servicio, lavandería, 2 parqueos y ascensor. Está en el 2do piso. *el valor no incluye alicuota`,
-    image:
-      'https://images.unsplash.com/photo-1484154218962-a197022b5858?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=874&q=80',
-    price: 200,
-    sector: 'Alborada Este',
-    address: 'Calle 2, vía 1, Manzana #2',
-    area: '23',
-    additionalDetails: {
-      bedrooms: 2,
-      bathrooms: 1
-    },
-    owner: {
-      phone: '0968176747'
-    }
-  },
-  {
-    id: 2,
-    name: 'Casa norte',
-    description: `Ubicado en Villas del Bosque, Km 20 Vía a la Costa, 4to retorno. Amoblado completamente. Cuenta con 3 dormitorios, sala-comedor amplios, cocina independiente, 1 cuarto de servicio, lavandería, 2 parqueos y ascensor. Está en el 2do piso. *el valor no incluye alicuota`,
-    image:
-      'https://images.unsplash.com/photo-1489171078254-c3365d6e359f?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1031&q=80',
-    price: 500,
-    sector: 'Alborada Este',
-    address: 'Calle 2, vía 1, Manzana #2',
-    area: '23',
-    additionalDetails: {
-      bedrooms: 2,
-      bathrooms: 1
-    },
-    owner: {
-      phone: '0968176747'
-    }
-  },
-  {
-    id: 3,
-    name: 'Casa norte',
-    description: `Ubicado en Villas del Bosque, Km 20 Vía a la Costa, 4to retorno. Amoblado completamente. Cuenta con 3 dormitorios, sala-comedor amplios, cocina independiente, 1 cuarto de servicio, lavandería, 2 parqueos y ascensor. Está en el 2do piso. *el valor no incluye alicuota`,
-    image:
-      'https://images.unsplash.com/photo-1503174971373-b1f69850bded?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=913&q=80',
-    price: 400,
-    sector: 'Alborada Este',
-    address: 'Calle 2, vía 1, Manzana #2',
-    area: '23',
-    additionalDetails: {
-      bedrooms: 2,
-      bathrooms: 1
-    },
-    owner: {
-      phone: '0968176747'
-    }
-  },
-  {
-    id: 4,
-    name: 'Casa norte',
-    description: `Ubicado en Villas del Bosque, Km 20 Vía a la Costa, 4to retorno. Amoblado completamente. Cuenta con 3 dormitorios, sala-comedor amplios, cocina independiente, 1 cuarto de servicio, lavandería, 2 parqueos y ascensor. Está en el 2do piso. *el valor no incluye alicuota`,
-    image:
-      'https://images.unsplash.com/photo-1507089947368-19c1da9775ae?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=876&q=80',
-    price: 300,
-    sector: 'Alborada Este',
-    address: 'Calle 2, vía 1, Manzana #2',
-    area: '23',
-    additionalDetails: {
-      bedrooms: 2,
-      bathrooms: 1
-    },
-    owner: {
-      phone: '0968176747'
-    }
-  },
-  {
-    id: 5,
-    name: 'Casa norte',
-    description: `Ubicado en Villas del Bosque, Km 20 Vía a la Costa, 4to retorno. Amoblado completamente. Cuenta con 3 dormitorios, sala-comedor amplios, cocina independiente, 1 cuarto de servicio, lavandería, 2 parqueos y ascensor. Está en el 2do piso. *el valor no incluye alicuota`,
-    image:
-      'https://images.unsplash.com/photo-1480074568708-e7b720bb3f09?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=874&q=80',
-    price: 200,
-    sector: 'Alborada Este',
-    address: 'Calle 2, vía 1, Manzana #2',
-    area: '23',
-    additionalDetails: {
-      bedrooms: 2,
-      bathrooms: 1
-    },
-    owner: {
-      phone: '0968176747'
-    }
-  }
-];
-
 export const SearchProperty = () => {
+  const { handleLoading } = useContext(LoadingContext);
+  const { handleOpenSnackbar } = useContext(SnackbarContext);
+
+  const [properties, setProperties] = useState([]);
+  const [sectors, setSectors] = useState([]);
+  const [selectedSector, setSelectedSector] = useState(null);
+  const [typeProperties, setTypeProperties] = useState([]);
+  const [selectedTypeProperty, setSelectedTypeProperty] = useState(null);
+
+  const fetchProperties = async () => {
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_PROPERTY_SERVICE_URL}/property`,
+      method: 'GET'
+    });
+    handleLoading(false);
+
+    if (response.error) {
+      handleOpenSnackbar('error', 'Hubo un error al obtener propiedades');
+    } else {
+      setProperties(response.data.data);
+    }
+  };
+
+  useEffect(() => {
+    fetchProperties();
+  }, []);
+
+  const fetchSectors = async () => {
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_PROPERTY_SERVICE_URL}/sector`,
+      method: 'GET'
+    });
+    handleLoading(false);
+
+    if (response.error) {
+      handleOpenSnackbar('error', 'Hubo un error');
+    } else {
+      setSectors(response.data?.data || []);
+    }
+  };
+
+  useEffect(() => {
+    fetchSectors();
+  }, []);
+
+  const fetchTypeProperties = async () => {
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_PROPERTY_SERVICE_URL}/type-property`,
+      method: 'GET'
+    });
+    handleLoading(false);
+
+    if (response.error) {
+      handleOpenSnackbar('error', 'Hubo un error');
+    } else {
+      setTypeProperties(response.data?.data || []);
+    }
+  };
+
+  useEffect(() => {
+    fetchTypeProperties();
+  }, []);
+
   return (
     <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
       <AppBar position="sticky" color="default">
@@ -188,25 +166,35 @@ export const SearchProperty = () => {
           <Grid container sx={{ my: 2, maxWidth: '700px' }} rowSpacing={1} spacing={1}>
             <Grid item xs={12} sm={3}>
               <FormControl fullWidth>
-                <InputLabel id="demo-simple-select-label">Tipo</InputLabel>
+                <InputLabel id="demo-simple-select-label">Tipo inmueble</InputLabel>
+
                 <Select
-                  labelId="demo-simple-select-label"
-                  id="demo-simple-select"
-                  value={1}
-                  label="Age"
-                  // onChange={handleChange}
-                >
-                  <MenuItem value={1}>Casa</MenuItem>
-                  <MenuItem value={2}>Departamento</MenuItem>
-                  <MenuItem value={3}>Local comercial</MenuItem>
-                  <MenuItem value={4}>Edificio</MenuItem>
-                  <MenuItem value={5}>Terreno</MenuItem>
+                  labelId="property-select"
+                  label="Tipo inmueble"
+                  value={selectedTypeProperty ?? ''}
+                  onChange={(e) => {
+                    setSelectedTypeProperty(e.target.value);
+                  }}>
+                  {typeProperties.map((type) => (
+                    <MenuItem key={type.id} value={type.id}>
+                      {type.name}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </Grid>
 
             <Grid item xs={12} sm={7}>
-              <TextField fullWidth placeholder="Ingresar sector a buscar" id="fullWidth" />
+              <Autocomplete
+                disablePortal
+                id="sectorsAutocomplete"
+                options={sectors}
+                value={selectedSector}
+                onChange={(e, newValue) => setSelectedSector(newValue)}
+                isOptionEqualToValue={(option, valueSelected) => option.id === valueSelected.id}
+                getOptionLabel={(option) => option.name}
+                renderInput={(params) => <TextField {...params} label="Sector" />}
+              />
             </Grid>
             <Grid item xs={12} sm={2}>
               <Button fullWidth variant="contained" sx={{ py: 2 }}>
@@ -225,7 +213,7 @@ export const SearchProperty = () => {
               flexWrap: 'wrap'
             }}>
             <Typography variant="h5" sx={{ mr: 2 }}>
-              Resultados encontrados {dataProperties.length}
+              Resultados encontrados {properties.length}
             </Typography>
             {/* <Stack direction="row" spacing={1}>
               <Button>
@@ -240,22 +228,23 @@ export const SearchProperty = () => {
           </Box>
 
           <Grid container spacing={2}>
-            {dataProperties.map((property) => (
+            {properties.map((property) => (
               <Grid key={property.id} xs={12} sm={6} md={4} lg={3} item>
                 <Card>
                   <CardMedia>
-                    {true ? (
+                    {property.ImagesProperties && property.ImagesProperties.length > 0 ? (
                       <Slider {...settings}>
-                        <img
-                          height={160}
-                          src="https://images.unsplash.com/photo-1480074568708-e7b720bb3f09?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=874&q=80"
-                          alt=""
-                        />
-                        <img
-                          height={160}
-                          src="https://images.unsplash.com/photo-1507089947368-19c1da9775ae?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=876&q=80"
-                          alt=""
-                        />
+                        {property.ImagesProperties?.map((image) => (
+                          <img
+                            key={image.id}
+                            height={160}
+                            src={
+                              image?.url ??
+                              'http://mediawestrealty.com/wp-content/uploads/2017/06/no-property-photo-2.jpg'
+                            }
+                            alt=""
+                          />
+                        ))}
                       </Slider>
                     ) : (
                       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -282,22 +271,22 @@ export const SearchProperty = () => {
                         {property.description}
                       </Typography>
                       <Typography variant="subtitle2" sx={{ opacity: 0.6 }}>
-                        {`${property.sector} - ${property.address}`}
+                        {`${property.sector?.name} - ${property?.address}`}
                       </Typography>
-                      <Stack
+                      {/* <Stack
                         direction="row"
                         divider={<Divider orientation="vertical" flexItem />}
                         spacing={1}>
                         <Typography variant="subtitle1">{`${property.area} m2`}</Typography>
                         <Typography variant="subtitle1">2 Hab.</Typography>
                         <Typography variant="subtitle1">1 bañ.</Typography>
-                      </Stack>
+                      </Stack> */}
 
                       <Button fullWidth size="small" color="secondary" variant="outlined">
                         Ver detalles
                       </Button>
                       <Button
-                        href={`https://wa.me/${property.owner.phone}?text=Hola`}
+                        href={`https://wa.me/${property?.owner?.phone}?text=Hola`}
                         target="_blank"
                         rel="noopener"
                         fullWidth
@@ -314,9 +303,9 @@ export const SearchProperty = () => {
           </Grid>
         </Box>
 
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', my: 5 }}>
+        {/* <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', my: 5 }}>
           <Pagination count={10} color="primary" size="small" />
-        </Box>
+        </Box> */}
       </Box>
     </Box>
   );

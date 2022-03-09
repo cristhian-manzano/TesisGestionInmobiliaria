@@ -12,10 +12,10 @@ import {
   Select,
   MenuItem
 } from '@mui/material';
-import { Link } from 'react-router-dom';
-import SearchIcon from '@mui/icons-material/Search';
-import LogoImage from '../assets/img/logo.png';
 
+import { Link } from 'react-router-dom';
+import { ArrowForward } from '@mui/icons-material';
+import LogoImage from '../assets/img/logo.png';
 import ImageLandingPage from '../assets/img/BuildingsLandingPage.jpeg';
 
 export const HomePage = () => {
@@ -74,7 +74,7 @@ export const HomePage = () => {
           </Typography>
 
           <Grid container sx={{ my: 2 }} rowSpacing={1} spacing={1}>
-            <Grid item xs={12} sm={3}>
+            {/* <Grid item xs={12} sm={3}>
               <FormControl fullWidth>
                 <InputLabel id="demo-simple-select-label">Tipo</InputLabel>
                 <Select
@@ -95,15 +95,16 @@ export const HomePage = () => {
 
             <Grid item xs={12} sm={7}>
               <TextField fullWidth placeholder="Ingresar sector a buscar" id="fullWidth" />
-            </Grid>
-            <Grid item xs={12} sm={2}>
+            </Grid> */}
+            <Grid item xs={12} sm={12}>
               <Button
                 component={Link}
                 to="/search-property"
                 fullWidth
-                variant="contained"
-                sx={{ py: 2 }}>
-                <SearchIcon />
+                color="inherit"
+                sx={{ py: 2 }}
+                variant="contained">
+                <ArrowForward />
               </Button>
             </Grid>
           </Grid>

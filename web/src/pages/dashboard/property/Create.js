@@ -24,7 +24,6 @@ import { LoadingContext } from '../../../store/context/LoadingGlobal';
 import { SnackbarContext } from '../../../store/context/SnackbarGlobal';
 import { ImagesUpload } from '../../../components/ImagesUpload';
 import { sendRequest } from '../../../helpers/utils';
-import { usePropertyFormData } from '../../../hooks/usePropertyFormData';
 
 export const Create = () => {
   // Contexts
@@ -35,12 +34,43 @@ export const Create = () => {
   const [images, setImages] = useState({ loaded: [], uploaded: [], deleted: [] });
   // Selected type property
   const [selectedTypeProperty, setSelectedTypeProperty] = useState({});
-  const { sectors, typeProperties, error, loading } = usePropertyFormData();
+  const [sectors, setSectors] = useState([]);
+  const [typeProperties, setTypeProperties] = useState([]);
+
+  const fetchSectors = async () => {
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_PROPERTY_SERVICE_URL}/sector`,
+      method: 'GET'
+    });
+    handleLoading(false);
+
+    if (response.error) {
+      handleOpenSnackbar('error', 'Hubo un error');
+    } else {
+      setSectors(response.data?.data || []);
+    }
+  };
+
+  const fetchTypeProperties = async () => {
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_PROPERTY_SERVICE_URL}/type-property`,
+      method: 'GET'
+    });
+    handleLoading(false);
+
+    if (response.error) {
+      handleOpenSnackbar('error', 'Hubo un error');
+    } else {
+      setTypeProperties(response.data?.data || []);
+    }
+  };
 
   useEffect(() => {
-    handleLoading(loading);
-    if (error) handleOpenSnackbar('error', error);
-  }, [error, loading]);
+    fetchSectors();
+    fetchTypeProperties();
+  }, []);
 
   const handleSelectTypeProperty = (e) => {
     const getTypeProperty = typeProperties.find((type) => type.id === e.target.value);
@@ -49,18 +79,11 @@ export const Create = () => {
 
   const {
     reset,
-    getValues,
     control,
     register,
     handleSubmit,
     formState: { errors }
   } = useForm();
-
-  /* eslint-disable no-console */
-  console.log('Selected type property: ---> ', selectedTypeProperty);
-  console.log('Errors: ---> ', errors);
-  console.log('Values: ---> ', getValues());
-  /* eslint-enable no-console */
 
   const handleChangeImages = (newState) => setImages(newState);
 
