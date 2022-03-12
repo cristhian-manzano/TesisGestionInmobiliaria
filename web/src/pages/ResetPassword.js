@@ -1,9 +1,5 @@
-import { useState } from 'react';
-
-import {
-  useSearchParams
-  // useNavigate
-} from 'react-router-dom';
+import { useState, useContext } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 
 import {
   Box,
@@ -18,12 +14,18 @@ import {
   FormControlLabel,
   Checkbox
 } from '@mui/material';
-
 import { Lock } from '@mui/icons-material';
 
+import { LoadingContext } from '../store/context/LoadingGlobal';
+import { SnackbarContext } from '../store/context/SnackbarGlobal';
+import { sendRequest } from '../helpers/utils';
+
 export const ResetPassword = () => {
-  const [searchParams] = useSearchParams();
-  // Redirect to login after submit---> const navigate = useNavigate();
+  const { token } = useParams();
+  const navigate = useNavigate();
+
+  const { handleLoading } = useContext(LoadingContext);
+  const { handleOpenSnackbar } = useContext(SnackbarContext);
 
   const [password, setPassword] = useState('');
   const [repeatPassword, setRepeatPassword] = useState('');
@@ -33,9 +35,31 @@ export const ResetPassword = () => {
   const handleChangeRepeatPassword = (event) => setRepeatPassword(event.target.value);
   const handleShowPassword = (event) => setShowPassword(event.target.checked);
 
-  const onSubmit = () => {
-    // eslint-disable-next-line no-console
-    console.log(searchParams.get('token'));
+  const validateSubmit = () => {
+    if (password.length < 6 || password.length > 30 || password !== repeatPassword) {
+      return false;
+    }
+
+    return true;
+  };
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_USER_SERVICE_URL}/auth/reset-password`,
+      method: 'POST',
+      data: { password, token }
+    });
+    handleLoading(false);
+
+    if (response.error) {
+      handleOpenSnackbar('error', 'Error !');
+    } else {
+      handleOpenSnackbar('success', 'Password changed!');
+      navigate('/login');
+    }
   };
 
   return (
@@ -52,7 +76,7 @@ export const ResetPassword = () => {
         <Typography variant="body" color="text.secondary">
           Por favor, ingrese la nueva contraseña.
         </Typography>
-        <Box sx={{ my: 2, maxWidth: '500px' }}>
+        <Box sx={{ my: 2, maxWidth: '500px' }} component="form" onSubmit={onSubmit}>
           <FormControl sx={{ my: 1 }} variant="outlined" fullWidth>
             <InputLabel htmlFor="outlined-adornment-password">Contraseña</InputLabel>
             <OutlinedInput
@@ -68,7 +92,7 @@ export const ResetPassword = () => {
               }
             />
 
-            <FormHelperText error>Contraseña invalida</FormHelperText>
+            {/* <FormHelperText error>Contraseña invalida</FormHelperText> */}
           </FormControl>
 
           <FormControl sx={{ my: 1 }} variant="outlined" fullWidth>
@@ -86,15 +110,25 @@ export const ResetPassword = () => {
               }
             />
 
-            <FormHelperText error>Contraseña invalida</FormHelperText>
+            {/* <FormHelperText error>Contraseña invalida</FormHelperText> */}
           </FormControl>
+
+          <FormHelperText>
+            *Longitud de caracteres minima de 6 caracteres y máxima de 30 caracteres.
+          </FormHelperText>
 
           <FormControlLabel
             control={<Checkbox checked={showPassword} onChange={handleShowPassword} />}
             label="Mostrar contraseñas"
           />
 
-          <Button sx={{ my: 2 }} onClick={onSubmit} fullWidth variant="contained">
+          <Button
+            sx={{ my: 2 }}
+            // onClick={onSubmit}
+            type="submit"
+            fullWidth
+            variant="contained"
+            disabled={!validateSubmit()}>
             Enviar
           </Button>
         </Box>

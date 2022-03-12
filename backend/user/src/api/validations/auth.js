@@ -22,4 +22,24 @@ const signUpValidation = (data) => {
   return schema.validate(data);
 };
 
-module.exports = { signInValidation, signUpValidation };
+const forgotPasswordValidation = (data) => {
+  const schema = Joi.object({
+    email: Joi.string().max(75).email().required()
+  });
+  return schema.validate(data);
+};
+
+const resetPasswordValidation = (data) => {
+  const schema = Joi.object({
+    password: Joi.string().min(6).max(30).required(),
+    token: Joi.string().required()
+  });
+  return schema.validate(data);
+};
+
+module.exports = {
+  signInValidation,
+  signUpValidation,
+  forgotPasswordValidation,
+  resetPasswordValidation
+};

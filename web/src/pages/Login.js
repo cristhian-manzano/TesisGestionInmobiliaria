@@ -140,11 +140,11 @@ export const Login = () => {
           </Box>
 
           <Grid container>
-            {/* <Grid item xs>
+            <Grid item xs>
               <MaterialLink component={RouterLink} to="/forgot-password" variant="body2">
                 ¿Olvidó la contraseña?
               </MaterialLink>
-            </Grid> */}
+            </Grid>
             <Grid item>
               <MaterialLink component={RouterLink} to="/register" variant="body2">
                 Registrarse
