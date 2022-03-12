@@ -42,7 +42,8 @@ const Property = sequelize.define(
 
     available: {
       type: DataTypes.BOOLEAN,
-      allowNull: true
+      allowNull: true,
+      defaultValue: true
     },
 
     additionalFeatures: {
