@@ -44,7 +44,7 @@ export const NotificationMenu = () => {
     handleLoading(false);
 
     if (response.error) {
-      handleOpenSnackbar('error', 'Hubo un error al obtener las notificaciones.');
+      // handleOpenSnackbar('error', 'Hubo un error al obtener las notificaciones.');
     } else {
       const newNotifications = response.data.data?.reduce((prev, cur) => {
         if (!cur.read) {

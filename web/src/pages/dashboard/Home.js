@@ -20,11 +20,27 @@ import { AuthContext } from '../../store/context/authContext';
 export const Home = () => {
   const { authSession } = useContext(AuthContext);
 
-  return authSession.user?.roles.includes('Arrendador') ? (
-    <Navigate to="/dashboard/tenants" />
-  ) : (
-    <Navigate to="/dashboard/rents" />
-  );
+  // dashboard/users
+
+  if (authSession.user?.roles.includes('Administrador')) {
+    return <Navigate to="/dashboard/users" />;
+  }
+
+  if (authSession.user?.roles.includes('Arrendador')) {
+    return <Navigate to="/dashboard/tenants" />;
+  }
+
+  if (authSession.user?.roles.includes('Arrendatario')) {
+    return <Navigate to="/dashboard/rents" />;
+  }
+
+  return <Navigate to="/" />;
+
+  // return authSession.user?.roles.includes('Arrendador') ? (
+  //   <Navigate to="/dashboard/tenants" />
+  // ) : (
+  //   <Navigate to="/dashboard/rents" />
+  // );
 
   // return (
   //   <Box>

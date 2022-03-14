@@ -11,7 +11,10 @@ import {
   Grid,
   FormHelperText,
   InputAdornment,
-  Autocomplete
+  Autocomplete,
+  InputLabel,
+  Select,
+  MenuItem
 } from '@mui/material';
 
 import { ArrowBack, CalendarToday } from '@mui/icons-material';
@@ -221,7 +224,7 @@ export const Update = () => {
               </FormControl>
             </Grid>
 
-            <Grid item xs={12} sm={6}>
+            {/* <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
                 <TextField
                   label="Día de pago mensual"
@@ -237,6 +240,35 @@ export const Update = () => {
                 />
                 <FormHelperText error>
                   {formState.errors.paymentDay && 'paymentDay is required'}
+                </FormHelperText>
+              </FormControl>
+            </Grid> */}
+
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                <InputLabel id="paymentDay-select">Día de pago mensual</InputLabel>
+                <Controller
+                  name="paymentDay"
+                  control={control}
+                  rules={{ required: true }}
+                  defaultValue=""
+                  render={({ field }) => (
+                    <Select labelId="paymentDay-select" label="Día de pago mensual" {...field}>
+                      <MenuItem value={0} disabled>
+                        Seleccionar
+                      </MenuItem>
+
+                      {Array.from({ length: 28 }, (_, i) => i + 1).map((day) => (
+                        <MenuItem key={day} value={day}>
+                          {day}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  )}
+                />
+
+                <FormHelperText error>
+                  {formState.errors?.paymentDay && 'paymentDay is required'}
                 </FormHelperText>
               </FormControl>
             </Grid>

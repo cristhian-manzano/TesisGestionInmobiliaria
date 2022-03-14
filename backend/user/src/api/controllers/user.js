@@ -20,6 +20,7 @@ const User = require('../models/user');
 const Role = require('../models/role');
 const { updateByAdminValidation, updateProfileValidation } = require('../validations/user');
 const { encryptData } = require('../helpers/functions');
+const { getPagination, getPagingData } = require('../helpers/pagination');
 
 const getById = async (req, res) => {
   try {
@@ -121,15 +122,26 @@ const getListUsers = async (req, res) => {
 const getUsersByAdmin = async (req, res) => {
   try {
     const user = req.User ?? {};
-
     const roles = user.roles?.map((role) => role.name) ?? [];
 
     if (roles.includes('Administrador')) {
-      const UsersData = await User.findAll({
-        where: {
-          id: {
-            [Op.ne]: user.id
+      const { page, size, search } = req.query;
+
+      const condition = search
+        ? {
+            [Op.or]: [
+              { email: { [Op.startsWith]: search } },
+              { idCard: { [Op.startsWith]: search } }
+            ]
           }
+        : null;
+
+      const { limit, offset } = getPagination(page, size);
+
+      const users = await User.findAll({
+        where: {
+          id: { [Op.ne]: user.id },
+          ...(condition && { ...condition })
         },
         include: {
           model: Role,
@@ -137,10 +149,19 @@ const getUsersByAdmin = async (req, res) => {
         },
         attributes: {
           exclude: ['password']
-        }
+        },
+        offset,
+        limit
       });
 
-      return res.status(OK).json(successResponse(res.statusCode, 'Ok!', UsersData));
+      const pagination = getPagingData(users.length, page, limit);
+
+      return res.status(OK).json(
+        successResponse(res.statusCode, 'Ok!', {
+          pagination,
+          users
+        })
+      );
     }
 
     return res.status(UNAUTHORIZED).json(errorResponse(res.statusCode, 'No authorized!'));
@@ -257,6 +278,29 @@ const deleteUsersByAdmin = async (req, res) => {
   }
 };
 
+const getProfileUser = async (req, res) => {
+  try {
+    const userOwner = req.User ?? {};
+
+    const user = await User.findByPk(userOwner.id, {
+      attributes: {
+        exclude: ['password']
+      }
+    });
+
+    if (!user) {
+      return res.status(BAD_REQUEST).json(errorResponse(res.statusCode, 'User not found!'));
+    }
+
+    return res.json(successResponse(OK, 'Ok!', user));
+  } catch (e) {
+    Logger.error(e.toString());
+    return res
+      .status(INTERNAL_SERVER_ERROR)
+      .json(errorResponse(res.statusCode, 'Cannot get user.'));
+  }
+};
+
 module.exports = {
   getById,
   getByFilter,
@@ -264,5 +308,6 @@ module.exports = {
   updateProfile,
   getUsersByAdmin,
   updateUsersByAdmin,
-  deleteUsersByAdmin
+  deleteUsersByAdmin,
+  getProfileUser
 };

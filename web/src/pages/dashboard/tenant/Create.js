@@ -12,7 +12,10 @@ import {
   FormHelperText,
   InputAdornment,
   IconButton,
-  Autocomplete
+  Autocomplete,
+  InputLabel,
+  Select,
+  MenuItem
 } from '@mui/material';
 
 import { ArrowBack, Search, Close, CalendarToday } from '@mui/icons-material';
@@ -273,7 +276,7 @@ export const Create = () => {
               </FormControl>
             </Grid>
 
-            <Grid item xs={12} sm={6}>
+            {/* <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
                 <TextField
                   disabled={!searchTenant.obtained}
@@ -287,6 +290,39 @@ export const Create = () => {
                     )
                   }}
                 />
+                <FormHelperText error>
+                  {errors.paymentDay && 'paymentDay is required'}
+                </FormHelperText>
+              </FormControl>
+            </Grid> */}
+
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                <InputLabel id="paymentDay-select">Día de pago mensual</InputLabel>
+                <Controller
+                  name="paymentDay"
+                  control={control}
+                  rules={{ required: true }}
+                  defaultValue=""
+                  render={({ field }) => (
+                    <Select
+                      labelId="paymentDay-select"
+                      disabled={!searchTenant.obtained}
+                      label="Día de pago mensual"
+                      {...field}>
+                      <MenuItem value={0} disabled>
+                        Seleccionar
+                      </MenuItem>
+
+                      {Array.from({ length: 28 }, (_, i) => i + 1).map((day) => (
+                        <MenuItem key={day} value={day}>
+                          {day}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  )}
+                />
+
                 <FormHelperText error>
                   {errors.paymentDay && 'paymentDay is required'}
                 </FormHelperText>

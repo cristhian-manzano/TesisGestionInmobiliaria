@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import {
   Box,
@@ -12,18 +12,16 @@ import {
   TableRow,
   TableCell,
   Paper,
-  Button,
   TablePagination,
   TextField,
   InputAdornment,
   IconButton,
   MenuItem,
   ListItemIcon,
-  ListItemText,
-  Chip
+  ListItemText
 } from '@mui/material';
 
-import { Search, Visibility, Edit, Delete, ExitToApp } from '@mui/icons-material';
+import { Search, Edit, Delete } from '@mui/icons-material';
 import { Alert } from '../../../components/Alert';
 import { TableMoreMenu } from '../../../components/TableMoreMenu';
 import { sendRequest } from '../../../helpers/utils';
@@ -31,59 +29,54 @@ import { AuthContext } from '../../../store/context/authContext';
 import { LoadingContext } from '../../../store/context/LoadingGlobal';
 import { SnackbarContext } from '../../../store/context/SnackbarGlobal';
 
-export const Tenant = () => {
+export const User = () => {
   const navigate = useNavigate();
   const { authSession } = useContext(AuthContext);
   const { handleLoading } = useContext(LoadingContext);
   const { handleOpenSnackbar } = useContext(SnackbarContext);
-  const [selectedTenant, setSelectedTenant] = useState(null);
+  const [selectedUser, setSelectedUser] = useState(null);
   const [alert, setAlert] = useState({ open: false, title: '', description: '' });
-  const [tenantsRent, setTenantsRent] = useState([]);
+  const [users, setUsers] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchInput, setSearchInput] = useState('');
 
-  const onView = (id) => navigate(`${id}`);
+  // const onView = (id) => navigate(`${id}`);
   const onUpdate = (id) => navigate(`update/${id}`);
 
-  const onFinishRent = (id) => {
-    console.log(`Finish rent: ${id}`);
-    // navigate(`update/${id}`);
-  };
-
-  const openDeleteAlert = (tenantRent) => {
-    setSelectedTenant(tenantRent);
+  const openDeleteAlert = (user) => {
+    setSelectedUser(user);
 
     setAlert({
       open: true,
-      title: `¿Está seguro que desea eliminar el inquilino '${tenantRent?.tenant?.firstName} ${tenantRent?.tenant?.lastName}'?`,
+      title: `¿Está seguro que desea eliminar el usuario de cédula:  '${user?.idCard}'?`,
       description:
-        'Al aceptar se eliminará el inquilino de manera permanente y no podrá deshacer los cambios.'
+        'Al aceptar se eliminará el usuario de manera permanente y no podrá deshacer los cambios.'
     });
   };
 
-  const fetchTenantsRent = async () => {
+  const fetchUsers = async () => {
     const condition = searchInput ? `&search=${searchInput}` : '';
 
     handleLoading(true);
     const response = await sendRequest({
-      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/rent?page=${page}&size=${rowsPerPage}${condition}`,
+      urlPath: `${process.env.REACT_APP_USER_SERVICE_URL}/user/admin/all?page=${page}&size=${rowsPerPage}${condition}`,
       token: authSession.user?.token,
       method: 'GET'
     });
     handleLoading(false);
 
     if (response.error) {
-      handleOpenSnackbar('error', 'Hubo un error al obtener los inquilinos');
+      handleOpenSnackbar('error', 'Hubo un error al obtener los usuarios.');
     } else {
-      setTenantsRent(response.data.data);
+      setUsers(response.data?.data);
     }
   };
 
-  useEffect(() => fetchTenantsRent(), [page, rowsPerPage]);
+  useEffect(() => fetchUsers(), [page, rowsPerPage]);
 
   const closeDeleteAlert = () => {
-    setSelectedTenant(null);
+    setSelectedUser(null);
     setAlert((previous) => ({
       ...previous,
       open: false
@@ -93,16 +86,16 @@ export const Tenant = () => {
   const onDelete = async () => {
     handleLoading(true);
     const response = await sendRequest({
-      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/rent/${selectedTenant?.id}`,
+      urlPath: `${process.env.REACT_APP_USER_SERVICE_URL}/user/admin/${selectedUser?.id}`,
       token: authSession.user?.token,
       method: 'DELETE'
     });
     handleLoading(false);
     if (response.error) {
-      handleOpenSnackbar('error', 'No se pudo elimnar el inquilino!');
+      handleOpenSnackbar('error', 'No se pudo elimnar el Usuario!');
     } else {
-      await fetchTenantsRent();
-      handleOpenSnackbar('success', 'Inquilino eliminado exitosamente!');
+      await fetchUsers();
+      handleOpenSnackbar('success', 'Usuario eliminado exitosamente!');
     }
   };
 
@@ -117,16 +110,13 @@ export const Tenant = () => {
 
   const onChangeSearchInput = (e) => setSearchInput(e.target.value);
 
-  const onSearch = () => fetchTenantsRent();
+  const onSearch = () => fetchUsers();
 
   return (
     <>
       <Box>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', p: 2 }}>
-          <Typography variant="h4">Inquilinos</Typography>
-          <Button component={RouterLink} to="create" variant="contained">
-            Agregar
-          </Button>
+          <Typography variant="h4">Usuarios</Typography>
         </Box>
         <Card sx={{ p: 3 }}>
           <Box sx={{ py: 2 }}>
@@ -149,40 +139,34 @@ export const Tenant = () => {
             <Table sx={{ minWidth: 800 }} aria-label="simple table">
               <TableHead sx={{ backgroundColor: '#e9e9e9' }}>
                 <TableRow>
-                  <TableCell>Inmueble</TableCell>
-                  <TableCell>Fecha de inicio</TableCell>
-                  <TableCell>Inquilino</TableCell>
-                  <TableCell>Email</TableCell>
+                  <TableCell>Cédula</TableCell>
+                  <TableCell>Correo</TableCell>
+                  <TableCell>Nombre</TableCell>
                   <TableCell>Teléfono</TableCell>
-                  <TableCell>Estado</TableCell>
+                  <TableCell>Roles</TableCell>
                   <TableCell />
                 </TableRow>
               </TableHead>
               <TableBody>
-                {tenantsRent.results?.length > 0 ? (
-                  tenantsRent.results?.map((rent) => (
+                {users.users?.length > 0 ? (
+                  users.users?.map((user) => (
                     <TableRow
                       hover
-                      key={rent?.id}
+                      key={user?.id}
                       sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                      <TableCell>{rent?.property?.tagName}</TableCell>
-                      <TableCell>{new Date(rent.startDate).toLocaleDateString('es-ES')}</TableCell>
+                      <TableCell>{user?.idCard}</TableCell>
+                      <TableCell>{user?.email}</TableCell>
+                      {/* <TableCell>{new Date(user.startDate).toLocaleDateString('es-ES')}</TableCell> */}
                       <TableCell>
-                        {rent?.tenant?.firstName ?? ''} {rent?.tenant?.lastName ?? ''}
+                        {user.firstName ?? ''} {user.lastName ?? ''}
                       </TableCell>
-                      <TableCell>{rent?.tenant?.email}</TableCell>
-                      <TableCell>{rent?.tenant?.phone}</TableCell>
-                      <TableCell>
-                        {rent?.endDate === null ? (
-                          <Chip size="small" label="Activo" color="primary" />
-                        ) : (
-                          <Chip size="small" label="Inactivo" color="error" />
-                        )}
-                      </TableCell>
+                      <TableCell>{user?.phone}</TableCell>
+                      {/* <TableCell>{user?.dateOfBirth}</TableCell> */}
+                      <TableCell>{user.roles?.map((rol) => rol.name).join()}</TableCell>
 
                       <TableCell>
                         <TableMoreMenu>
-                          <MenuItem onClick={() => onView(rent.id)}>
+                          {/* <MenuItem onClick={() => onView(user.id)}>
                             <ListItemIcon>
                               <Visibility sx={{ fontSize: 25 }} />
                             </ListItemIcon>
@@ -190,9 +174,9 @@ export const Tenant = () => {
                               primary="Ver mas"
                               primaryTypographyProps={{ variant: 'body2' }}
                             />
-                          </MenuItem>
+                          </MenuItem> */}
 
-                          <MenuItem onClick={() => onUpdate(rent.id)}>
+                          <MenuItem onClick={() => onUpdate(user.id)}>
                             <ListItemIcon>
                               <Edit sx={{ fontSize: 25 }} />
                             </ListItemIcon>
@@ -202,17 +186,7 @@ export const Tenant = () => {
                             />
                           </MenuItem>
 
-                          <MenuItem onClick={() => onFinishRent(rent.id)}>
-                            <ListItemIcon>
-                              <ExitToApp sx={{ fontSize: 25 }} />
-                            </ListItemIcon>
-                            <ListItemText
-                              primary="Finalizar"
-                              primaryTypographyProps={{ variant: 'body2' }}
-                            />
-                          </MenuItem>
-
-                          <MenuItem onClick={() => openDeleteAlert(rent)}>
+                          <MenuItem onClick={() => openDeleteAlert(user)}>
                             <ListItemIcon>
                               <Delete sx={{ fontSize: 25 }} />
                             </ListItemIcon>
@@ -237,7 +211,7 @@ export const Tenant = () => {
                           justifyContent: 'center'
                         }}>
                         <Typography variant="h5" sx={{ opacity: 0.5 }}>
-                          No se encontraron inquilinos.
+                          No se encontraron usuarios.
                         </Typography>
                       </Box>
                     </TableCell>
@@ -248,7 +222,7 @@ export const Tenant = () => {
           </TableContainer>
           <TablePagination
             component="div"
-            count={tenantsRent.pagination?.totalItems ?? 0}
+            count={users.pagination?.totalItems ?? 0}
             page={page}
             onPageChange={handleChangePage}
             rowsPerPage={rowsPerPage}

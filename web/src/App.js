@@ -22,6 +22,10 @@ import { AuthContextProvider } from './store/context/authContext';
 
 import { Profile } from './pages/dashboard/Profile';
 
+// Admin
+import { User } from './pages/dashboard/user/index';
+import { Update as UpdateUser } from './pages/dashboard/user/update';
+
 // new
 import { Property } from './pages/dashboard/property/index';
 import { Create as CreateProperty } from './pages/dashboard/property/Create';
@@ -74,6 +78,13 @@ const App = () => {
                     <Route index element={<Home />} />
 
                     <Route path="profile" element={<Profile />} />
+
+                    <Route path="users" element={<Outlet />}>
+                      <Route path="" element={<User />} />
+                      <Route path="update/:id" element={<UpdateUser />} />
+                      {/* <Route path="create" element={<CreateObservation />} />
+                      <Route path=":id" element={<DetailsObservation />} /> */}
+                    </Route>
 
                     <Route path="observations" element={<Outlet />}>
                       <Route path="" element={<Observation />} />

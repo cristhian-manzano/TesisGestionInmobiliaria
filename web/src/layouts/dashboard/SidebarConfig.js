@@ -19,6 +19,12 @@ export const sidebarConfig = [
   //   roles: [ROLES.ADMINISTRADOR, ROLES.ARRENDADOR, ROLES.ARRENDATARIO]
   // },
   {
+    href: '/dashboard/users',
+    icon: <Group fontSize="small" />,
+    title: 'Usuarios',
+    roles: [ROLES.ADMINISTRADOR]
+  },
+  {
     href: '/dashboard/tenants',
     icon: <Group fontSize="small" />,
     title: 'Inquilinos',

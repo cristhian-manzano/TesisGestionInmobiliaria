@@ -27,24 +27,25 @@ import { LoadingContext } from '../../store/context/LoadingGlobal';
 import { SnackbarContext } from '../../store/context/SnackbarGlobal';
 import { sendRequest } from '../../helpers/utils';
 
-const profileData = {
-  email: 'cri@gmail.com',
-  idCard: '123456789',
-  firstName: 'Cristhian Steven',
-  lastName: 'Manzano Manzano',
-  dateOfBirth: '2020-01-01',
-  phone: '0123456334',
-  profileImage:
-    'https://image.freepik.com/free-vector/businessman-character-avatar-isolated_24877-60111.jpg'
-};
+// const profileData = {
+//   email: 'cri@gmail.com',
+//   idCard: '123456789',
+//   firstName: 'Cristhian Steven',
+//   lastName: 'Manzano Manzano',
+//   dateOfBirth: '2020-01-01',
+//   phone: '0123456334',
+//   profileImage:
+//     'https://image.freepik.com/free-vector/businessman-character-avatar-isolated_24877-60111.jpg'
+// };
 
 export const Profile = () => {
   // const palabraClaveEliminarcuenta = 'confirmar-eliminación'; --> Implement
   // const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   // const [textDeleteAccount, setTextDeleteAccount] = useState('');
+  // const [imageProfile, setImageProfile] = useState(null);
 
   const [showPassword, setShowPassoword] = useState(false);
-  const [imageProfile, setImageProfile] = useState(null);
+  const [profileData, setProfileData] = useState({});
 
   // Contexts
   const { handleLoading } = useContext(LoadingContext);
@@ -60,71 +61,81 @@ export const Profile = () => {
     formState: { dirtyFields, errors, isDirty }
   } = useForm();
 
-  const fetchProfile = () => {
-    reset({
-      email: profileData?.email,
-      idCard: profileData?.idCard,
-      firstName: profileData?.firstName,
-      lastName: profileData?.lastName,
-      dateOfBirth: profileData?.dateOfBirth,
-      phone: profileData?.phone,
-      password: ''
-    });
-    setImageProfile({ url: profileData?.profileImage });
-  };
+  // const fetchProfile = () => {
+  //   reset({
+  //     email: profileData?.email,
+  //     idCard: profileData?.idCard,
+  //     firstName: profileData?.firstName,
+  //     lastName: profileData?.lastName,
+  //     dateOfBirth: profileData?.dateOfBirth,
+  //     phone: profileData?.phone,
+  //     password: ''
+  //   });
+  //   setImageProfile({ url: profileData?.profileImage });
+  // };
 
-  useEffect(() => {
-    fetchProfile();
-  }, []);
-
-  const handleClickProfileUpload = (e) => {
-    if (imageProfile) {
-      e.preventDefault();
-      setImageProfile(null);
-    }
-  };
-
-  const handleChangeProfileUpload = (e) => {
-    const newImage = e.target?.files?.[0];
-
-    if (newImage)
-      setImageProfile({
-        file: newImage,
-        url: URL.createObjectURL(newImage)
-      });
-
-    e.target.value = null;
-  };
-
-  const onSubmit = async (data) => {
-    const dataToSend = {
-      ...(dirtyFields?.phone && { phone: data.phone }),
-      ...(dirtyFields?.password && { password: data.password })
-    };
-
-    const formData = new FormData();
-    Object.keys(dataToSend).forEach((key) => formData.append(key, dataToSend[key]));
-
-    // Adding images to formdata
-    if (imageProfile.file) {
-      formData.append('propertyImages', imageProfile.file);
-    }
-
+  const fetchUser = async () => {
     handleLoading(true);
     const response = await sendRequest({
-      urlPath: `${process.env.REACT_APP_PROPERTY_SERVICE_URL}/profile`,
-      method: 'PUT',
+      urlPath: `${process.env.REACT_APP_USER_SERVICE_URL}/user/profile`,
       token: authSession.user?.token,
-      data: formData,
-      isFormData: true
+      method: 'GET'
     });
     handleLoading(false);
 
     if (response.error) {
-      handleOpenSnackbar('error', 'No se pudo actualizar el perfil!');
+      handleOpenSnackbar('error', 'Hubo un error al obtener la información');
     } else {
-      handleOpenSnackbar('success', 'profile actualizado exitosamente!');
-      // fetch profile
+      console.log(response.data.data);
+      setProfileData(response.data.data);
+      reset(response.data.data);
+    }
+  };
+
+  useEffect(() => {
+    fetchUser();
+  }, []);
+
+  // const handleClickProfileUpload = (e) => {
+  //   if (imageProfile) {
+  //     e.preventDefault();
+  //     setImageProfile(null);
+  //   }
+  // };
+
+  // const handleChangeProfileUpload = (e) => {
+  //   const newImage = e.target?.files?.[0];
+
+  //   if (newImage)
+  //     setImageProfile({
+  //       file: newImage,
+  //       url: URL.createObjectURL(newImage)
+  //     });
+
+  //   e.target.value = null;
+  // };
+
+  const onSubmit = async (data) => {
+    const dataToSend = {};
+
+    Object.keys(dirtyFields).forEach((key) => {
+      dataToSend[key] = data[key];
+    });
+
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_USER_SERVICE_URL}/user/profile`,
+      method: 'POST',
+      token: authSession.user?.token,
+      data: dataToSend
+    });
+    handleLoading(false);
+
+    if (response.error) {
+      handleOpenSnackbar('error', 'No se pudo actualizar!');
+    } else {
+      handleOpenSnackbar('success', 'Actualizado exitosamente!');
+      fetchUser();
     }
   };
 
@@ -176,32 +187,61 @@ export const Profile = () => {
             </Grid> */}
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
-                <TextField label="Email" {...register('email')} disabled />
+                <TextField
+                  label="Email"
+                  {...register('email')}
+                  InputLabelProps={{ shrink: true }}
+                  disabled
+                />
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
-                <TextField label="Cédula" {...register('idCard')} disabled />
+                <TextField
+                  label="Cédula"
+                  {...register('idCard')}
+                  InputLabelProps={{ shrink: true }}
+                  disabled
+                />
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
-                <TextField label="Nombres" {...register('firstName')} disabled />
+                <TextField
+                  label="Nombres"
+                  {...register('firstName')}
+                  InputLabelProps={{ shrink: true }}
+                  disabled
+                />
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
-                <TextField label="Apellidos" {...register('lastName')} disabled />
+                <TextField
+                  label="Apellidos"
+                  {...register('lastName')}
+                  InputLabelProps={{ shrink: true }}
+                  disabled
+                />
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
-                <TextField label="Fecha de nacimiento" {...register('dateOfBirth')} disabled />
+                <TextField
+                  label="Fecha de nacimiento"
+                  {...register('dateOfBirth')}
+                  InputLabelProps={{ shrink: true }}
+                  disabled
+                />
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
-                <TextField label="Teléfono" {...register('phone')} />
+                <TextField
+                  label="Teléfono"
+                  {...register('phone')}
+                  InputLabelProps={{ shrink: true }}
+                />
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -232,7 +272,8 @@ export const Profile = () => {
                 color="primary"
                 fullWidth
                 variant="contained"
-                disabled={!imageProfile?.file && !isDirty}>
+                // disabled={!imageProfile?.file && !isDirty}>
+                disabled={!isDirty}>
                 Actualizar
               </Button>
             </Grid>

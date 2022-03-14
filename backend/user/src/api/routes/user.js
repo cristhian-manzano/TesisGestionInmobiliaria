@@ -7,7 +7,8 @@ const {
   getListUsers,
   getUsersByAdmin,
   deleteUsersByAdmin,
-  updateUsersByAdmin
+  updateUsersByAdmin,
+  getProfileUser
 } = require('../controllers/user');
 const { validateToken } = require('../middlewares/auth');
 
@@ -17,6 +18,7 @@ router.put('/admin/:id', validateToken, updateUsersByAdmin);
 router.delete('/admin/:id', validateToken, deleteUsersByAdmin);
 
 // All
+router.get('/profile', validateToken, getProfileUser);
 router.post('/profile', validateToken, updateProfile);
 router.post('/list', getListUsers);
 router.get('/tenant', getByFilter);
