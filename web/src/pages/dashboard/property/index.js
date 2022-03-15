@@ -189,25 +189,29 @@ export const Property = () => {
                             />
                           </MenuItem>
 
-                          <MenuItem onClick={() => onUpdate(row.id)}>
-                            <ListItemIcon>
-                              <Edit sx={{ fontSize: 25 }} />
-                            </ListItemIcon>
-                            <ListItemText
-                              primary="Editar"
-                              primaryTypographyProps={{ variant: 'body2' }}
-                            />
-                          </MenuItem>
+                          {row.available && (
+                            <MenuItem onClick={() => onUpdate(row.id)}>
+                              <ListItemIcon>
+                                <Edit sx={{ fontSize: 25 }} />
+                              </ListItemIcon>
+                              <ListItemText
+                                primary="Editar"
+                                primaryTypographyProps={{ variant: 'body2' }}
+                              />
+                            </MenuItem>
+                          )}
 
-                          <MenuItem onClick={() => openDeleteAlert(row)}>
-                            <ListItemIcon>
-                              <Delete sx={{ fontSize: 25 }} />
-                            </ListItemIcon>
-                            <ListItemText
-                              primary="Eliminar"
-                              primaryTypographyProps={{ variant: 'body2' }}
-                            />
-                          </MenuItem>
+                          {row.available && (
+                            <MenuItem onClick={() => openDeleteAlert(row)}>
+                              <ListItemIcon>
+                                <Delete sx={{ fontSize: 25 }} />
+                              </ListItemIcon>
+                              <ListItemText
+                                primary="Eliminar"
+                                primaryTypographyProps={{ variant: 'body2' }}
+                              />
+                            </MenuItem>
+                          )}
                         </TableMoreMenu>
                       </TableCell>
                     </TableRow>

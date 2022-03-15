@@ -47,6 +47,7 @@ export const Income = () => {
 
   // Filters
   const [selectedProperty, setSelectedProperty] = useState(null);
+  const [selectedPropertyChart, setSelectedPropertyChart] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState(null);
   const [chartSelectedYear, setChartSelectedYear] = useState(null);
 
@@ -108,40 +109,53 @@ export const Income = () => {
 
   const fetchIncomeByYear = async () => {
     // Get data
-    const dateSelected = new Date(chartSelectedYear);
+    // const dateSelected = new Date(chartSelectedYear);
 
-    handleLoading(true);
-    const response = await sendRequest({
-      urlPath: `${
-        process.env.REACT_APP_RENT_SERVICE_URL
-      }/payment/income?year=${dateSelected.getFullYear()}`,
-      token: authSession.user?.token,
-      method: 'GET'
-    });
-    handleLoading(false);
+    // start prueba
+    const url = new URL(`${process.env.REACT_APP_RENT_SERVICE_URL}/payment/income`);
 
-    if (response.error) {
-      handleOpenSnackbar('error', 'Hubo un error');
-    } else {
-      const { results } = response.data?.data ?? [];
+    if (selectedPropertyChart && selectedPropertyChart.id) {
+      url.searchParams.append('idProperty', selectedPropertyChart?.id);
+    }
 
-      console.log('RESULTS: ', results);
-      console.log('RESULTS: ', response.data?.data);
+    if (chartSelectedYear) {
+      const dateSelected = new Date(chartSelectedYear);
+      url.searchParams.append('year', dateSelected.getFullYear());
+    }
 
-      const dataFinal = results.reduce((previous, current) => {
-        const monthPaid = new Date(current.datePaid).getMonth();
-        const temp = previous;
-        temp[monthPaid] += +current.amount;
-        return temp;
-      }, new Array(12).fill(0));
+    console.log(url);
 
-      setChartIncomeByYear({ data: dataFinal, totalIncome: response.data?.data?.totalIncome });
+    // end prueba
+
+    if (selectedPropertyChart || chartSelectedYear) {
+      handleLoading(true);
+      const response = await sendRequest({
+        urlPath: url,
+        token: authSession.user?.token,
+        method: 'GET'
+      });
+      handleLoading(false);
+
+      if (response.error) {
+        handleOpenSnackbar('error', 'Hubo un error');
+      } else {
+        const { results } = response.data?.data ?? [];
+
+        const dataFinal = results.reduce((previous, current) => {
+          const monthPaid = new Date(current.datePaid).getMonth();
+          const temp = previous;
+          temp[monthPaid] += +current.amount;
+          return temp;
+        }, new Array(12).fill(0));
+
+        setChartIncomeByYear({ data: dataFinal, totalIncome: response.data?.data?.totalIncome });
+      }
     }
   };
 
   useEffect(() => {
     fetchIncomeByYear();
-  }, [chartSelectedYear]);
+  }, [chartSelectedYear, selectedPropertyChart]);
 
   const onChangeProperty = (event, newValue) => {
     setSelectedProperty(newValue);
@@ -158,6 +172,10 @@ export const Income = () => {
 
   const onChangeChartIncome = async (newValue) => {
     setChartSelectedYear(newValue);
+  };
+
+  const onChangePropertyChart = (event, newValue) => {
+    setSelectedPropertyChart(newValue);
   };
 
   return (
@@ -282,10 +300,23 @@ export const Income = () => {
       </Card>
 
       <Card sx={{ my: 3, p: 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap' }}>
-          <Typography variant="h4">Por año</Typography>
+        <Typography variant="h4">Gráfico de ingresos anuales</Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'flex-start', flexWrap: 'wrap', my: 1 }}>
+          <FormControl sx={{ width: 300, mt: 2 }}>
+            <Autocomplete
+              disablePortal
+              value={selectedPropertyChart}
+              onChange={onChangePropertyChart}
+              options={properties}
+              getOptionLabel={(option) => option.name}
+              isOptionEqualToValue={(option, valueSelected) => option.id === valueSelected.id}
+              renderInput={(params) => <TextField {...params} label="Inmueble" />}
+            />
+          </FormControl>
 
-          <FormControl>
+          <Box sx={{ width: 20 }} />
+
+          <FormControl sx={{ width: 300, mt: 2 }}>
             <LocalizationProvider dateAdapter={AdapterDateFns} locale={es}>
               <DatePicker
                 disableFuture
@@ -299,7 +330,7 @@ export const Income = () => {
           </FormControl>
         </Box>
 
-        <Box sx={{ height: 400 }}>
+        <Box sx={{ height: 550 }}>
           <Bar
             height={115}
             data={{
