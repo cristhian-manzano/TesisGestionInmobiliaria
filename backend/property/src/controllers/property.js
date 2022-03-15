@@ -363,6 +363,42 @@ const getlistProperties = async (req, res) => {
   }
 };
 
+const updateStateProperty = async (req, res) => {
+  try {
+    const id = req.params?.id;
+    const { available } = req.body;
+
+    if (available === null || available === undefined)
+      return res
+        .status(responseStatusCodes.UNPROCESSABLE_ENTITY)
+        .json(validationResponse(res.statusCode, 'Property available not found in body request.'));
+
+    const property = await Property.findByPk(id);
+
+    if (!property)
+      return res
+        .status(responseStatusCodes.NOT_FOUND)
+        .json(errorResponse(res.statusCode, `Property "${id}" not found!`));
+
+    // Update Property
+
+    let updated = property;
+
+    if (property.available !== available) {
+      updated = await property.update({ available });
+    }
+
+    return res
+      .status(responseStatusCodes.OK)
+      .json(successResponse(res.statusCode, 'Updated!', updated));
+  } catch (e) {
+    Logger.error('ERROR: ', e.message);
+    return res
+      .status(responseStatusCodes.INTERNAL_SERVER_ERROR)
+      .json(errorResponse(res.statusCode, 'Internal server errror.'));
+  }
+};
+
 module.exports = {
   getAll,
   get,
@@ -370,5 +406,6 @@ module.exports = {
   update,
   destroy,
   getByOwner,
-  getlistProperties
+  getlistProperties,
+  updateStateProperty
 };
