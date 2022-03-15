@@ -4,6 +4,9 @@ import { useForm, Controller } from 'react-hook-form';
 
 import { LocalizationProvider, MobileDatePicker } from '@mui/lab';
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
+import { es } from 'date-fns/locale';
+
+import moment from 'moment';
 
 import {
   Box,
@@ -35,6 +38,20 @@ export const Create = () => {
 
   const [tenantsRent, setTenantsRent] = useState([]);
 
+  const [rangeDates, setRangeDates] = useState({
+    minDate: null,
+    maxDate: null
+  });
+
+  const changeRangeDates = (e) => {
+    if (e) {
+      setRangeDates((previous) => ({
+        ...previous,
+        minDate: new Date(moment(e).add(1, 'M').format())
+      }));
+    }
+  };
+
   const fetchTenantsRent = async () => {
     handleLoading(true);
     const response = await sendRequest({
@@ -47,7 +64,8 @@ export const Create = () => {
     if (response.error) {
       handleOpenSnackbar('error', 'Hubo un error al obtener los inquilinos');
     } else {
-      setTenantsRent(response.data.data);
+      const data = response.data?.data.filter((d) => d.endDate === null) ?? [];
+      setTenantsRent(data);
     }
   };
 
@@ -59,6 +77,7 @@ export const Create = () => {
     control,
     handleSubmit,
     reset,
+    getValues,
     formState: { errors }
   } = useForm();
 
@@ -155,7 +174,7 @@ export const Create = () => {
 
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
-                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <LocalizationProvider dateAdapter={AdapterDateFns} locale={es}>
                   <Controller
                     name="startDate"
                     rules={{ required: true }}
@@ -165,7 +184,10 @@ export const Create = () => {
                       <MobileDatePicker
                         label="Fecha de inicio"
                         value={field.value}
-                        onChange={field.onChange}
+                        onChange={(e) => {
+                          field.onChange(e);
+                          changeRangeDates(e);
+                        }}
                         renderInput={(params) => <TextField {...params} />}
                       />
                     )}
@@ -178,7 +200,7 @@ export const Create = () => {
             </Grid>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
-                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <LocalizationProvider dateAdapter={AdapterDateFns} locale={es}>
                   <Controller
                     name="endDate"
                     rules={{ required: true }}
@@ -189,6 +211,8 @@ export const Create = () => {
                         label="Fecha de fin"
                         value={field.value}
                         onChange={field.onChange}
+                        minDate={rangeDates.minDate}
+                        disabled={!rangeDates.minDate}
                         renderInput={(params) => <TextField {...params} />}
                       />
                     )}
@@ -218,7 +242,7 @@ export const Create = () => {
                       type="file"
                       id="btn-upload"
                       style={{ display: 'none' }}
-                      accept=".jpg, .jpeg, .png, .pdf"
+                      accept=".pdf"
                       onChange={uploadFile}
                     />
                     <Button variant="outlined" component="span">

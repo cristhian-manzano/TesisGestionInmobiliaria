@@ -41,6 +41,7 @@ export const Create = () => {
     control,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors }
   } = useForm();
 
@@ -56,7 +57,10 @@ export const Create = () => {
     if (response.error) {
       handleOpenSnackbar('error', 'Cannot get rents');
     } else {
-      setTenantsRent(response.data.data);
+      const data = response.data?.data.filter((d) => d.endDate === null) ?? [];
+
+      // setTenantsRent(response.data.data);
+      setTenantsRent(data);
     }
   };
 
@@ -108,6 +112,11 @@ export const Create = () => {
     setPaymentFile(null);
   };
 
+  const onChangeRent = ({ target }) => {
+    const rent = tenantsRent.find((r) => r.id === target.value);
+    setValue('amount', rent.property?.price);
+  };
+
   return (
     <Box>
       <Button
@@ -136,16 +145,21 @@ export const Create = () => {
                       rules={{ required: true }}
                       defaultValue=""
                       render={({ field }) => (
-                        <Select labelId="rent-select" label="Alquileres" {...field}>
+                        <Select
+                          labelId="rent-select"
+                          label="Alquileres"
+                          {...field}
+                          onChange={(e) => {
+                            field.onChange(e);
+                            onChangeRent(e);
+                          }}>
                           <MenuItem value={0} disabled>
                             Seleccionar
                           </MenuItem>
 
                           {tenantsRent?.map((rent) => (
                             <MenuItem key={rent.id} value={rent.id}>
-                              {`${rent.property?.tagName ?? ''} ${rent.tenant?.firstName ?? ''} - ${
-                                rent.property?.address ?? ''
-                              } - ${rent.tenant?.lastName ?? ''} `}
+                              {`${rent.property?.tagName ?? ''} - ${rent.property?.address ?? ''}`}
                             </MenuItem>
                           ))}
                         </Select>
@@ -171,6 +185,7 @@ export const Create = () => {
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
                 <TextField
+                  disabled
                   label="Cantidad"
                   {...register('amount', { required: true })}
                   InputProps={{

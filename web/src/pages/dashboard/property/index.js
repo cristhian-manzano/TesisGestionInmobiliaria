@@ -153,7 +153,7 @@ export const Property = () => {
                   <TableCell>Nombre</TableCell>
                   <TableCell>Tipo de inmueble</TableCell>
                   <TableCell>Sector</TableCell>
-                  {/* <TableCell>Estado</TableCell> */}
+                  <TableCell>Estado</TableCell>
                   <TableCell>Precio</TableCell>
                   <TableCell />
                 </TableRow>
@@ -168,13 +168,13 @@ export const Property = () => {
                       <TableCell>{row.tagName}</TableCell>
                       <TableCell>{row.typeProperty?.name}</TableCell>
                       <TableCell>{row.sector?.name}</TableCell>
-                      {/* <TableCell>
+                      <TableCell>
                         {row.available ? (
                           <Chip label="Disponible" size="small" color="success" />
                         ) : (
                           <Chip label="Ocupado" size="small" color="error" />
                         )}
-                      </TableCell> */}
+                      </TableCell>
                       <TableCell>$ {row.price}</TableCell>
 
                       <TableCell>

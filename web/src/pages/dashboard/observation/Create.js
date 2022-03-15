@@ -41,7 +41,8 @@ export const Create = () => {
     if (response.error) {
       handleOpenSnackbar('error', 'Hubo un error al obtener los inquilinos');
     } else {
-      setTenantsRent(response.data.data);
+      const data = response.data?.data.filter((d) => d.endDate === null) ?? [];
+      setTenantsRent(data);
     }
   };
 

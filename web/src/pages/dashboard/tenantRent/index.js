@@ -18,7 +18,8 @@ import {
   IconButton,
   MenuItem,
   ListItemIcon,
-  ListItemText
+  ListItemText,
+  Chip
 } from '@mui/material';
 
 import { Search, Visibility } from '@mui/icons-material';
@@ -53,7 +54,7 @@ export const TenantRent = () => {
     handleLoading(false);
 
     if (response.error) {
-      handleOpenSnackbar('error', 'Hubo un error al obtener los inquilinos');
+      handleOpenSnackbar('error', 'Hubo un error al obtener los alquileres');
     } else {
       setTenantsRent(response.data.data);
     }
@@ -105,6 +106,7 @@ export const TenantRent = () => {
                 <TableCell>Nombre (Propietario)</TableCell>
                 <TableCell>Email</TableCell>
                 <TableCell>Teléfono</TableCell>
+                <TableCell>Estado</TableCell>
                 <TableCell />
               </TableRow>
             </TableHead>
@@ -122,6 +124,13 @@ export const TenantRent = () => {
                     }`}</TableCell>
                     <TableCell>{rent?.owner?.email}</TableCell>
                     <TableCell>{rent?.owner?.phone}</TableCell>
+                    <TableCell>
+                      {rent?.endDate === null ? (
+                        <Chip size="small" label="Activo" color="primary" />
+                      ) : (
+                        <Chip size="small" label="Inactivo" color="error" />
+                      )}
+                    </TableCell>
 
                     <TableCell>
                       <TableMoreMenu>

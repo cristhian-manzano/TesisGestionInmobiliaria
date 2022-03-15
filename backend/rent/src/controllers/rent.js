@@ -186,6 +186,17 @@ const create = async (req, res) => {
       idOwner: authUserId
     });
 
+    // Update status property
+    await axios.put(
+      `${process.env.API_PROPERTY_URL}/property/${createdRent.idProperty}/availability`,
+      { available: false },
+      {
+        headers: {
+          Authorization: `${req.user.token}`
+        }
+      }
+    );
+
     // Result property and result tenant
     return res
       .status(responseStatusCodes.OK)
@@ -289,15 +300,70 @@ const destroy = async (req, res) => {
     const authUserId = req.user?.id;
     const { id: idRent } = req.params;
 
-    const deleted = await Rent.destroy({
+    const rent = await Rent.findOne({
       where: {
         [Op.and]: [{ id: idRent }, { idOwner: authUserId }]
       }
     });
 
+    if (!rent)
+      return res
+        .status(responseStatusCodes.NOT_FOUND)
+        .json(errorResponse(res.statusCode, 'Rent not found!'));
+
+    await rent.destroy();
+
+    // Update status property
+    await axios.put(
+      `${process.env.API_PROPERTY_URL}/property/${rent.idProperty}/availability`,
+      { available: true },
+      {
+        headers: {
+          Authorization: `${req.user.token}`
+        }
+      }
+    );
+
+    return res.status(responseStatusCodes.OK).json(successResponse(res.statusCode, 'Deleted!'));
+  } catch (e) {
+    Logger.error(e.message);
     return res
-      .status(responseStatusCodes.OK)
-      .json(successResponse(res.statusCode, 'Got it!', deleted));
+      .status(responseStatusCodes.INTERNAL_SERVER_ERROR)
+      .json(errorResponse(res.statusCode, e.message));
+  }
+};
+
+const finishRent = async (req, res) => {
+  try {
+    const authUserId = req.user?.id;
+    const { id: idRent } = req.params;
+
+    const rent = await Rent.findOne({
+      where: {
+        [Op.and]: [{ id: idRent }, { idOwner: authUserId }]
+      }
+    });
+
+    if (!rent)
+      return res
+        .status(responseStatusCodes.NOT_FOUND)
+        .json(errorResponse(res.statusCode, 'Rent not found!'));
+
+    await rent.update({ endDate: new Date() });
+
+    // Update status property
+    await axios.put(
+      `${process.env.API_PROPERTY_URL}/property/${rent.idProperty}/availability`,
+      { available: true },
+      {
+        headers: {
+          Authorization: `${req.user.token}`
+        }
+      }
+    );
+
+    // Result property and result tenant
+    return res.status(responseStatusCodes.OK).json(successResponse(res.statusCode, 'Updated!', {}));
   } catch (e) {
     Logger.error(e.message);
     return res
@@ -312,5 +378,6 @@ module.exports = {
   destroy,
   get,
   update,
-  getAllByTenant
+  getAllByTenant,
+  finishRent
 };

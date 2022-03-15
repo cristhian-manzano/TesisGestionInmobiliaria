@@ -163,7 +163,7 @@ export const Contract = () => {
                   {/* <TableCell>Archivo</TableCell> */}
                   <TableCell>Propiedad</TableCell>
                   <TableCell>Inquilino</TableCell>
-                  <TableCell>Estado</TableCell>
+                  {/* <TableCell>Estado</TableCell> */}
                   <TableCell />
                 </TableRow>
               </TableHead>
@@ -186,13 +186,13 @@ export const Contract = () => {
                       <TableCell>
                         {`${contract.tenant?.firstName ?? ''} ${contract.tenant?.lastName ?? ''}`}
                       </TableCell>
-                      <TableCell>
+                      {/* <TableCell>
                         {contract.active ? (
                           <Chip label="Activo" size="small" color="success" />
                         ) : (
                           <Chip label="Inactivo" size="small" color="error" />
                         )}
-                      </TableCell>
+                      </TableCell> */}
 
                       <TableCell>
                         <TableMoreMenu>

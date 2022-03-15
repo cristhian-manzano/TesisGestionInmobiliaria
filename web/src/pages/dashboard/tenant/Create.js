@@ -59,9 +59,8 @@ export const Create = () => {
     handleLoading(false);
 
     if (!response.error) {
-      setProperties(
-        response.data?.data.map((property) => ({ id: property.id, name: property.tagName }))
-      );
+      const data = response.data.data?.filter((d) => d.available) ?? [];
+      setProperties(data.map((property) => ({ id: property.id, name: property.tagName })));
     } else {
       handleOpenSnackbar('error', 'Cannot get properties!');
     }
@@ -228,7 +227,9 @@ export const Create = () => {
                       isOptionEqualToValue={(option, valueSelected) =>
                         option.id === valueSelected.id
                       }
-                      renderInput={(params) => <TextField {...params} label="Inmueble" />}
+                      renderInput={(params) => (
+                        <TextField {...params} label="Inmuebles disponibles" />
+                      )}
                     />
                   )}
                 />

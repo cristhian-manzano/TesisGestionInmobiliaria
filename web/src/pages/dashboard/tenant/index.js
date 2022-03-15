@@ -43,22 +43,31 @@ export const Tenant = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchInput, setSearchInput] = useState('');
 
+  // Finish alert
+  const [finishAlert, setFinishAlert] = useState({ open: false, title: '', description: '' });
+
   const onView = (id) => navigate(`${id}`);
   const onUpdate = (id) => navigate(`update/${id}`);
-
-  const onFinishRent = (id) => {
-    console.log(`Finish rent: ${id}`);
-    // navigate(`update/${id}`);
-  };
 
   const openDeleteAlert = (tenantRent) => {
     setSelectedTenant(tenantRent);
 
     setAlert({
       open: true,
-      title: `¿Está seguro que desea eliminar el inquilino '${tenantRent?.tenant?.firstName} ${tenantRent?.tenant?.lastName}'?`,
+      title: `¿Está seguro que desea eliminar el registro del inquilino '${tenantRent?.tenant?.firstName} ${tenantRent?.tenant?.lastName}'?`,
       description:
         'Al aceptar se eliminará el inquilino de manera permanente y no podrá deshacer los cambios.'
+    });
+  };
+
+  const openFinishAlert = (tenantRent) => {
+    setSelectedTenant(tenantRent);
+
+    setFinishAlert({
+      open: true,
+      title: `¿Está seguro que desea finalizar el alquiler con el inquilino '${tenantRent?.tenant?.firstName} ${tenantRent?.tenant?.lastName}'?`,
+      description:
+        'Al aceptar se finalizará el alquiler con el inquilino de manera permanente y no podrá deshacer los cambios.'
     });
   };
 
@@ -90,6 +99,14 @@ export const Tenant = () => {
     }));
   };
 
+  const closeFinishAlert = () => {
+    setSelectedTenant(null);
+    setFinishAlert((previous) => ({
+      ...previous,
+      open: false
+    }));
+  };
+
   const onDelete = async () => {
     handleLoading(true);
     const response = await sendRequest({
@@ -103,6 +120,22 @@ export const Tenant = () => {
     } else {
       await fetchTenantsRent();
       handleOpenSnackbar('success', 'Inquilino eliminado exitosamente!');
+    }
+  };
+
+  const onFinishRent = async () => {
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/rent/finish/${selectedTenant?.id}`,
+      token: authSession.user?.token,
+      method: 'PUT'
+    });
+    handleLoading(false);
+    if (response.error) {
+      handleOpenSnackbar('error', 'Error!');
+    } else {
+      await fetchTenantsRent();
+      handleOpenSnackbar('success', 'Alquiler finalizado!');
     }
   };
 
@@ -192,25 +225,29 @@ export const Tenant = () => {
                             />
                           </MenuItem>
 
-                          <MenuItem onClick={() => onUpdate(rent.id)}>
-                            <ListItemIcon>
-                              <Edit sx={{ fontSize: 25 }} />
-                            </ListItemIcon>
-                            <ListItemText
-                              primary="Editar"
-                              primaryTypographyProps={{ variant: 'body2' }}
-                            />
-                          </MenuItem>
+                          {rent?.endDate === null && (
+                            <MenuItem onClick={() => onUpdate(rent.id)}>
+                              <ListItemIcon>
+                                <Edit sx={{ fontSize: 25 }} />
+                              </ListItemIcon>
+                              <ListItemText
+                                primary="Editar"
+                                primaryTypographyProps={{ variant: 'body2' }}
+                              />
+                            </MenuItem>
+                          )}
 
-                          <MenuItem onClick={() => onFinishRent(rent.id)}>
-                            <ListItemIcon>
-                              <ExitToApp sx={{ fontSize: 25 }} />
-                            </ListItemIcon>
-                            <ListItemText
-                              primary="Finalizar"
-                              primaryTypographyProps={{ variant: 'body2' }}
-                            />
-                          </MenuItem>
+                          {rent?.endDate === null && (
+                            <MenuItem onClick={() => openFinishAlert(rent)}>
+                              <ListItemIcon>
+                                <ExitToApp sx={{ fontSize: 25 }} />
+                              </ListItemIcon>
+                              <ListItemText
+                                primary="Finalizar"
+                                primaryTypographyProps={{ variant: 'body2' }}
+                              />
+                            </MenuItem>
+                          )}
 
                           <MenuItem onClick={() => openDeleteAlert(rent)}>
                             <ListItemIcon>
@@ -260,6 +297,7 @@ export const Tenant = () => {
         </Card>
       </Box>
       <Alert state={alert} closeAlert={closeDeleteAlert} onConfirm={() => onDelete()} />
+      <Alert state={finishAlert} closeAlert={closeFinishAlert} onConfirm={() => onFinishRent()} />
     </>
   );
 };

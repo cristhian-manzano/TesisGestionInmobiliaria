@@ -15,7 +15,8 @@ const validateToken = async (req, res, next) => {
       token
     });
 
-    req.user = response.data?.data;
+    req.user = { ...response.data?.data, token };
+
     return next();
   } catch (e) {
     Logger.error('ERROR: ', e.message);
