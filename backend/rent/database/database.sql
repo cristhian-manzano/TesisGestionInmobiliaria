@@ -93,3 +93,11 @@ CREATE TABLE "Notification"(
 	"idReceiver" BIGINT NOT NULL,
 	CONSTRAINT "Notification_pkey" PRIMARY KEY ("id")
 );
+
+CREATE TABLE "PendingPayment"(
+	"id" BIGSERIAL NOT NULL,
+	"pendingDate" TIMESTAMPTZ NOT NULL,
+	"idRent" BIGINT NOT NULL,
+	CONSTRAINT "PendingPayment_pkey" PRIMARY KEY ("id"),
+	CONSTRAINT "PendingPayment_idRent_fkey" FOREIGN KEY ("idRent") REFERENCES "Rent"("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
