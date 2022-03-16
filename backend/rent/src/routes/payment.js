@@ -8,12 +8,15 @@ const {
   get,
   destroy,
   validatePayment,
-  getIncomeByFilter
+  getIncomeByFilter,
+  getPendingRents
 } = require('../controllers/payment');
 
 routes.use(validateToken);
 
 routes.get('/income', getIncomeByFilter);
+
+routes.get('/pending', getPendingRents);
 
 routes.get('/:id', get);
 routes.delete('/:id', destroy);

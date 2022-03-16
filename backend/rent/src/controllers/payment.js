@@ -11,6 +11,7 @@ const {
 } = require('../helpers/responsesFormat');
 const Payment = require('../models/payment');
 const PaymentFile = require('../models/PaymentFile');
+const PendingPayment = require('../models/pendingPaymentRent');
 const Rent = require('../models/rent');
 const sequelize = require('../models/index');
 const { uploadFile, deleteFiles } = require('../services/awsService');
@@ -391,9 +392,111 @@ const validatePayment = async (req, res) => {
     // Valida en caso que update falle
     await payment.update({ validated: true });
 
+    // Remove from pending
+    const month = new Date(payment.datePaid).getMonth() + 1;
+    const year = new Date(payment.datePaid).getFullYear();
+
+    await PendingPayment.destroy({
+      where: {
+        [Op.and]: [
+          sequelize.where(sequelize.literal(`extract(MONTH FROM "pendingDate")`), month),
+          sequelize.where(sequelize.literal(`extract(YEAR FROM "pendingDate")`), year),
+          { idRent: payment.idRent }
+        ]
+      }
+    });
+
+    // Endd remove
+
     return res
       .status(responseStatusCodes.OK)
       .json(successResponse(res.statusCode, 'Payment validated!', null));
+  } catch (e) {
+    Logger.error(e.message);
+    return res
+      .status(responseStatusCodes.INTERNAL_SERVER_ERROR)
+      .json(errorResponse(res.statusCode, e.message));
+  }
+};
+
+const getPendingRents = async (req, res) => {
+  try {
+    const idUser = req.user.id;
+
+    const payments = await PendingPayment.findAll({
+      include: [
+        {
+          model: Rent,
+          as: 'rent',
+          where: { [Op.or]: [{ idOwner: idUser }, { idTenant: idUser }] }
+        }
+      ],
+      order: [['pendingDate', 'DESC']]
+    });
+
+    // Get ids of users and properties - for request to service
+    const paymentDetails = payments.reduce(
+      ({ tenants, owners, properties }, { rent }) => ({
+        tenants: tenants.concat(tenants.includes(rent.idTenant) ? [] : rent.idTenant),
+        owners: owners.concat(owners.includes(rent.idOwner) ? [] : rent.idOwner),
+        properties: properties.concat(properties.includes(rent.idProperty) ? [] : rent.idProperty)
+      }),
+      { properties: [], owners: [], tenants: [] }
+    );
+
+    // Refactor this
+    const { data: usersResponse } =
+      [...paymentDetails.tenants, ...paymentDetails.owners].length > 0 &&
+      (await axios.post(`${process.env.API_USER_URL}/user/list`, {
+        users: [...paymentDetails.tenants, ...paymentDetails.owners]
+      }));
+
+    const { data: propertiesResponse } =
+      paymentDetails.properties &&
+      (await axios.post(`${process.env.API_PROPERTY_URL}/property/list`, {
+        properties: paymentDetails.properties
+      }));
+
+    let data = payments.map((payment) => {
+      const owner = usersResponse.data?.find((user) => user.id === payment.rent.idOwner);
+      const tenant = usersResponse.data?.find((user) => user.id === payment.rent.idTenant);
+      const property = propertiesResponse.data?.find((prop) => prop.id === payment.rent.idProperty);
+
+      return {
+        ...payment.dataValues,
+        owner,
+        tenant,
+        property
+      };
+    });
+
+    // Filtrado pagination
+    const { search, page, size } = req.query;
+
+    if (search) {
+      data = data.filter(
+        (d) =>
+          d.tenant.firstName.includes(search) ||
+          d.tenant.lastName.includes(search) ||
+          d.property.tagName.includes(search)
+      );
+    }
+
+    if (page || size) {
+      const { limit, offset } = getPagination(page, size);
+      const pagination = getPagingData(data.length, page, limit);
+      data = data.slice(offset, offset + limit);
+      return res.status(responseStatusCodes.OK).json(
+        successResponse(res.statusCode, 'Successfull request!', {
+          pagination,
+          results: data
+        })
+      );
+    }
+
+    return res
+      .status(responseStatusCodes.OK)
+      .json(successResponse(res.statusCode, 'Got it!', data));
   } catch (e) {
     Logger.error(e.message);
     return res
@@ -408,5 +511,6 @@ module.exports = {
   get,
   destroy,
   validatePayment,
-  getIncomeByFilter
+  getIncomeByFilter,
+  getPendingRents
 };

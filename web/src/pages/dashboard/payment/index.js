@@ -30,6 +30,8 @@ import { LoadingContext } from '../../../store/context/LoadingGlobal';
 import { SnackbarContext } from '../../../store/context/SnackbarGlobal';
 import { sendRequest } from '../../../helpers/utils';
 
+import { PendingPayment } from './PendingPayments';
+
 export const Payment = () => {
   const navigate = useNavigate();
 
@@ -81,97 +83,100 @@ export const Payment = () => {
   const onSearch = () => fetchPayments();
 
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', p: 2 }}>
-        <Typography variant="h4">Pagos</Typography>
+    <>
+      <Box>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', p: 2 }}>
+          <Typography variant="h4">Pagos</Typography>
 
-        {authSession.user?.roles.includes('Arrendatario') && (
-          <Button component={RouterLink} to="create" variant="contained">
-            Agregar
-          </Button>
-        )}
-      </Box>
-      <Card sx={{ p: 3 }}>
-        <Box sx={{ py: 2 }}>
-          <TextField
-            placeholder="search"
-            onChange={onChangeSearchInput}
-            value={searchInput}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton onClick={onSearch}>
-                    <Search />
-                  </IconButton>
-                </InputAdornment>
-              )
-            }}
-          />
+          {authSession.user?.roles.includes('Arrendatario') && (
+            <Button component={RouterLink} to="create" variant="contained">
+              Agregar
+            </Button>
+          )}
         </Box>
+        <Card sx={{ p: 3 }}>
+          <Box sx={{ py: 2 }}>
+            <TextField
+              placeholder="search"
+              onChange={onChangeSearchInput}
+              value={searchInput}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={onSearch}>
+                      <Search />
+                    </IconButton>
+                  </InputAdornment>
+                )
+              }}
+            />
+          </Box>
 
-        <TableContainer component={Paper}>
-          <Table sx={{ minWidth: 800 }} aria-label="simple table">
-            <TableHead sx={{ backgroundColor: '#e9e9e9' }}>
-              <TableRow>
-                <TableCell>Código de comprobrante</TableCell>
-                <TableCell>Fecha de pago</TableCell>
-                <TableCell>Mes pagado</TableCell>
-                <TableCell>Cantidad</TableCell>
-                <TableCell>Departamento</TableCell>
+          <TableContainer component={Paper}>
+            <Table sx={{ minWidth: 800 }} aria-label="simple table">
+              <TableHead sx={{ backgroundColor: '#e9e9e9' }}>
+                <TableRow>
+                  <TableCell>Código de comprobrante</TableCell>
+                  <TableCell>Fecha de pago</TableCell>
+                  <TableCell>Mes pagado</TableCell>
+                  <TableCell>Cantidad</TableCell>
+                  <TableCell>Departamento</TableCell>
 
-                {authSession.user?.roles.includes('Arrendador') && <TableCell>Inquilino</TableCell>}
+                  {authSession.user?.roles.includes('Arrendador') && (
+                    <TableCell>Inquilino</TableCell>
+                  )}
 
-                <TableCell>Estado</TableCell>
-                <TableCell />
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {payments.results?.length > 0 ? (
-                payments.results?.map((payment) => (
-                  <TableRow
-                    hover
-                    key={payment.id}
-                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                    <TableCell>{payment.code ?? ''}</TableCell>
-                    <TableCell>
-                      {new Date(payment?.paymentDate).toLocaleDateString('es-ES') ?? ''}
-                    </TableCell>
-                    <TableCell>
-                      {new Date(payment?.datePaid).toLocaleDateString('es-ES', {
-                        year: 'numeric',
-                        month: 'numeric'
-                      }) ?? ''}
-                    </TableCell>
-                    <TableCell>$ {payment.amount ?? '-'}</TableCell>
-                    <TableCell>{payment.property?.tagName ?? ''}</TableCell>
+                  <TableCell>Estado</TableCell>
+                  <TableCell />
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {payments.results?.length > 0 ? (
+                  payments.results?.map((payment) => (
+                    <TableRow
+                      hover
+                      key={payment.id}
+                      sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                      <TableCell>{payment.code ?? ''}</TableCell>
+                      <TableCell>
+                        {new Date(payment?.paymentDate).toLocaleDateString('es-ES') ?? ''}
+                      </TableCell>
+                      <TableCell>
+                        {new Date(payment?.datePaid).toLocaleDateString('es-ES', {
+                          year: 'numeric',
+                          month: 'numeric'
+                        }) ?? ''}
+                      </TableCell>
+                      <TableCell>$ {payment.amount ?? '-'}</TableCell>
+                      <TableCell>{payment.property?.tagName ?? ''}</TableCell>
 
-                    {authSession.user?.roles.includes('Arrendador') && (
-                      <TableCell>{`${payment.tenant?.firstName ?? ''} ${
-                        payment.tenant?.lastName ?? ''
-                      }`}</TableCell>
-                    )}
-
-                    <TableCell>
-                      {payment.validated ? (
-                        <Chip size="small" label="Validado" color="primary" />
-                      ) : (
-                        <Chip size="small" label="No validado" color="warning" />
+                      {authSession.user?.roles.includes('Arrendador') && (
+                        <TableCell>{`${payment.tenant?.firstName ?? ''} ${
+                          payment.tenant?.lastName ?? ''
+                        }`}</TableCell>
                       )}
-                    </TableCell>
 
-                    <TableCell>
-                      <TableMoreMenu>
-                        <MenuItem onClick={() => onView(payment.id)}>
-                          <ListItemIcon>
-                            <Visibility sx={{ fontSize: 25 }} />
-                          </ListItemIcon>
-                          <ListItemText
-                            primary="Ver mas"
-                            primaryTypographyProps={{ variant: 'body2' }}
-                          />
-                        </MenuItem>
+                      <TableCell>
+                        {payment.validated ? (
+                          <Chip size="small" label="Validado" color="primary" />
+                        ) : (
+                          <Chip size="small" label="No validado" color="warning" />
+                        )}
+                      </TableCell>
 
-                        {/* <MenuItem onClick={() => onUpdate(payment?.id ?? '')}>
+                      <TableCell>
+                        <TableMoreMenu>
+                          <MenuItem onClick={() => onView(payment.id)}>
+                            <ListItemIcon>
+                              <Visibility sx={{ fontSize: 25 }} />
+                            </ListItemIcon>
+                            <ListItemText
+                              primary="Ver mas"
+                              primaryTypographyProps={{ variant: 'body2' }}
+                            />
+                          </MenuItem>
+
+                          {/* <MenuItem onClick={() => onUpdate(payment?.id ?? '')}>
                             <ListItemIcon>
                               <Edit sx={{ fontSize: 25 }} />
                             </ListItemIcon>
@@ -190,43 +195,48 @@ export const Payment = () => {
                               primaryTypographyProps={{ variant: 'body2' }}
                             />
                           </MenuItem> */}
-                      </TableMoreMenu>
+                        </TableMoreMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  // Valida - que no salga esto si esta cargando...
+                  <TableRow>
+                    <TableCell colSpan={7}>
+                      <Box
+                        sx={{
+                          p: 4,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                        <Typography variant="h5" sx={{ opacity: 0.5 }}>
+                          No se encontraron pagos.
+                        </Typography>
+                      </Box>
                     </TableCell>
                   </TableRow>
-                ))
-              ) : (
-                // Valida - que no salga esto si esta cargando...
-                <TableRow>
-                  <TableCell colSpan={7}>
-                    <Box
-                      sx={{
-                        p: 4,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }}>
-                      <Typography variant="h5" sx={{ opacity: 0.5 }}>
-                        No se encontraron pagos.
-                      </Typography>
-                    </Box>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <TablePagination
-          component="div"
-          count={payments.pagination?.totalItems ?? 0}
-          page={page}
-          onPageChange={handleChangePage}
-          rowsPerPage={rowsPerPage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-          labelRowsPerPage="Filas por página"
-          labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
-          rowsPerPageOptions={[5, 10, 20]}
-        />
-      </Card>
-    </Box>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <TablePagination
+            component="div"
+            count={payments.pagination?.totalItems ?? 0}
+            page={page}
+            onPageChange={handleChangePage}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            labelRowsPerPage="Filas por página"
+            labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
+            rowsPerPageOptions={[5, 10, 20]}
+          />
+        </Card>
+      </Box>
+
+      <Box sx={{ mt: 3, mb: 6 }}>
+        <PendingPayment />
+      </Box>
+    </>
   );
 };

@@ -155,7 +155,7 @@ export const SearchProperty = () => {
       </AppBar>
 
       <Box sx={{ px: 4, flex: '1 1 auto' }}>
-        <Box
+        {/* <Box
           sx={{
             mt: 2,
             mb: 4,
@@ -202,9 +202,9 @@ export const SearchProperty = () => {
               </Button>
             </Grid>
           </Grid>
-        </Box>
+        </Box> */}
 
-        <Box>
+        <Box sx={{ mt: 4 }}>
           <Box
             sx={{
               mb: 3,
@@ -213,7 +213,7 @@ export const SearchProperty = () => {
               flexWrap: 'wrap'
             }}>
             <Typography variant="h5" sx={{ mr: 2 }}>
-              Resultados encontrados {properties.length}
+              Propiedades disponibles {properties.length}
             </Typography>
             {/* <Stack direction="row" spacing={1}>
               <Button>
@@ -282,11 +282,11 @@ export const SearchProperty = () => {
                         <Typography variant="subtitle1">1 bañ.</Typography>
                       </Stack> */}
 
-                      <Button fullWidth size="small" color="secondary" variant="outlined">
+                      {/* <Button fullWidth size="small" color="secondary" variant="outlined">
                         Ver detalles
-                      </Button>
+                      </Button> */}
                       <Button
-                        href={`https://wa.me/${property?.owner?.phone}?text=Hola`}
+                        href="https://wa.me/0968176747?text=Hola! estoy interesado en la propiedad."
                         target="_blank"
                         rel="noopener"
                         fullWidth

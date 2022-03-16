@@ -36,6 +36,8 @@ export const Create = () => {
 
   const [tenantsRent, setTenantsRent] = useState([]);
 
+  const [minDatePaid, setMinDatePaid] = useState(null);
+
   const {
     register,
     control,
@@ -114,7 +116,12 @@ export const Create = () => {
 
   const onChangeRent = ({ target }) => {
     const rent = tenantsRent.find((r) => r.id === target.value);
-    setValue('amount', rent.property?.price);
+
+    if (rent) {
+      setValue('amount', rent.property?.price);
+
+      if (rent.startDate) setMinDatePaid(new Date(rent.startDate));
+    }
   };
 
   return (
@@ -240,7 +247,7 @@ export const Create = () => {
                         value={field.value}
                         onChange={field.onChange}
                         renderInput={(params) => <TextField {...params} />}
-                        // minDate={new Date('2012-03-01')}
+                        minDate={minDatePaid ? new Date(minDatePaid) : null}
                         // maxDate={new Date('2023-06-01')}
                       />
                     )}
