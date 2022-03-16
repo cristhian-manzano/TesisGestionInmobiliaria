@@ -48,21 +48,27 @@ export const sendRequest = async ({
 
     const dataResponse = await response.json();
 
-    if (!response.ok && [401, 403].includes(response.status) && token) {
-      localStorage.removeItem('sesion');
-      return responsesFormat({
-        error: true,
-        message: 'Usuario no autorizado.',
-        data: dataResponse,
-        redirect: '/login'
-      });
-    }
-
-    if (dataResponse.error)
+    if (!response.ok) {
+      if ([401, 403].includes(response.status) && token) {
+        localStorage.removeItem('sesion');
+        return responsesFormat({
+          error: true,
+          message: 'Usuario no autorizado.',
+          data: dataResponse,
+          redirect: '/login'
+        });
+      }
       return responsesFormat({
         error: true,
         message: 'Error solicitud.'
       });
+    }
+
+    // if (dataResponse.error)
+    //   return responsesFormat({
+    //     error: true,
+    //     message: 'Error solicitud.'
+    //   });
 
     return responsesFormat({ error: false, message: 'Solicitud exitosa.', data: dataResponse });
   } catch (error) {

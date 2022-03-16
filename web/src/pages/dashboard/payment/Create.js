@@ -234,7 +234,7 @@ export const Create = () => {
                     defaultValue={null}
                     render={({ field }) => (
                       <DatePicker
-                        disableFuture
+                        // disableFuture
                         label="Mes pagado"
                         views={['year', 'month']}
                         value={field.value}

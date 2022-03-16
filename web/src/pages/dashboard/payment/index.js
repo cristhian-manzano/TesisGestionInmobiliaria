@@ -155,7 +155,7 @@ export const Payment = () => {
                       {payment.validated ? (
                         <Chip size="small" label="Validado" color="primary" />
                       ) : (
-                        <Chip size="small" label="No validado" color="error" />
+                        <Chip size="small" label="No validado" color="warning" />
                       )}
                     </TableCell>
 

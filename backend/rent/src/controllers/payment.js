@@ -25,6 +25,31 @@ const create = async (req, res) => {
         .status(responseStatusCodes.UNPROCESSABLE_ENTITY)
         .json(validationResponse(res.statusCode, error.message));
 
+    // Validate if payed before
+
+    const datePaid = new Date(value.datePaid);
+    const month = datePaid.getMonth() + 1;
+    const year = datePaid.getFullYear();
+
+    const paymentExist = await Payment.findOne({
+      where: {
+        [Op.and]: [
+          sequelize.where(sequelize.literal(`extract(MONTH FROM "datePaid")`), month),
+          sequelize.where(sequelize.literal(`extract(YEAR FROM "datePaid")`), year),
+          { idRent: value.idRent },
+          { validated: true }
+        ]
+      }
+    });
+
+    if (paymentExist) {
+      return res
+        .status(responseStatusCodes.CONFLICT)
+        .json(errorResponse(res.statusCode, 'Ya ha realizado el pago del mes seleccionado.'));
+    }
+
+    // Validate if payed before
+
     if (!req.file)
       return res
         .status(responseStatusCodes.UNPROCESSABLE_ENTITY)
