@@ -1,10 +1,13 @@
 const { Op } = require('sequelize');
 const moment = require('moment');
+const { default: axios } = require('axios');
 
 const Rent = require('./models/rent');
 const Payment = require('./models/payment');
+const Notification = require('./models/notification');
 const sequelize = require('./models/index');
 const PendingPayment = require('./models/pendingPaymentRent');
+const Logger = require('./config/logger');
 
 const getPaymentsRent = async () =>
   Rent.findAll({
@@ -29,6 +32,26 @@ const getPaymentsRent = async () =>
       }
     ]
   });
+
+const pendingPaymentNotificaion = async (data = {}) => {
+  const userData = await axios.post(`${process.env.API_USER_URL}/user/list`, {
+    users: [data.rent?.idTenant]
+  });
+
+  const receiverId = data.rent?.idOwner;
+
+  await Notification.create({
+    description: `${
+      userData.data.data[0].lastName
+    } debe el mes ${data.pendingDate.getMonth()}/${data.pendingDate.getFullYear()}.`,
+    entity: 'PendingPayment',
+    idEntity: data.rent?.id,
+    idSender: data.rent.idTenant,
+    idReceiver: receiverId
+  }).catch((e) => {
+    Logger.error(e);
+  });
+};
 
 const setPendingPayments = async () => {
   const payments = await getPaymentsRent();
@@ -92,13 +115,18 @@ const setPendingPayments = async () => {
           pendingDate: data.pendingDate,
           idRent: data.rent.id
         });
+
+        // Create notification
+        await pendingPaymentNotificaion(data);
       }
     })
   );
 };
 
 const job = async () => {
-  await setPendingPayments();
+  await setPendingPayments().catch((e) => {
+    Logger.error(e);
+  });
 };
 
 module.exports = { job };
