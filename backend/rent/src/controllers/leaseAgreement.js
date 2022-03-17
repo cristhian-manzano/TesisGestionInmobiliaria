@@ -118,9 +118,10 @@ const getAll = async (req, res) => {
     if (search) {
       Data = Data.filter(
         (lease) =>
-          lease.property.tagName.includes(search) ||
-          lease.tenant.firstName.includes(search) ||
-          lease.tenant.lastName.includes(search)
+          lease.tenant.firstName
+            ?.concat(' ', lease.tenant.lastName)
+            .toLowerCase()
+            .includes(search.toLowerCase()) || lease.property.tagName.includes(search)
       );
     }
 

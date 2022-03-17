@@ -64,11 +64,12 @@ const getAll = async (req, res) => {
 
     if (search) {
       rentsData = rentsData.filter(
-        (rent) =>
-          rent.property.tagName.includes(search) ||
-          rent.tenant.firstName.includes(search) ||
-          rent.tenant.lastName.includes(search) ||
-          rent.tenant.email.includes(search)
+        ({ property = {}, tenant = {} }) =>
+          property.tagName?.includes(search) ||
+          tenant.firstName
+            ?.concat(' ', tenant.lastName)
+            .toLowerCase()
+            .includes(search.toLowerCase())
       );
     }
 
@@ -138,9 +139,10 @@ const getAllByTenant = async (req, res) => {
       rentsData = rentsData.filter(
         (rent) =>
           rent.property.tagName.includes(search) ||
-          rent.owner.firstName.includes(search) ||
-          rent.owner.lastName.includes(search) ||
-          rent.owner.email.includes(search)
+          rent.owner.firstName
+            ?.concat(' ', rent.owner.lastName)
+            .toLowerCase()
+            .includes(search.toLowerCase())
       );
     }
 

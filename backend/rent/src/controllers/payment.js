@@ -144,10 +144,12 @@ const getAll = async (req, res) => {
     if (search) {
       data = data.filter(
         (d) =>
-          d.tenant.firstName.includes(search) ||
-          d.tenant.lastName.includes(search) ||
-          d.property.tagName.includes(search) ||
-          d.code.includes(search)
+          d.code.includes(search) ||
+          d.tenant.firstName
+            ?.concat(' ', d.tenant.lastName)
+            .toLowerCase()
+            .includes(search.toLowerCase()) ||
+          d.property.tagName.includes(search)
       );
     }
 
@@ -476,9 +478,10 @@ const getPendingRents = async (req, res) => {
     if (search) {
       data = data.filter(
         (d) =>
-          d.tenant.firstName.includes(search) ||
-          d.tenant.lastName.includes(search) ||
-          d.property.tagName.includes(search)
+          d.tenant.firstName
+            ?.concat(' ', d.tenant.lastName)
+            .toLowerCase()
+            .includes(search.toLowerCase()) || d.property.tagName.includes(search)
       );
     }
 

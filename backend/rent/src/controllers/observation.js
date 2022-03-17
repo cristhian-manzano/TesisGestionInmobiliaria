@@ -84,9 +84,10 @@ const getAll = async (req, res) => {
     if (search) {
       observationsData = observationsData.filter(
         (observation) =>
-          observation.user.firstName.includes(search) ||
-          observation.user.lastName.includes(search) ||
-          observation.description.includes(search)
+          observation.user.firstName
+            ?.concat(' ', observation.user.lastName)
+            .toLowerCase()
+            .includes(search.toLowerCase()) || observation.property.tagName?.includes(search)
       );
     }
 

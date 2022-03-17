@@ -48,11 +48,17 @@ export const Payment = () => {
   const onView = (id) => navigate(`${id}`);
 
   const fetchPayments = async () => {
-    const condition = searchInput ? `&search=${searchInput}` : '';
+    const url = new URL(
+      `${process.env.REACT_APP_RENT_SERVICE_URL}/payment?page=${page}&size=${rowsPerPage}`
+    );
+
+    if (searchInput) {
+      url.searchParams.append('search', searchInput);
+    }
 
     handleLoading(true);
     const response = await sendRequest({
-      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/payment?page=${page}&size=${rowsPerPage}${condition}`,
+      urlPath: url,
       token: authSession.user?.token,
       method: 'GET'
     });
@@ -97,7 +103,7 @@ export const Payment = () => {
         <Card sx={{ p: 3 }}>
           <Box sx={{ py: 2 }}>
             <TextField
-              placeholder="search"
+              placeholder="Código, inquilino o departamento"
               onChange={onChangeSearchInput}
               value={searchInput}
               InputProps={{

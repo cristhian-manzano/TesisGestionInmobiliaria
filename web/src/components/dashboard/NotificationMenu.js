@@ -1,4 +1,12 @@
-import { NotificationsNone, Visibility, WatchLater, RateReview, Chat } from '@mui/icons-material';
+import {
+  NotificationsNone,
+  Visibility,
+  WatchLater,
+  RateReview,
+  Chat,
+  CreditCardOff
+} from '@mui/icons-material';
+
 import {
   Badge,
   Divider,
@@ -176,6 +184,7 @@ export const NotificationMenu = () => {
                 <Avatar sx={{ bgcolor: 'background.neutral' }}>
                   {notification.entity === 'Observation' && <RateReview />}
                   {notification.entity === 'Comment' && <Chat />}
+                  {notification.entity === 'PendingPayment' && <CreditCardOff />}
                 </Avatar>
               </ListItemAvatar>
               <ListItemText
@@ -183,6 +192,7 @@ export const NotificationMenu = () => {
                   <Typography variant="subtitle1">
                     {notification.entity === 'Observation' && 'Nueva observación'}
                     {notification.entity === 'Comment' && 'Nuevo comentario'}
+                    {notification.entity === 'PendingPayment' && 'Pago pendiente'}
                     <Typography component="span" variant="body1" sx={{ color: 'text.secondary' }}>
                       &nbsp; {notification.description}
                     </Typography>

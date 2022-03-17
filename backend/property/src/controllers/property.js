@@ -94,9 +94,9 @@ const getByOwner = async (req, res) => {
     if (search) {
       properties = properties.filter(
         (property) =>
-          property.tagName.includes(search) ||
-          +property.price === +search ||
-          property.typeProperty.name.includes(search)
+          property.tagName.toLowerCase().includes(search.toLowerCase()) ||
+          property.typeProperty?.name?.toLowerCase().includes(search.toLowerCase()) ||
+          property.sector?.name?.toLowerCase().includes(search.toLowerCase())
       );
     }
 

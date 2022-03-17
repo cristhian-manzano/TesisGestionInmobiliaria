@@ -38,11 +38,17 @@ export const PendingPayment = () => {
   const { handleOpenSnackbar } = useContext(SnackbarContext);
 
   const fetchPayments = async () => {
-    const condition = searchInput ? `&search=${searchInput}` : '';
+    const url = new URL(
+      `${process.env.REACT_APP_RENT_SERVICE_URL}/payment/pending?page=${page}&size=${rowsPerPage}`
+    );
+
+    if (searchInput) {
+      url.searchParams.append('search', searchInput);
+    }
 
     handleLoading(true);
     const response = await sendRequest({
-      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/payment/pending?page=${page}&size=${rowsPerPage}${condition}`,
+      urlPath: url,
       token: authSession.user?.token,
       method: 'GET'
     });
@@ -79,7 +85,7 @@ export const PendingPayment = () => {
       <Card sx={{ p: 3 }}>
         <Box sx={{ py: 2 }}>
           <TextField
-            placeholder="search"
+            placeholder="Departamento o inquilino"
             onChange={onChangeSearchInput}
             value={searchInput}
             InputProps={{

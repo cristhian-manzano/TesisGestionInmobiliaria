@@ -68,11 +68,17 @@ export const Property = () => {
   };
 
   const fetchProperties = async () => {
-    const condition = searchInput ? `&search=${searchInput}` : '';
+    const url = new URL(
+      `${process.env.REACT_APP_PROPERTY_SERVICE_URL}/property/get-by-owner?page=${page}&size=${rowsPerPage}`
+    );
+
+    if (searchInput) {
+      url.searchParams.append('search', searchInput);
+    }
 
     handleLoading(true);
     const response = await sendRequest({
-      urlPath: `${process.env.REACT_APP_PROPERTY_SERVICE_URL}/property/get-by-owner?page=${page}&size=${rowsPerPage}${condition}`,
+      urlPath: url,
       token: authSession.user?.token,
       method: 'GET'
     });
@@ -132,7 +138,7 @@ export const Property = () => {
         <Card sx={{ p: 3 }}>
           <Box sx={{ py: 2 }}>
             <TextField
-              placeholder="search"
+              placeholder="Nombre, tipo o sector"
               onChange={onChangeSearchInput}
               InputProps={{
                 endAdornment: (

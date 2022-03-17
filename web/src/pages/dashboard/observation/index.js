@@ -50,11 +50,15 @@ export const Observation = () => {
   const onView = (id) => navigate(`${id}`);
 
   const fetchObservations = async () => {
-    const condition = searchInput ? `&search=${searchInput}` : '';
-
+    const url = new URL(
+      `${process.env.REACT_APP_RENT_SERVICE_URL}/observation?page=${page}&size=${rowsPerPage}`
+    );
+    if (searchInput) {
+      url.searchParams.append('search', searchInput);
+    }
     handleLoading(true);
     const response = await sendRequest({
-      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/observation?page=${page}&size=${rowsPerPage}${condition}`,
+      urlPath: url,
       token: authSession.user?.token,
       method: 'GET'
     });
@@ -131,7 +135,7 @@ export const Observation = () => {
           <Box sx={{ py: 2 }}>
             <TextField
               onChange={onChangeSearchInput}
-              placeholder="search"
+              placeholder="Usuario o propiedad"
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">

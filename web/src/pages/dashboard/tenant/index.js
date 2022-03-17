@@ -72,11 +72,17 @@ export const Tenant = () => {
   };
 
   const fetchTenantsRent = async () => {
-    const condition = searchInput ? `&search=${searchInput}` : '';
+    const url = new URL(
+      `${process.env.REACT_APP_RENT_SERVICE_URL}/rent?page=${page}&size=${rowsPerPage}`
+    );
+
+    if (searchInput) {
+      url.searchParams.append('search', searchInput);
+    }
 
     handleLoading(true);
     const response = await sendRequest({
-      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/rent?page=${page}&size=${rowsPerPage}${condition}`,
+      urlPath: url,
       token: authSession.user?.token,
       method: 'GET'
     });
@@ -164,7 +170,7 @@ export const Tenant = () => {
         <Card sx={{ p: 3 }}>
           <Box sx={{ py: 2 }}>
             <TextField
-              placeholder="search"
+              placeholder="Inmueble o inquilino"
               onChange={onChangeSearchInput}
               InputProps={{
                 endAdornment: (

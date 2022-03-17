@@ -59,11 +59,17 @@ export const Contract = () => {
   const closeModalFile = () => setModalFile({ open: false, url: '' });
 
   const fetchContracts = async () => {
-    const condition = searchInput ? `&search=${searchInput}` : '';
+    const url = new URL(
+      `${process.env.REACT_APP_RENT_SERVICE_URL}/contracts?page=${page}&size=${rowsPerPage}`
+    );
+
+    if (searchInput) {
+      url.searchParams.append('search', searchInput);
+    }
 
     handleLoading(true);
     const response = await sendRequest({
-      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/contracts?page=${page}&size=${rowsPerPage}${condition}`,
+      urlPath: url,
       token: authSession.user?.token,
       method: 'GET'
     });
@@ -139,7 +145,7 @@ export const Contract = () => {
         <Card sx={{ p: 3 }}>
           <Box sx={{ py: 2 }}>
             <TextField
-              placeholder="search"
+              placeholder="Propiedad o inquilino"
               onChange={onChangeSearchInput}
               InputProps={{
                 endAdornment: (
@@ -163,7 +169,7 @@ export const Contract = () => {
                   {/* <TableCell>Archivo</TableCell> */}
                   <TableCell>Propiedad</TableCell>
                   <TableCell>Inquilino</TableCell>
-                  {/* <TableCell>Estado</TableCell> */}
+                  <TableCell>Estado</TableCell>
                   <TableCell />
                 </TableRow>
               </TableHead>
@@ -186,13 +192,13 @@ export const Contract = () => {
                       <TableCell>
                         {`${contract.tenant?.firstName ?? ''} ${contract.tenant?.lastName ?? ''}`}
                       </TableCell>
-                      {/* <TableCell>
+                      <TableCell>
                         {contract.active ? (
                           <Chip label="Activo" size="small" color="success" />
                         ) : (
                           <Chip label="Inactivo" size="small" color="error" />
                         )}
-                      </TableCell> */}
+                      </TableCell>
 
                       <TableCell>
                         <TableMoreMenu>
