@@ -1,4 +1,5 @@
 const { Op } = require('sequelize');
+const axios = require('axios');
 const { uploadFiles, deleteFiles } = require('../services/awsService');
 const { validateCreateProperty, validateUpdateProperty } = require('../validations/property');
 const Property = require('../models/property');
@@ -399,6 +400,67 @@ const updateStateProperty = async (req, res) => {
   }
 };
 
+const getPublicProperties = async (req, res) => {
+  try {
+    const { page, size, idTypeProperty, idSector } = req.query;
+
+    const { limit, offset } = getPagination(page, size);
+
+    const properties = await Property.findAll({
+      where: { available: true },
+
+      include: [
+        {
+          model: ImagesProperty,
+          as: 'ImagesProperties'
+        },
+        {
+          model: TypeProperty,
+          as: 'typeProperty',
+          ...(idTypeProperty && { where: { id: idTypeProperty } })
+        },
+        {
+          model: Sector,
+          as: 'sector',
+          ...(idSector && { where: { id: idSector } })
+        }
+      ],
+      offset,
+      limit
+    });
+
+    const pagination = getPagingData(properties.length, page, limit);
+
+    const owners = properties.reduce(
+      (prev, cur) => (prev.includes(cur.idOwner) ? prev : prev.concat(cur.idOwner)),
+      []
+    );
+
+    const ownersData =
+      owners.length > 0 &&
+      (await axios.post(`${process.env.API_USER_URL}/user/list`, {
+        users: owners
+      }));
+
+    const results = properties.map((p) => {
+      const owner = ownersData.data.data.find((o) => p.idOwner === o.id);
+      return {
+        ...p.dataValues,
+        owner
+      };
+    });
+
+    return res
+      .status(responseStatusCodes.OK)
+      .json(successResponse(res.statusCode, 'Successfull request!', { pagination, results }));
+  } catch (e) {
+    Logger.error('Error: ', e.message);
+    return res
+      .status(responseStatusCodes.INTERNAL_SERVER_ERROR)
+      .json(errorResponse(res.statusCode, 'Internal server errror.'));
+  }
+};
+
 module.exports = {
   getAll,
   get,
@@ -407,5 +469,6 @@ module.exports = {
   destroy,
   getByOwner,
   getlistProperties,
-  updateStateProperty
+  updateStateProperty,
+  getPublicProperties
 };

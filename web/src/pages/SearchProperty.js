@@ -14,6 +14,7 @@ import {
   Button,
   CardMedia,
   Stack,
+  TablePagination,
   Divider,
   Autocomplete,
   FormControl,
@@ -51,16 +52,31 @@ export const SearchProperty = () => {
   const { handleLoading } = useContext(LoadingContext);
   const { handleOpenSnackbar } = useContext(SnackbarContext);
 
-  const [properties, setProperties] = useState([]);
+  const [properties, setProperties] = useState({});
   const [sectors, setSectors] = useState([]);
   const [selectedSector, setSelectedSector] = useState(null);
   const [typeProperties, setTypeProperties] = useState([]);
   const [selectedTypeProperty, setSelectedTypeProperty] = useState(null);
 
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
   const fetchProperties = async () => {
+    const url = new URL(
+      `${process.env.REACT_APP_PROPERTY_SERVICE_URL}/property/public?page=${page}&size=${rowsPerPage}`
+    );
+
+    if (selectedTypeProperty) {
+      url.searchParams.append('idTypeProperty', selectedTypeProperty);
+    }
+
+    if (selectedSector?.id) {
+      url.searchParams.append('idSector', selectedSector.id);
+    }
+
     handleLoading(true);
     const response = await sendRequest({
-      urlPath: `${process.env.REACT_APP_PROPERTY_SERVICE_URL}/property`,
+      urlPath: url,
       method: 'GET'
     });
     handleLoading(false);
@@ -114,6 +130,19 @@ export const SearchProperty = () => {
     fetchTypeProperties();
   }, []);
 
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const onSearchProperties = () => {
+    fetchProperties();
+  };
+
   return (
     <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
       <AppBar position="sticky" color="default">
@@ -155,7 +184,7 @@ export const SearchProperty = () => {
       </AppBar>
 
       <Box sx={{ px: 4, flex: '1 1 auto' }}>
-        {/* <Box
+        <Box
           sx={{
             mt: 2,
             mb: 4,
@@ -197,12 +226,12 @@ export const SearchProperty = () => {
               />
             </Grid>
             <Grid item xs={12} sm={2}>
-              <Button fullWidth variant="contained" sx={{ py: 2 }}>
+              <Button fullWidth variant="contained" onClick={onSearchProperties} sx={{ py: 2 }}>
                 <Search />
               </Button>
             </Grid>
           </Grid>
-        </Box> */}
+        </Box>
 
         <Box sx={{ mt: 4 }}>
           <Box
@@ -213,7 +242,7 @@ export const SearchProperty = () => {
               flexWrap: 'wrap'
             }}>
             <Typography variant="h5" sx={{ mr: 2 }}>
-              Propiedades disponibles {properties.length}
+              Propiedades disponibles {properties.results?.length}
             </Typography>
             {/* <Stack direction="row" spacing={1}>
               <Button>
@@ -228,7 +257,7 @@ export const SearchProperty = () => {
           </Box>
 
           <Grid container spacing={2}>
-            {properties.map((property) => (
+            {properties.results?.map((property) => (
               <Grid key={property.id} xs={12} sm={6} md={4} lg={3} item>
                 <Card>
                   <CardMedia>
@@ -286,7 +315,7 @@ export const SearchProperty = () => {
                         Ver detalles
                       </Button> */}
                       <Button
-                        href="https://wa.me/0968176747?text=Hola! estoy interesado en la propiedad."
+                        href={`https://wa.me/${property.owner?.phone}?text=Hola! estoy interesado en la propiedad.`}
                         target="_blank"
                         rel="noopener"
                         fullWidth
@@ -303,9 +332,19 @@ export const SearchProperty = () => {
           </Grid>
         </Box>
 
-        {/* <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', my: 5 }}>
-          <Pagination count={10} color="primary" size="small" />
-        </Box> */}
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', my: 5 }}>
+          <TablePagination
+            component="div"
+            count={properties.pagination?.totalItems ?? 0}
+            page={page}
+            onPageChange={handleChangePage}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            labelRowsPerPage="Filas por página"
+            labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
+            rowsPerPageOptions={[5, 10, 20]}
+          />
+        </Box>
       </Box>
     </Box>
   );

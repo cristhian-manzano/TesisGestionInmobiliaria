@@ -8,7 +8,8 @@ const {
   update,
   destroy,
   getlistProperties,
-  updateStateProperty
+  updateStateProperty,
+  getPublicProperties
 } = require('../controllers/property');
 
 // Multer, files
@@ -19,6 +20,7 @@ const { validateToken } = require('../middlewares/AuthMiddleare');
 
 // Routes
 routes.get('/', getAll);
+routes.get('/public', getPublicProperties);
 routes.get('/get-by-owner', validateToken, getByOwner);
 routes.post('/', validateToken, multerMiddleware, create);
 routes.post('/list', getlistProperties);
