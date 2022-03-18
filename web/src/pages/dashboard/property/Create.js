@@ -196,14 +196,34 @@ export const Create = () => {
             </Grid>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
-                <TextField label="Nombre" {...register('tagName', { required: true })} />
-                <FormHelperText error>{errors.tagName && 'Nombre requerido'}</FormHelperText>
+                <TextField
+                  label="Nombre"
+                  {...register('tagName', {
+                    required: { value: true, message: 'Nombre requerido' },
+                    maxLength: {
+                      value: 50,
+                      message: 'Máxima longitud de caracteres: 50'
+                    }
+                  })}
+                />
+                <FormHelperText error>{errors.tagName?.message}</FormHelperText>
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
-                <TextField label="Area m2" {...register('area', { required: true })} />
-                <FormHelperText error>{errors.area && 'Area requerida'}</FormHelperText>
+                <TextField
+                  label="Area m2"
+                  {...register('area', {
+                    required: { value: true, message: 'Area requerida' },
+                    pattern: {
+                      value: /^\d+\.?\d{0,2}?$/,
+                      message: 'Solo se aceptan números enteros o con 2 decimales.'
+                    },
+                    min: { value: 0, message: 'Ingrese números positivos.' },
+                    max: { value: 100000000, message: 'Longitud demasiado elevada.' }
+                  })}
+                />
+                <FormHelperText error>{errors.area?.message}</FormHelperText>
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -236,18 +256,35 @@ export const Create = () => {
               <FormControl fullWidth>
                 <TextField
                   label="Precio mensual"
-                  {...register('price', { required: true })}
+                  {...register('price', {
+                    required: { value: true, message: 'Precio mensual requerido' },
+                    pattern: {
+                      value: /^\d+\.?\d{0,2}?$/,
+                      message: 'Solo se aceptan números enteros o con 2 decimales.'
+                    },
+                    min: { value: 0, message: 'Ingrese números positivos.' },
+                    max: { value: 100000000, message: 'Longitud demasiado elevada.' }
+                  })}
                   InputProps={{
                     startAdornment: <InputAdornment position="start">$</InputAdornment>
                   }}
                 />
-                <FormHelperText error>{errors.price && 'Precio requerido'}</FormHelperText>
+                <FormHelperText error>{errors.price?.message}</FormHelperText>
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
-                <TextField label="Dirección" {...register('address', { required: true })} />
-                <FormHelperText error>{errors.address && 'Dirección requerida'}</FormHelperText>
+                <TextField
+                  label="Dirección"
+                  {...register('address', {
+                    required: { value: true, message: 'Dirección requerida' },
+                    maxLength: {
+                      value: 100,
+                      message: 'Máxima longitud de caracteres: 100'
+                    }
+                  })}
+                />
+                <FormHelperText error>{errors.address?.message}</FormHelperText>
               </FormControl>
             </Grid>
 
@@ -255,10 +292,17 @@ export const Create = () => {
             {selectedTypeProperty?.additionalFeatures?.includes('bedRooms') && (
               <Grid item xs={12} sm={6}>
                 <FormControl fullWidth>
-                  <TextField label="Habitaciones" {...register('bedRooms', { required: true })} />
-                  <FormHelperText error>
-                    {errors.bedRooms && 'Habitaciones requeridas'}
-                  </FormHelperText>
+                  <TextField
+                    label="Habitaciones"
+                    {...register('bedRooms', {
+                      required: { value: true, message: 'Número de habitaciones requerido.' },
+                      pattern: {
+                        value: /^[1-9]\d*(\d+)?$/i,
+                        message: 'Solo se aceptan números enteros.'
+                      }
+                    })}
+                  />
+                  <FormHelperText error>{errors.bedRooms?.message}</FormHelperText>
                 </FormControl>
               </Grid>
             )}
@@ -266,8 +310,17 @@ export const Create = () => {
             {selectedTypeProperty?.additionalFeatures?.includes('bathRooms') && (
               <Grid item xs={12} sm={6}>
                 <FormControl fullWidth>
-                  <TextField label="Baños" {...register('bathRooms', { required: true })} />
-                  <FormHelperText error>{errors.bathRooms && 'Baños requeridas'}</FormHelperText>
+                  <TextField
+                    label="Baños"
+                    {...register('bathRooms', {
+                      required: { value: true, message: 'Número de baños requerido.' },
+                      pattern: {
+                        value: /^[1-9]\d*(\d+)?$/i,
+                        message: 'Solo se aceptan números enteros.'
+                      }
+                    })}
+                  />
+                  <FormHelperText error>{errors.bathRooms?.message}</FormHelperText>
                 </FormControl>
               </Grid>
             )}
@@ -277,20 +330,24 @@ export const Create = () => {
               <FormControl fullWidth>
                 <TextField
                   label="Descripción"
-                  {...register('description', { required: true })}
+                  {...register('description', {
+                    required: { value: true, message: 'Descripción requerida' },
+                    maxLength: { value: 255, message: 'Máxima cantidad de caracteres: 255' }
+                  })}
                   placeholder="Agregar descripción de inmueble..."
                   multiline
                   maxRows={20}
                   minRows={5}
                   inputProps={{ maxLength: 2000 }}
                 />
-                <FormHelperText error>
-                  {errors.description && 'Descripción requerida'}
-                </FormHelperText>
+                <FormHelperText error>{errors.description?.message}</FormHelperText>
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={12}>
               <ImagesUpload images={images} onChangeImages={handleChangeImages} />
+              <FormHelperText>
+                Formato: .jpg, .jpeg, .png - Tamaño máximo de imagenes permitido: 5MB
+              </FormHelperText>
             </Grid>
             <Grid item xs={12} sm={12}>
               <Button type="submit" fullWidth variant="contained">

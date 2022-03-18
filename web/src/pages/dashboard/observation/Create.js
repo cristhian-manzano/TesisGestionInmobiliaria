@@ -109,7 +109,7 @@ export const Create = () => {
                     <Controller
                       name="idRent"
                       control={control}
-                      rules={{ required: true }}
+                      rules={{ required: { value: true, message: 'Alquiler requerido.' } }}
                       defaultValue=""
                       render={({ field }) => (
                         <Select labelId="rent-select" label="Alquileres" {...field}>
@@ -128,9 +128,7 @@ export const Create = () => {
                       )}
                     />
 
-                    <FormHelperText error>
-                      {formState.errors?.idRent && 'Alquiler required'}
-                    </FormHelperText>
+                    <FormHelperText error>{formState.errors?.idRent?.message}</FormHelperText>
                   </FormControl>
                 </Grid>
               </Grid>
@@ -143,16 +141,14 @@ export const Create = () => {
                   label="Descripción"
                   placeholder="Agregar descripción de inmueble..."
                   multiline
-                  {...register('description', { required: true, maxLength: 300 })}
+                  {...register('description', {
+                    required: { value: true, message: 'Description requerida.' },
+                    maxLength: { value: 300, message: 'Longitud máxima de caracteres: 300' }
+                  })}
                   maxRows={20}
                   minRows={5}
-                  inputProps={{ maxLength: 2000 }}
                 />
-                <FormHelperText error>
-                  {formState.errors.description?.type === 'required' && 'Description required'}
-                  {formState.errors.description?.type === 'maxLength' &&
-                    'Description maxlength 300'}
-                </FormHelperText>
+                <FormHelperText error>{formState.errors.description?.message}</FormHelperText>
               </FormControl>
             </Grid>
 

@@ -1,6 +1,8 @@
 import { useState, useContext, useEffect } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 
+import moment from 'moment';
+
 import {
   Box,
   TextField,
@@ -18,7 +20,7 @@ import {
   MenuItem
 } from '@mui/material';
 
-import { ArrowBack, Search, Close, CalendarToday } from '@mui/icons-material';
+import { ArrowBack, Search, Close } from '@mui/icons-material';
 import { LocalizationProvider } from '@mui/lab';
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
 import DatePicker from '@mui/lab/DatePicker';
@@ -46,6 +48,7 @@ export const Create = () => {
     handleSubmit,
     reset,
     control,
+    setValue,
     formState: { errors }
   } = useForm();
 
@@ -62,7 +65,7 @@ export const Create = () => {
       const data = response.data.data?.filter((d) => d.available) ?? [];
       setProperties(data.map((property) => ({ id: property.id, name: property.tagName })));
     } else {
-      handleOpenSnackbar('error', 'Cannot get properties!');
+      handleOpenSnackbar('error', 'Error al obtener propiedades!');
     }
   };
 
@@ -91,14 +94,14 @@ export const Create = () => {
     handleLoading(false);
 
     if (!response.error) {
-      handleOpenSnackbar('success', 'User get it');
+      handleOpenSnackbar('success', 'usuario encontrado.');
       setSearchTenant((previous) => ({
         ...previous,
         tenant: response.data.data,
         obtained: true
       }));
     } else {
-      handleOpenSnackbar('error', 'Cannot find user!');
+      handleOpenSnackbar('error', 'Usuario no encontrado!');
     }
   };
 
@@ -234,7 +237,7 @@ export const Create = () => {
                   )}
                 />
                 <FormHelperText error>
-                  {errors.propertyType && 'propertyType is required'}
+                  {errors.propertyType && 'Tipo de propiedad es requerido.'}
                 </FormHelperText>
               </FormControl>
             </Grid>
@@ -242,16 +245,23 @@ export const Create = () => {
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
                 <TextField
+                  placeholder="00.00"
                   disabled={!searchTenant.obtained}
                   label="Depósito de garantía"
-                  {...register('securityDeposit', { required: true })}
+                  {...register('securityDeposit', {
+                    required: { value: true, message: 'Depósito de garantía es requerido.' },
+                    min: { value: 0, message: 'Ingrese cantidades positivas.' },
+                    max: { value: 10000000, message: 'Número demasiado elevado.' },
+                    pattern: {
+                      value: /^\d+\.?\d{0,2}?$/,
+                      message: 'Solo se aceptan números enteros o con 2 decimales.'
+                    }
+                  })}
                   InputProps={{
                     startAdornment: <InputAdornment position="start">$</InputAdornment>
                   }}
                 />
-                <FormHelperText error>
-                  {errors.securityDeposit && 'securityDeposit is required'}
-                </FormHelperText>
+                <FormHelperText error>{errors.securityDeposit?.message}</FormHelperText>
               </FormControl>
             </Grid>
 
@@ -260,7 +270,23 @@ export const Create = () => {
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
                   <Controller
                     name="startDate"
-                    rules={{ required: true }}
+                    rules={{
+                      valueAsDate: true,
+
+                      required: { value: true, message: 'Fecha de inicio válida es requerida.' },
+
+                      max: {
+                        value: new Date(),
+                        message: `Fecha máxima: ${new Date().toLocaleDateString('es-EC')}`
+                      },
+
+                      min: {
+                        value: new Date(moment().subtract(5, 'years').calendar()),
+                        message: `Fecha mínima: ${new Date(
+                          moment().subtract(5, 'years').calendar()
+                        ).toLocaleDateString('es-EC')}`
+                      }
+                    }}
                     control={control}
                     render={({ field }) => (
                       <DatePicker
@@ -268,12 +294,15 @@ export const Create = () => {
                         {...field}
                         label="Inicio de alquiler"
                         value={field.value ?? null}
+                        maxDate={new Date()}
+                        minDate={new Date(moment().subtract(5, 'years').calendar())}
                         renderInput={(params) => <TextField {...params} />}
+                        onError={(e) => setValue('startDate', null)}
                       />
                     )}
                   />
                 </LocalizationProvider>
-                <FormHelperText error>{errors.startDate && 'startDate is required'}</FormHelperText>
+                <FormHelperText error>{errors.startDate?.message}</FormHelperText>
               </FormControl>
             </Grid>
 
@@ -325,7 +354,7 @@ export const Create = () => {
                 />
 
                 <FormHelperText error>
-                  {errors.paymentDay && 'paymentDay is required'}
+                  {errors.paymentDay && 'Día de pago requerido'}
                 </FormHelperText>
               </FormControl>
             </Grid>

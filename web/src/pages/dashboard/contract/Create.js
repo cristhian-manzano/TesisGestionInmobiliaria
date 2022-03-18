@@ -109,6 +109,8 @@ export const Create = () => {
   const uploadFile = (e) => {
     const file = e.target.files[0];
 
+    if (parseFloat(file.size / 1024 ** 2) > 5) return;
+
     setContractFile({
       id: `${file.name}-${Date.now()}`,
       url: URL.createObjectURL(file),
@@ -147,7 +149,7 @@ export const Create = () => {
                     <Controller
                       name="idRent"
                       control={control}
-                      rules={{ required: true }}
+                      rules={{ required: { value: true, message: 'Alquiler requerido.' } }}
                       defaultValue=""
                       render={({ field }) => (
                         <Select labelId="rent-select" label="Alquileres" {...field}>
@@ -166,7 +168,7 @@ export const Create = () => {
                       )}
                     />
 
-                    <FormHelperText error>{errors?.idRent && 'Alquiler required'}</FormHelperText>
+                    <FormHelperText error>{errors.idRent?.message}</FormHelperText>
                   </FormControl>
                 </Grid>
               </Grid>
@@ -177,7 +179,7 @@ export const Create = () => {
                 <LocalizationProvider dateAdapter={AdapterDateFns} locale={es}>
                   <Controller
                     name="startDate"
-                    rules={{ required: true }}
+                    rules={{ required: { value: true, message: 'Fecha de inicio requerida.' } }}
                     control={control}
                     defaultValue={null}
                     render={({ field }) => (
@@ -188,14 +190,14 @@ export const Create = () => {
                           field.onChange(e);
                           changeRangeDates(e);
                         }}
+                        maxDate={new Date()}
+                        minDate={new Date(moment().subtract(5, 'years').calendar())}
                         renderInput={(params) => <TextField {...params} />}
                       />
                     )}
                   />
                 </LocalizationProvider>
-                <FormHelperText error>
-                  {errors.startDate?.type === 'required' && 'Fecha de inicio required'}
-                </FormHelperText>
+                <FormHelperText error>{errors.startDate?.message}</FormHelperText>
               </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -203,7 +205,7 @@ export const Create = () => {
                 <LocalizationProvider dateAdapter={AdapterDateFns} locale={es}>
                   <Controller
                     name="endDate"
-                    rules={{ required: true }}
+                    rules={{ required: { value: true, message: 'Fecha de fin requerida.' } }}
                     control={control}
                     defaultValue={null}
                     render={({ field }) => (
@@ -212,6 +214,7 @@ export const Create = () => {
                         value={field.value}
                         onChange={field.onChange}
                         minDate={rangeDates.minDate}
+                        maxDate={new Date(moment().add(5, 'years').calendar())}
                         disabled={!rangeDates.minDate}
                         renderInput={(params) => <TextField {...params} />}
                       />
@@ -219,9 +222,7 @@ export const Create = () => {
                   />
                 </LocalizationProvider>
 
-                <FormHelperText error>
-                  {errors.endDate?.type === 'required' && 'Fecha de fin required'}
-                </FormHelperText>
+                <FormHelperText error>{errors.endDate?.message}</FormHelperText>
               </FormControl>
             </Grid>
 
@@ -269,6 +270,9 @@ export const Create = () => {
                   </Box>
                 )}
               </Box>
+              <FormHelperText>
+                Formatos permitidos: .pdf - Tamaño máximo de documento permitido: 5MB
+              </FormHelperText>
             </Grid>
 
             <Grid item xs={12} sm={12}>

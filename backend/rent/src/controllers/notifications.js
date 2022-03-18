@@ -14,7 +14,8 @@ const get = async (req, res) => {
 
     const notifications = await Notification.findAll({
       // where: { [Op.and]: [{ read: false }, { idReceiver: idUser }] }
-      where: { idReceiver: idUser }
+      where: { idReceiver: idUser },
+      order: [['date', 'DESC']]
     });
 
     return res

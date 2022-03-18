@@ -22,6 +22,8 @@ import {
   Button
 } from '@mui/material';
 
+import moment from 'moment';
+
 import { Bar } from 'react-chartjs-2';
 import { Chart } from 'chart.js/auto'; // This is necessary for chart visualization
 import { Search } from '@mui/icons-material';
@@ -324,6 +326,7 @@ export const Income = () => {
                 views={['year']}
                 value={chartSelectedYear}
                 onChange={onChangeChartIncome}
+                minDate={new Date(moment().subtract(10, 'years').calendar())}
                 renderInput={(params) => <TextField {...params} disabled />}
               />
             </LocalizationProvider>

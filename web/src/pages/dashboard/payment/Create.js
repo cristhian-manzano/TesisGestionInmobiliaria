@@ -6,6 +6,8 @@ import { LocalizationProvider, DatePicker } from '@mui/lab';
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
 import { es } from 'date-fns/locale';
 
+import moment from 'moment';
+
 import {
   Box,
   Grid,
@@ -36,7 +38,8 @@ export const Create = () => {
 
   const [tenantsRent, setTenantsRent] = useState([]);
 
-  const [minDatePaid, setMinDatePaid] = useState(null);
+  // const [minDatePaid, setMinDatePaid] = useState(null);
+  const [selectedRent, setSelectedRent] = useState(null);
 
   const {
     register,
@@ -71,7 +74,7 @@ export const Create = () => {
   }, []);
 
   const onSubmit = async (dataForm) => {
-    if (!paymentFile) return handleOpenSnackbar('error', 'File required!');
+    if (!paymentFile) return handleOpenSnackbar('error', 'Archivo requerido!');
 
     const dataToSend = {
       ...dataForm,
@@ -103,6 +106,8 @@ export const Create = () => {
   const uploadFile = (e) => {
     const file = e.target.files[0];
 
+    if (parseFloat(file.size / 1024 ** 2) > 5) return;
+
     setPaymentFile({
       id: `${file.name}-${Date.now()}`,
       url: URL.createObjectURL(file),
@@ -119,8 +124,8 @@ export const Create = () => {
 
     if (rent) {
       setValue('amount', rent.property?.price);
-
-      if (rent.startDate) setMinDatePaid(new Date(rent.startDate));
+      // if (rent.startDate) setMinDatePaid(new Date(rent.startDate));
+      setSelectedRent(rent);
     }
   };
 
@@ -149,7 +154,7 @@ export const Create = () => {
                     <Controller
                       name="idRent"
                       control={control}
-                      rules={{ required: true }}
+                      rules={{ required: { value: true, message: 'Alquiler requerido.' } }}
                       defaultValue=""
                       render={({ field }) => (
                         <Select
@@ -172,8 +177,7 @@ export const Create = () => {
                         </Select>
                       )}
                     />
-
-                    <FormHelperText error>{errors?.idRent && 'Alquiler requerido'}</FormHelperText>
+                    <FormHelperText error>{errors?.idRent?.message}</FormHelperText>
                   </FormControl>
                 </Grid>
               </Grid>
@@ -183,9 +187,12 @@ export const Create = () => {
               <FormControl fullWidth>
                 <TextField
                   label="Código de comprobante"
-                  {...register('code', { required: true })}
+                  {...register('code', {
+                    required: { value: true, message: 'Código de comprobante requerido' },
+                    maxLength: { value: 50, message: 'Longitud máxima de caracteres: 50' }
+                  })}
                 />
-                <FormHelperText error>{errors.code && 'Código requerido'}</FormHelperText>
+                <FormHelperText error>{errors.code?.message}</FormHelperText>
               </FormControl>
             </Grid>
 
@@ -205,7 +212,7 @@ export const Create = () => {
 
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
-                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <LocalizationProvider dateAdapter={AdapterDateFns} locale={es}>
                   <Controller
                     name="paymentDate"
                     control={control}
@@ -214,10 +221,12 @@ export const Create = () => {
                     render={({ field }) => (
                       <DatePicker
                         disableFuture
+                        disabled={!selectedRent}
                         label="Fecha de pago"
-                        // openTo="year"
+                        openTo="day"
                         views={['year', 'month', 'day']}
                         value={field.value}
+                        minDate={selectedRent?.startDate ? new Date(selectedRent.startDate) : null}
                         onChange={field.onChange}
                         renderInput={(params) => <TextField {...params} />}
                       />
@@ -242,12 +251,16 @@ export const Create = () => {
                     render={({ field }) => (
                       <DatePicker
                         // disableFuture
+                        disabled={!selectedRent}
                         label="Mes pagado"
                         views={['year', 'month']}
+                        openTo="month"
                         value={field.value}
                         onChange={field.onChange}
+                        minDate={selectedRent?.startDate ? new Date(selectedRent.startDate) : null}
+                        maxDate={new Date(moment().add(3, 'M').calendar())}
                         renderInput={(params) => <TextField {...params} />}
-                        minDate={minDatePaid ? new Date(minDatePaid) : null}
+                        // minDate={minDatePaid ? new Date(minDatePaid) : null}
                         // maxDate={new Date('2023-06-01')}
                       />
                     )}
@@ -304,6 +317,10 @@ export const Create = () => {
                   </Box>
                 )}
               </Box>
+              <FormHelperText>
+                Formatos permitidos: .jpg, .jpeg, .png, .pdf - Tamaño máximo de archivo permitido:
+                5MB
+              </FormHelperText>
             </Grid>
 
             <Grid item xs={12} sm={12}>

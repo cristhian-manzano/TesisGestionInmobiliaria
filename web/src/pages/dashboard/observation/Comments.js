@@ -152,18 +152,19 @@ export const Comments = ({ observation, openComments }) => {
             <DialogContent>
               <FormControl fullWidth>
                 <TextField
-                  {...register('description', { required: true, maxLength: 200 })}
+                  {...register('description', {
+                    required: { value: true, message: 'Comentario requerido' },
+                    maxLength: {
+                      value: 200,
+                      message: 'Longitud máxima de caracteres: 200'
+                    }
+                  })}
                   placeholder="Agregar comentario..."
                   multiline
                   maxRows={20}
                   minRows={5}
-                  inputProps={{ maxLength: 2000 }}
                 />
-                <FormHelperText error>
-                  {formState.errors.description?.type === 'required' && 'descripción requerida'}
-                  {formState.errors.description?.type === 'maxLength' &&
-                    'Longitud máxima permitidad: 200'}
-                </FormHelperText>
+                <FormHelperText error>{formState.errors.description?.message}</FormHelperText>
               </FormControl>
             </DialogContent>
             <DialogActions>

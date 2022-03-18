@@ -90,7 +90,7 @@ export const SearchProperty = () => {
 
   useEffect(() => {
     fetchProperties();
-  }, []);
+  }, [page, rowsPerPage]);
 
   const fetchSectors = async () => {
     handleLoading(true);

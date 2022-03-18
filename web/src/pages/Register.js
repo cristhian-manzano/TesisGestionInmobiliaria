@@ -21,8 +21,11 @@ import { useEffect, useState, useContext } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 
+import moment from 'moment';
+
 import { LocalizationProvider, MobileDatePicker } from '@mui/lab';
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
+import { es } from 'date-fns/locale';
 
 // Routing
 import { Link as RouterLink } from 'react-router-dom';
@@ -55,7 +58,7 @@ export const Register = () => {
     resolver: yupResolver(registerScheme),
     defaultValues: {
       roles: [],
-      dateOfBirth: new Date()
+      dateOfBirth: new Date(moment().subtract(18, 'years').calendar())
     }
   });
 
@@ -152,7 +155,7 @@ export const Register = () => {
 
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
-                <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <LocalizationProvider dateAdapter={AdapterDateFns} locale={es}>
                   <Controller
                     name="dateOfBirth"
                     control={control}
@@ -161,8 +164,8 @@ export const Register = () => {
                         label="Fecha de nacimiento"
                         value={field.value}
                         onChange={field.onChange}
-                        maxDate={new Date()}
-                        minDate={new Date(1900, 1, 1)}
+                        maxDate={new Date(moment().subtract(18, 'years').calendar())}
+                        minDate={new Date(1920, 1, 1)}
                         renderInput={(params) => <TextField {...params} />}
                       />
                     )}

@@ -24,7 +24,7 @@ db.authenticate().catch((e) => {
   Logger.error(e.message);
 });
 
-cronJob.start();
+// cronJob.start();
 
 app.listen(PORT, () => {
   Logger.info(`SERVER IS RUNNING IN PORT ${PORT}`);
