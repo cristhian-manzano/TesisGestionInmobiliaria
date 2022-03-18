@@ -1,0 +1,22 @@
+{
+  "name": "notificationservice",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.26.1",
+    "cron": "^1.8.2",
+    "dotenv": "^16.0.0",
+    "moment": "^2.29.1",
+    "pg": "^8.7.3",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.17.0",
+    "winston": "^3.6.0"
+  }
+}
