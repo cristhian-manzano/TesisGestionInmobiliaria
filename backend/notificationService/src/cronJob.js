@@ -3,7 +3,7 @@ const { job } = require("./jobs/dbNotifications");
 
 let isRunning = false;
 
-const jobCron = new CronJob("*/15 * * * * * ", async () => {
+const jobCron = new CronJob("*/30 * * * * * ", async () => {
   if (!isRunning) {
     isRunning = true;
     await job();

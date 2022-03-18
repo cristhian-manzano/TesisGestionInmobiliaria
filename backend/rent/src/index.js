@@ -7,8 +7,6 @@ const Logger = require('./config/logger');
 const db = require('./models/index');
 const routes = require('./routes/index');
 
-const cronJob = require('./cronJobs');
-
 const app = express();
 const PORT = process.env.APP_PORT || 3000;
 
@@ -23,8 +21,6 @@ app.use('/', routes);
 db.authenticate().catch((e) => {
   Logger.error(e.message);
 });
-
-// cronJob.start();
 
 app.listen(PORT, () => {
   Logger.info(`SERVER IS RUNNING IN PORT ${PORT}`);
