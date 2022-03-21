@@ -4,7 +4,8 @@ import {
   WatchLater,
   RateReview,
   Chat,
-  CreditCardOff
+  CreditCardOff,
+  Article
 } from '@mui/icons-material';
 
 import {
@@ -185,6 +186,7 @@ export const NotificationMenu = () => {
                   {notification.entity === 'Observation' && <RateReview />}
                   {notification.entity === 'Comment' && <Chat />}
                   {notification.entity === 'PendingPayment' && <CreditCardOff />}
+                  {notification.entity === 'FinishContract' && <Article />}
                 </Avatar>
               </ListItemAvatar>
               <ListItemText
@@ -193,6 +195,7 @@ export const NotificationMenu = () => {
                     {notification.entity === 'Observation' && 'Nueva observación'}
                     {notification.entity === 'Comment' && 'Nuevo comentario'}
                     {notification.entity === 'PendingPayment' && 'Pago pendiente'}
+                    {notification.entity === 'FinishContract' && 'Contrato finalizado'}
                     <Typography component="span" variant="body1" sx={{ color: 'text.secondary' }}>
                       &nbsp; {notification.description}
                     </Typography>
