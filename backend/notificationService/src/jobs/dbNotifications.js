@@ -4,6 +4,7 @@ const { default: axios } = require("axios");
 
 const Rent = require("../models/rent");
 const Payment = require("../models/payment");
+const LeaseAgreement = require("../models/leaseAgreement");
 const Notification = require("../models/notification");
 const sequelize = require("../models/index");
 const PendingPayment = require("../models/pendingPaymentRent");
@@ -38,16 +39,35 @@ const pendingPaymentNotificaion = async (data = {}) => {
     users: [data.rent?.idTenant],
   });
 
+  const property = await axios.post(
+    `${process.env.API_PROPERTY_URL}/property/list`,
+    {
+      properties: [data.rent?.idProperty],
+    }
+  );
+
   const receiverId = data.rent?.idOwner;
 
+  // Create for owner
   await Notification.create({
-    description: `${
-      userData.data.data[0].lastName
-    } debe el mes ${data.pendingDate.getMonth()}/${data.pendingDate.getFullYear()}.`,
+    description: `${userData.data.data[0].lastName} debe el mes ${
+      data.pendingDate.getMonth() + 1
+    }/${data.pendingDate.getFullYear()}.`,
     entity: "PendingPayment",
     idEntity: data.rent?.id,
     idSender: data.rent.idTenant,
     idReceiver: receiverId,
+  }).catch((e) => {
+    Logger.error(e);
+  });
+
+  // Create for tenant
+  await Notification.create({
+    description: `Tiene un pago pendiente en la propiedad '${property.data.data[0]?.tagName}'.`,
+    entity: "PendingPayment",
+    idEntity: data.rent?.id,
+    idSender: receiverId,
+    idReceiver: data.rent?.idTenant,
   }).catch((e) => {
     Logger.error(e);
   });
@@ -137,8 +157,64 @@ const setPendingPayments = async () => {
   );
 };
 
+const finishContracts = async () => {
+  const Leases = await LeaseAgreement.findAll({
+    where: {
+      active: true,
+      endDate: {
+        [Op.lte]: new Date(),
+      },
+    },
+    include: [
+      {
+        model: Rent,
+        as: "rent",
+      },
+    ],
+  });
+
+  await Promise.all(
+    Leases.map(async (lease) => {
+      await lease.update({ active: false });
+
+      const property = await axios.post(
+        `${process.env.API_PROPERTY_URL}/property/list`,
+        {
+          properties: [lease.rent?.idProperty],
+        }
+      );
+
+      // Create for tenant
+      await Notification.create({
+        description: `El contrato de la propiedad '${property.data.data[0]?.tagName}' ha terminado.`,
+        entity: "FinishContract",
+        idEntity: lease.id,
+        idSender: lease.rent?.idOwner,
+        idReceiver: lease.rent?.idTenant,
+      }).catch((e) => {
+        Logger.error(e);
+      });
+
+      // Create for owner
+      await Notification.create({
+        description: `El contrato de la propiedad '${property.data.data[0]?.tagName}' ha terminado.`,
+        entity: "FinishContract",
+        idEntity: lease.id,
+        idSender: lease.rent?.idTenant,
+        idReceiver: lease.rent?.idOwner,
+      }).catch((e) => {
+        Logger.error(e);
+      });
+    })
+  );
+};
+
 const job = async () => {
   await setPendingPayments().catch((e) => {
+    Logger.error(e);
+  });
+
+  await finishContracts().catch((e) => {
     Logger.error(e);
   });
 };
