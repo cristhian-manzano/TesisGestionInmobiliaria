@@ -177,6 +177,21 @@ const create = async (req, res) => {
       .json(validationResponse(res.statusCode, error.message));
 
   try {
+    const propertyExist = await Property.findOne({
+      where: {
+        tagName: {
+          [Op.iLike]: `%${value.tagName}`
+        },
+        idOwner: req.user?.id
+      }
+    });
+
+    if (propertyExist) {
+      return res
+        .status(responseStatusCodes.BAD_REQUEST)
+        .json(errorResponse(res.statusCode, `Nombre de propiedad ya existe`));
+    }
+
     const result = await sequelize.transaction(async (t) => {
       // got owner id by token
       value.idOwner = req.user?.id;

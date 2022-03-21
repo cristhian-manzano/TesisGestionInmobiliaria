@@ -58,9 +58,10 @@ export const sendRequest = async ({
           redirect: '/login'
         });
       }
+
       return responsesFormat({
         error: true,
-        message: 'Error solicitud.'
+        message: dataResponse.message ?? 'Error solicitud.'
       });
     }
 

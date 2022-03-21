@@ -26,6 +26,22 @@ const create = async (req, res) => {
         .status(responseStatusCodes.UNPROCESSABLE_ENTITY)
         .json(validationResponse(res.statusCode, error.message));
 
+    // Validate if code exist
+
+    const paymentCodeExist = await Payment.findOne({
+      where: {
+        code: {
+          [Op.iLike]: `%${value.code}`
+        }
+      }
+    });
+
+    if (paymentCodeExist) {
+      return res
+        .status(responseStatusCodes.BAD_REQUEST)
+        .json(errorResponse(res.statusCode, `Código de comprobante ya existe`));
+    }
+
     // Validate if payed before
 
     const datePaid = new Date(value.datePaid);
@@ -324,27 +340,29 @@ const destroy = async (req, res) => {
     const { id } = req.params;
 
     const payment = await Payment.findByPk(id, {
+      where: {
+        validated: false
+      },
       include: [
         {
           model: Rent,
           as: 'rent',
-          where: { idTenant: idUser },
-          attributes: []
+          where: {
+            [Op.or]: [{ idOwner: idUser }, { idTenant: idUser }]
+          },
+          required: true
         },
         {
           model: PaymentFile,
           as: 'paymentFile'
         }
-      ],
-      attributes: {
-        exclude: ['idRent']
-      }
+      ]
     });
 
     if (!payment)
       return res
         .status(responseStatusCodes.NOT_FOUND)
-        .json(errorResponse(res.statusCode, 'payment not found!'));
+        .json(errorResponse(res.statusCode, 'Pago no encontrado!'));
 
     let result;
 
@@ -430,7 +448,12 @@ const getPendingRents = async (req, res) => {
         {
           model: Rent,
           as: 'rent',
-          where: { [Op.or]: [{ idOwner: idUser }, { idTenant: idUser }] }
+          where: {
+            [Op.or]: [{ idOwner: idUser }, { idTenant: idUser }],
+            endDate: {
+              [Op.eq]: null
+            } // Added: only pendingPayments of active rentsTenants
+          }
         }
       ],
       order: [['pendingDate', 'DESC']]

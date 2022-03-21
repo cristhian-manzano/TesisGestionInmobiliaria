@@ -134,7 +134,8 @@ export const Create = () => {
     handleLoading(false);
 
     if (response.error) {
-      handleOpenSnackbar('error', 'No se pudo crear la propiedad!');
+      console.log('RESPONSE: ', response);
+      handleOpenSnackbar('error', response.message ?? 'No se pudo crear la propiedad!');
     } else {
       handleOpenSnackbar('success', 'Propiedad creada exitosamente!');
       reset();

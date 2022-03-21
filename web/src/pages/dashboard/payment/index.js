@@ -23,12 +23,14 @@ import {
   Chip
 } from '@mui/material';
 
-import { Search, Visibility } from '@mui/icons-material';
+import { Search, Visibility, Delete } from '@mui/icons-material';
 import { TableMoreMenu } from '../../../components/TableMoreMenu';
 import { AuthContext } from '../../../store/context/authContext';
 import { LoadingContext } from '../../../store/context/LoadingGlobal';
 import { SnackbarContext } from '../../../store/context/SnackbarGlobal';
 import { sendRequest } from '../../../helpers/utils';
+
+import { Alert } from '../../../components/Alert';
 
 import { PendingPayment } from './PendingPayments';
 
@@ -39,6 +41,10 @@ export const Payment = () => {
   const [payments, setPayments] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  const [alert, setAlert] = useState({ open: false, title: '', description: '' });
+
+  const [selectedPayment, setSelectedPayment] = useState(null);
 
   // Context
   const { authSession } = useContext(AuthContext);
@@ -87,6 +93,42 @@ export const Payment = () => {
   const onChangeSearchInput = (e) => setSearchInput(e.target.value);
 
   const onSearch = () => fetchPayments();
+
+  const openDeleteAlert = (payment) => {
+    setSelectedPayment(payment);
+
+    setAlert({
+      open: true,
+      title: `¿Está seguro que desea eliminar el pago con código de comprobante '${payment?.code}' ?`,
+      description:
+        'Al aceptar se eliminará el pago de manera permanente y no podrá deshacer los cambios.'
+    });
+  };
+
+  const closeDeleteAlert = () => {
+    setSelectedPayment(null);
+    setAlert((previous) => ({
+      ...previous,
+      open: false
+    }));
+  };
+
+  const onDelete = async () => {
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/payment/${selectedPayment?.id}`,
+      token: authSession.user?.token,
+      method: 'DELETE'
+    });
+
+    handleLoading(false);
+    if (response.error) {
+      handleOpenSnackbar('error', response.message ?? 'No se pudo eliminar el pago!');
+    } else {
+      await fetchPayments();
+      handleOpenSnackbar('success', 'Pago eliminado exitosamente!');
+    }
+  };
 
   return (
     <>
@@ -190,17 +232,19 @@ export const Payment = () => {
                               primary="Editar"
                               primaryTypographyProps={{ variant: 'body2' }}
                             />
-                          </MenuItem>
-
-                          <MenuItem onClick={() => openDeleteAlert(payment)}>
-                            <ListItemIcon>
-                              <Delete sx={{ fontSize: 25 }} />
-                            </ListItemIcon>
-                            <ListItemText
-                              primary="Eliminar"
-                              primaryTypographyProps={{ variant: 'body2' }}
-                            />
                           </MenuItem> */}
+
+                          {!payment.validated && (
+                            <MenuItem onClick={() => openDeleteAlert(payment)}>
+                              <ListItemIcon>
+                                <Delete sx={{ fontSize: 25 }} />
+                              </ListItemIcon>
+                              <ListItemText
+                                primary="Eliminar"
+                                primaryTypographyProps={{ variant: 'body2' }}
+                              />
+                            </MenuItem>
+                          )}
                         </TableMoreMenu>
                       </TableCell>
                     </TableRow>
@@ -243,6 +287,8 @@ export const Payment = () => {
       <Box sx={{ mt: 3, mb: 6 }}>
         <PendingPayment />
       </Box>
+
+      <Alert state={alert} closeAlert={closeDeleteAlert} onConfirm={() => onDelete()} />
     </>
   );
 };

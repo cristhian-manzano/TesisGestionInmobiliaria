@@ -93,7 +93,7 @@ export const Create = () => {
     });
     handleLoading(false);
     if (response.error) {
-      handleOpenSnackbar('error', 'No se pudo crear el pago!');
+      handleOpenSnackbar('error', response.message ?? 'No se pudo crear el pago!');
     } else {
       handleOpenSnackbar('success', 'pago creado exitosamente!');
       reset();
