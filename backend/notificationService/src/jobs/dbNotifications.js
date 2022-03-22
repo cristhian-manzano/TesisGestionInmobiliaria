@@ -50,7 +50,9 @@ const pendingPaymentNotificaion = async (data = {}) => {
 
   // Create for owner
   await Notification.create({
-    description: `${userData.data.data[0].lastName} debe el mes ${
+    description: `${userData.data.data[0].firstName?.split(" ")[0]} ${
+      userData.data.data[0].lastName?.split(" ")[0]
+    } tiene un pago pendiente del mes ${
       data.pendingDate.getMonth() + 1
     }/${data.pendingDate.getFullYear()}.`,
     entity: "PendingPayment",
@@ -63,7 +65,11 @@ const pendingPaymentNotificaion = async (data = {}) => {
 
   // Create for tenant
   await Notification.create({
-    description: `Tiene un pago pendiente en la propiedad '${property.data.data[0]?.tagName}'.`,
+    description: `Tiene un pago pendiente del mes ${
+      data.pendingDate.getMonth() + 1
+    }/${data.pendingDate.getFullYear()} en la propiedad '${
+      property.data.data[0]?.tagName
+    }'.`,
     entity: "PendingPayment",
     idEntity: data.rent?.id,
     idSender: receiverId,
@@ -186,7 +192,7 @@ const finishContracts = async () => {
 
       // Create for tenant
       await Notification.create({
-        description: `El contrato de la propiedad '${property.data.data[0]?.tagName}' ha terminado.`,
+        description: `El contrato de la propiedad '${property.data.data[0]?.tagName}' ha caducado.`,
         entity: "FinishContract",
         idEntity: lease.id,
         idSender: lease.rent?.idOwner,
@@ -197,7 +203,7 @@ const finishContracts = async () => {
 
       // Create for owner
       await Notification.create({
-        description: `El contrato de la propiedad '${property.data.data[0]?.tagName}' ha terminado.`,
+        description: `El contrato de la propiedad '${property.data.data[0]?.tagName}' ha caducado.`,
         entity: "FinishContract",
         idEntity: lease.id,
         idSender: lease.rent?.idTenant,

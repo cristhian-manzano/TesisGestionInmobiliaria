@@ -185,7 +185,7 @@ export const Comments = ({ observation, openComments }) => {
                       ? 'Yo'
                       : `${comment.user?.firstName ?? ''} ${comment.user?.lastName ?? ''}`
                   }
-                  subheader={new Date(comment?.date).toLocaleString()}
+                  subheader={new Date(comment?.date).toLocaleString('es-ES')}
                   action={
                     comment.user?.email === authSession.user?.email && (
                       <IconButton aria-label="delete" onClick={() => openDeleteAlert(comment)}>

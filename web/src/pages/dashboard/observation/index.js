@@ -184,7 +184,7 @@ export const Observation = () => {
                           </Badge>
                         )}
                       </TableCell>
-                      <TableCell>{new Date(observation.date).toLocaleString()}</TableCell>
+                      <TableCell>{new Date(observation.date).toLocaleString('es-ES')}</TableCell>
                       <TableCell>
                         {authSession.user?.email === observation.user?.email
                           ? 'Yo'

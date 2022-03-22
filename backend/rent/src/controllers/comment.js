@@ -81,8 +81,6 @@ const create = async (req, res) => {
       date: new Date()
     });
 
-    // ! Start - Experimental
-
     try {
       const observation = await Observation.findByPk(createdComment.idObservation, {
         include: [
@@ -103,19 +101,17 @@ const create = async (req, res) => {
           : observation.rent?.idOwner;
 
       await Notification.create({
-        description: `${userData.data.data[0].lastName} ha comentado la observación "${
-          observation.description?.slice(0, 10) ?? ''
-        }"...`,
+        description: `${userData.data.data[0].firstName?.split(' ')[0]} ${
+          userData.data.data[0].lastName?.split(' ')[0]
+        } ha comentado la observación "${observation.description?.slice(0, 10) ?? ''}"...`,
         entity: 'Comment',
-        idEntity: createdComment?.id,
+        idEntity: observation?.id,
         idSender: idOwner,
         idReceiver: receiverId
       });
     } catch (e) {
       console.log(e);
     }
-
-    // ! End - Experimental
 
     return res
       .status(responseStatusCodes.OK)

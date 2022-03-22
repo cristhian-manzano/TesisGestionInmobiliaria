@@ -18,7 +18,7 @@ export const Details = () => {
   const { handleLoading } = useContext(LoadingContext);
   const { handleOpenSnackbar } = useContext(SnackbarContext);
 
-  const [contract, setContract] = useState({});
+  const [contract, setContract] = useState(null);
 
   const [modalFile, setModalFile] = useState({
     open: false,
@@ -62,52 +62,62 @@ export const Details = () => {
           aria-label="Example">
           <ArrowBack /> regresar
         </Button>
-        <Card sx={{ p: 3 }}>
-          <Typography variant="h4">Detalles de contrato</Typography>
-          <Box sx={{ my: 3 }}>
-            <Grid container spacing={2} rowSpacing={5}>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="subtitle1">Fecha de inicio</Typography>
-                <Typography variant="body1">{contract?.startDate || '-'}</Typography>
+
+        {contract && (
+          <Card sx={{ p: 3 }}>
+            <Typography variant="h4">Detalles de contrato</Typography>
+            <Box sx={{ my: 3 }}>
+              <Grid container spacing={2} rowSpacing={5}>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle1">Fecha de inicio</Typography>
+                  <Typography variant="body1">
+                    {new Date(contract?.startDate).toLocaleDateString('es-ES') ?? ''}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle1">Fecha de fin</Typography>
+                  <Typography variant="body1">
+                    {new Date(contract?.endDate).toLocaleDateString('es-ES') ?? ''}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle1">Estado</Typography>
+                  <Typography variant="body1">
+                    {contract?.active ? 'Activo' : 'Inactivo'}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle1">Propiedad</Typography>
+                  <Typography variant="body1">{contract?.property?.tagName || '-'}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle1">Propietario</Typography>
+                  <Typography variant="body1">
+                    {`${contract?.owner?.firstName ?? ''} ${contract?.owner?.lastName ?? ''}` ||
+                      '-'}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle1">Inquilino</Typography>
+                  <Typography variant="body1">
+                    {`${contract?.tenant?.firstName ?? ''} ${contract?.tenant?.lastName ?? ''}` ||
+                      '-'}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12} sm={12}>
+                  <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <Button
+                      fullWidth
+                      variant="contained"
+                      onClick={() => openModalFile(contract?.contractFile.url)}>
+                      ver contrato
+                    </Button>
+                  </Box>
+                </Grid>
               </Grid>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="subtitle1">Fecha de fin</Typography>
-                <Typography variant="body1">{contract?.endDate || '-'}</Typography>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="subtitle1">Estado</Typography>
-                <Typography variant="body1">{contract?.active ? 'Activo' : 'Inactivo'}</Typography>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="subtitle1">Propiedad</Typography>
-                <Typography variant="body1">{contract?.property?.tagName || '-'}</Typography>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="subtitle1">Propietario</Typography>
-                <Typography variant="body1">
-                  {`${contract?.owner?.firstName ?? ''} ${contract?.owner?.lastName ?? ''}` || '-'}
-                </Typography>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="subtitle1">Inquilino</Typography>
-                <Typography variant="body1">
-                  {`${contract?.tenant?.firstName ?? ''} ${contract?.tenant?.lastName ?? ''}` ||
-                    '-'}
-                </Typography>
-              </Grid>
-              <Grid item xs={12} sm={12}>
-                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    onClick={() => openModalFile(contract?.contractFile.url)}>
-                    ver contrato
-                  </Button>
-                </Box>
-              </Grid>
-            </Grid>
-          </Box>
-        </Card>
+            </Box>
+          </Card>
+        )}
       </Box>
 
       {modalFile.open && (

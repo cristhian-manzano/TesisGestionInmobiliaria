@@ -1,3 +1,7 @@
+import { useState, useEffect, useContext } from 'react';
+
+import { Link as RouterLink } from 'react-router-dom';
+
 import {
   NotificationsNone,
   Visibility,
@@ -24,18 +28,22 @@ import {
   List,
   Chip
 } from '@mui/material';
-import { useState, useEffect, useContext } from 'react';
-import { sendRequest } from '../../helpers/utils';
 
+import { sendRequest } from '../../helpers/utils';
 import { AuthContext } from '../../store/context/authContext';
 import { LoadingContext } from '../../store/context/LoadingGlobal';
 import { SnackbarContext } from '../../store/context/SnackbarGlobal';
 
+const routesLink = {
+  PendingPayment: '/dashboard/payments',
+  FinishContract: '/dashboard/contracts',
+  Observation: '/dashboard/observations',
+  Comment: '/dashboard/observations'
+};
+
 export const NotificationMenu = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
-
-  // ! Start - Experimental
 
   const { authSession } = useContext(AuthContext);
   const { handleLoading } = useContext(LoadingContext);
@@ -85,8 +93,6 @@ export const NotificationMenu = () => {
       fetchNotifications();
     }
   };
-
-  // ! End - Experimental
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -170,56 +176,64 @@ export const NotificationMenu = () => {
 
         <List disablePadding sx={{ maxHeight: 310, overflow: 'scroll' }}>
           {notifications.data?.map((notification) => (
-            <ListItemButton
+            <RouterLink
+              to={
+                notification.entity === 'PendingPayment'
+                  ? routesLink[notification.entity]
+                  : `${routesLink[notification.entity]}/${notification.idEntity}`
+              }
               key={notification.id}
-              disableGutters
-              sx={{
-                py: 1.5,
-                px: 2.5,
-                mt: '1px',
-                ...(!notification.read && {
-                  bgcolor: 'action.selected'
-                })
-              }}>
-              <ListItemAvatar>
-                <Avatar sx={{ bgcolor: 'background.neutral' }}>
-                  {notification.entity === 'Observation' && <RateReview />}
-                  {notification.entity === 'Comment' && <Chat />}
-                  {notification.entity === 'PendingPayment' && <CreditCardOff />}
-                  {notification.entity === 'FinishContract' && <Article />}
-                </Avatar>
-              </ListItemAvatar>
-              <ListItemText
-                primary={
-                  <Typography variant="subtitle1">
-                    {notification.entity === 'Observation' && 'Nueva observación'}
-                    {notification.entity === 'Comment' && 'Nuevo comentario'}
-                    {notification.entity === 'PendingPayment' && 'Pago pendiente'}
-                    {notification.entity === 'FinishContract' && 'Contrato finalizado'}
-                    <Typography component="span" variant="body1" sx={{ color: 'text.secondary' }}>
-                      &nbsp; {notification.description}
+              style={{ textDecoration: 'none', color: 'black' }}>
+              <ListItemButton
+                disableGutters
+                sx={{
+                  py: 1.5,
+                  px: 2.5,
+                  mt: '1px',
+                  ...(!notification.read && {
+                    bgcolor: 'action.selected'
+                  })
+                }}>
+                <ListItemAvatar>
+                  <Avatar sx={{ bgcolor: 'background.neutral' }}>
+                    {notification.entity === 'Observation' && <RateReview />}
+                    {notification.entity === 'Comment' && <Chat />}
+                    {notification.entity === 'PendingPayment' && <CreditCardOff />}
+                    {notification.entity === 'FinishContract' && <Article />}
+                  </Avatar>
+                </ListItemAvatar>
+                <ListItemText
+                  primary={
+                    <Typography variant="subtitle1">
+                      {notification.entity === 'Observation' && 'Nueva observación'}
+                      {notification.entity === 'Comment' && 'Nuevo comentario'}
+                      {notification.entity === 'PendingPayment' && 'Pago pendiente'}
+                      {notification.entity === 'FinishContract' && 'Contrato finalizado'}
+                      <Typography component="span" variant="body1" sx={{ color: 'text.secondary' }}>
+                        &nbsp; {notification.description}
+                      </Typography>
                     </Typography>
-                  </Typography>
-                }
-                secondary={
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      mt: 0.5,
-                      display: 'flex',
-                      alignItems: 'center',
-                      color: 'text.disabled'
-                    }}>
-                    <WatchLater sx={{ fontSize: 18, mr: 0.5 }} />
-                    {new Date(notification?.date).toLocaleString('es-ES')}
+                  }
+                  secondary={
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        mt: 0.5,
+                        display: 'flex',
+                        alignItems: 'center',
+                        color: 'text.disabled'
+                      }}>
+                      <WatchLater sx={{ fontSize: 18, mr: 0.5 }} />
+                      {new Date(notification?.date).toLocaleString('es-ES')}
 
-                    {!notification.read && (
-                      <Chip sx={{ ml: 1 }} label="Nueva" color="warning" size="small" />
-                    )}
-                  </Typography>
-                }
-              />
-            </ListItemButton>
+                      {!notification.read && (
+                        <Chip sx={{ ml: 1 }} label="Nueva" color="warning" size="small" />
+                      )}
+                    </Typography>
+                  }
+                />
+              </ListItemButton>
+            </RouterLink>
           ))}
         </List>
 

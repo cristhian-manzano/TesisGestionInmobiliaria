@@ -72,7 +72,7 @@ export const Details = () => {
                   ? 'Yo'
                   : `${observation?.user?.firstName ?? ''} ${observation?.user?.lastName ?? ''}`
               }
-              subheader={new Date(observation?.date).toLocaleString()}
+              subheader={new Date(observation?.date).toLocaleString('es-ES')}
             />
             <CardContent>
               <Box sx={{ maxWidth: '100vw', overflow: 'hidden' }}>

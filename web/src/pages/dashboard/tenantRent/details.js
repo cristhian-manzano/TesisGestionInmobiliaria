@@ -15,7 +15,7 @@ export const Details = () => {
   const { handleLoading } = useContext(LoadingContext);
   const { handleOpenSnackbar } = useContext(SnackbarContext);
 
-  const [tenantRent, setTenantRent] = useState({});
+  const [tenantRent, setTenantRent] = useState(null);
 
   const fetchTenantRent = async () => {
     handleLoading(true);
@@ -46,59 +46,63 @@ export const Details = () => {
         <ArrowBack /> regresar
       </Button>
 
-      <Card sx={{ p: 3 }}>
-        <Typography variant="h4">Detalles de renta / propietario</Typography>
-        <Box sx={{ my: 3 }}>
-          <Grid container spacing={2} rowSpacing={5}>
-            <Grid item xs={12} sm={6}>
-              <Typography variant="subtitle1">Cédula</Typography>
-              <Typography variant="body1">{tenantRent?.owner?.idCard || '-'}</Typography>
-            </Grid>
+      {tenantRent && (
+        <Card sx={{ p: 3 }}>
+          <Typography variant="h4">Detalles de renta / propietario</Typography>
+          <Box sx={{ my: 3 }}>
+            <Grid container spacing={2} rowSpacing={5}>
+              <Grid item xs={12} sm={6}>
+                <Typography variant="subtitle1">Cédula</Typography>
+                <Typography variant="body1">{tenantRent?.owner?.idCard || '-'}</Typography>
+              </Grid>
 
-            <Grid item xs={12} sm={6}>
-              <Typography variant="subtitle1">Correo</Typography>
-              <Typography variant="body1">{tenantRent?.owner?.email || '-'}</Typography>
-            </Grid>
+              <Grid item xs={12} sm={6}>
+                <Typography variant="subtitle1">Correo</Typography>
+                <Typography variant="body1">{tenantRent?.owner?.email || '-'}</Typography>
+              </Grid>
 
-            <Grid item xs={12} sm={6}>
-              <Typography variant="subtitle1">Nombres</Typography>
-              <Typography variant="body1">{tenantRent?.owner?.firstName || '-'}</Typography>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Typography variant="subtitle1">Apellidos</Typography>
-              <Typography variant="body1">{tenantRent?.owner?.lastName || '-'}</Typography>
-            </Grid>
+              <Grid item xs={12} sm={6}>
+                <Typography variant="subtitle1">Nombres</Typography>
+                <Typography variant="body1">{tenantRent?.owner?.firstName || '-'}</Typography>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Typography variant="subtitle1">Apellidos</Typography>
+                <Typography variant="body1">{tenantRent?.owner?.lastName || '-'}</Typography>
+              </Grid>
 
-            <Grid item xs={12} sm={6}>
-              <Typography variant="subtitle1">Teléfono</Typography>
-              <Typography variant="body1">{tenantRent?.owner?.phone || '-'}</Typography>
-            </Grid>
+              <Grid item xs={12} sm={6}>
+                <Typography variant="subtitle1">Teléfono</Typography>
+                <Typography variant="body1">{tenantRent?.owner?.phone || '-'}</Typography>
+              </Grid>
 
-            <Grid item xs={12} sm={6}>
-              <Typography variant="subtitle1">Fecha de inicio de alquiler</Typography>
-              <Typography variant="body1">{tenantRent?.startDate || '-'}</Typography>
+              <Grid item xs={12} sm={6}>
+                <Typography variant="subtitle1">Fecha de inicio de alquiler</Typography>
+                <Typography variant="body1">
+                  {new Date(tenantRent?.startDate).toLocaleDateString('es-ES') ?? ''}
+                </Typography>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Typography variant="subtitle1">Propiedad</Typography>
+                <Typography variant="body1">{tenantRent?.property?.tagName || '-'}</Typography>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Typography variant="subtitle1">Dirección</Typography>
+                <Typography variant="body1">{tenantRent.property?.address || '-'}</Typography>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Typography variant="subtitle1">Día mensual de pago</Typography>
+                <Typography variant="body1">{tenantRent?.paymentDay || '-'}</Typography>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Typography variant="subtitle1">Garantía pagada</Typography>
+                <Typography variant="body1">
+                  {(tenantRent?.securityDeposit && `$${tenantRent?.securityDeposit}`) || '-'}
+                </Typography>
+              </Grid>
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <Typography variant="subtitle1">Propiedad</Typography>
-              <Typography variant="body1">{tenantRent?.property?.tagName || '-'}</Typography>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Typography variant="subtitle1">Dirección</Typography>
-              <Typography variant="body1">{tenantRent.property?.address || '-'}</Typography>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Typography variant="subtitle1">Día mensual de pago</Typography>
-              <Typography variant="body1">{tenantRent?.paymentDay || '-'}</Typography>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Typography variant="subtitle1">Garantía pagada</Typography>
-              <Typography variant="body1">
-                {(tenantRent?.securityDeposit && `$${tenantRent?.securityDeposit}`) || '-'}
-              </Typography>
-            </Grid>
-          </Grid>
-        </Box>
-      </Card>
+          </Box>
+        </Card>
+      )}
     </Box>
   );
 };

@@ -57,7 +57,7 @@ export const Register = () => {
   } = useForm({
     resolver: yupResolver(registerScheme),
     defaultValues: {
-      roles: [],
+      // roles: [],
       dateOfBirth: new Date(moment().subtract(18, 'years').calendar())
     }
   });
@@ -85,8 +85,11 @@ export const Register = () => {
     const dataUser = {
       ...data,
       dateOfBirth: data.dateOfBirth.toLocaleDateString(),
-      roles: data.roles.map((role) => role.id)
+      roles: [data.role]
+      // roles: data.roles.map((role) => role.id)
     };
+
+    delete dataUser.role;
 
     handleLoading(true);
     const response = await sendRequest({
@@ -180,29 +183,26 @@ export const Register = () => {
               <FormControl fullWidth>
                 <InputLabel id="multiple-roles-checkbox">Tipo de usuario</InputLabel>
                 <Controller
-                  name="roles"
+                  name="role"
                   control={control}
                   render={({ field }) => {
                     return (
                       <Select
                         labelId="multiple-roles-checkbox"
-                        id="demo-multiple-checkbox"
-                        multiple
-                        value={field.value}
-                        onChange={field.onChange}
-                        input={<OutlinedInput label="Tipo de usuario" />}
-                        renderValue={(selected) => selected?.map((role) => role.name).join(', ')}>
+                        label="Tipo de usuario"
+                        defaultValue=""
+                        value={field.value ?? ''}
+                        onChange={field.onChange}>
                         {roles.map((role) => (
-                          <MenuItem key={role.id} value={role}>
-                            <Checkbox checked={field.value.indexOf(role) > -1} />
-                            <ListItemText primary={role.name} />
+                          <MenuItem key={role.id} value={role.id}>
+                            {role.name}
                           </MenuItem>
                         ))}
                       </Select>
                     );
                   }}
                 />
-                <FormHelperText error>{errors.roles?.message}</FormHelperText>
+                <FormHelperText error>{errors.role?.message}</FormHelperText>
               </FormControl>
             </Grid>
 
