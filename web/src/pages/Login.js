@@ -52,7 +52,7 @@ export const Login = () => {
     handleLoading(false);
 
     if (response.error) {
-      handleOpenSnackbar('error', 'Error al iniciar sesión!');
+      handleOpenSnackbar('error', response.message ?? 'Error al iniciar sesión!');
     } else {
       setLocalstorage('session', response.data.data);
       setAuthSession({ user: response.data.data });

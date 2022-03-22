@@ -52,10 +52,12 @@ const signIn = async (req, res) => {
     });
 
     if (!user)
-      return res.status(BAD_REQUEST).json(errorResponse(res.statusCode, 'Invalid credentials!'));
+      return res.status(BAD_REQUEST).json(errorResponse(res.statusCode, 'Usuario no existe!'));
 
     if (!(await verifyEncrypted(value.password, user.password)))
-      return res.status(BAD_REQUEST).json(errorResponse(res.statusCode, 'Invalid credentials!'));
+      return res
+        .status(BAD_REQUEST)
+        .json(errorResponse(res.statusCode, 'Credenciales incorrectas!'));
 
     const tokenCreated = createToken({ id: user.id, email: user.email });
 
@@ -72,7 +74,7 @@ const signIn = async (req, res) => {
     Logger.error(e.toString());
     return res
       .status(INTERNAL_SERVER_ERROR)
-      .json(errorResponse(res.statusCode, 'Cannot authenticate user.'));
+      .json(errorResponse(res.statusCode, 'Error al autenticar usuario.'));
   }
 };
 
@@ -92,7 +94,7 @@ const signUp = async (req, res) => {
     if (user)
       return res
         .status(UNPROCESSABLE_ENTITY)
-        .json(validationResponse(res.statusCode, 'User already exists!'));
+        .json(errorResponse(res.statusCode, 'Cédula o correo ya registrados!'));
 
     // Encrypt password before creating user
     value.password = await encryptData(value.password);

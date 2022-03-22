@@ -17,7 +17,12 @@ export const registerScheme = yup
       .matches(/^\d+$/, 'Solo se permiten números.')
       .max(15, 'La longitud máxima es de 15 caracteres.')
       .min(10, 'La longitud mínima es de 10 caracteres.'),
-    phone: yup.string().max(15, 'La longitud máxima es de 15 caracteres.'),
+    phone: yup
+      .string()
+      .required('Teléfono es requerido')
+      .min(10, 'La longitud mínima es de 10 caracteres.')
+      .max(15, 'La longitud máxima es de 15 caracteres.')
+      .matches(/^\d+$/, 'Solo se permiten números.'),
     email: yup.string().email('Ingrese un email valido.').required('Email es requerido.'),
     password: yup
       .string()

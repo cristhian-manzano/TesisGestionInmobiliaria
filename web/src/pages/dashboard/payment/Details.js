@@ -167,7 +167,7 @@ export const Details = () => {
                     ver comprobante
                   </Button>
 
-                  {!payment.validated && (
+                  {authSession.user?.roles.includes('Arrendador') && !payment.validated && (
                     <Button
                       fullWidth
                       color="secondary"

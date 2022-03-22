@@ -100,7 +100,7 @@ export const Register = () => {
     handleLoading(false);
 
     if (response.error) {
-      handleOpenSnackbar('error', 'No se pudo registrar el usuario!');
+      handleOpenSnackbar('error', response.message ?? 'No se pudo registrar el usuario!');
     } else {
       handleOpenSnackbar('success', 'Usuario registrado!');
       reset();
