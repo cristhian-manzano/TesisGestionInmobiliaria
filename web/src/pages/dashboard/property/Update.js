@@ -24,7 +24,6 @@ import { LoadingContext } from '../../../store/context/LoadingGlobal';
 import { SnackbarContext } from '../../../store/context/SnackbarGlobal';
 import { ImagesUpload } from '../../../components/ImagesUpload';
 import { sendRequest } from '../../../helpers/utils';
-import { usePropertyFormData } from '../../../hooks/usePropertyFormData';
 
 export const Update = () => {
   const { id } = useParams();
@@ -35,14 +34,9 @@ export const Update = () => {
   const { authSession } = useContext(AuthContext);
 
   const [images, setImages] = useState({ loaded: [], uploaded: [], deleted: [] });
-  // Selected type property
   const [selectedTypeProperty, setSelectedTypeProperty] = useState({});
-  const {
-    sectors,
-    typeProperties
-    // error,
-    // loading
-  } = usePropertyFormData();
+  const [sectors, setSectors] = useState([]);
+  const [typeProperties, setTypeProperties] = useState([]);
   const [updateProperty, setUpdateProperty] = useState(null);
 
   const { reset, control, register, handleSubmit, formState } = useForm();
@@ -57,13 +51,48 @@ export const Update = () => {
     handleLoading(false);
 
     if (response.error) {
-      handleOpenSnackbar('error', 'Error de conexión!');
+      handleOpenSnackbar('error', 'No se pudo obtener la propiedad!');
     } else {
       setUpdateProperty(response.data?.data);
     }
   };
 
   useEffect(() => fetchProperty(), []);
+
+  const fetchTypeProperties = async () => {
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_PROPERTY_SERVICE_URL}/type-property`,
+      method: 'GET'
+    });
+    handleLoading(false);
+
+    if (response.error) {
+      handleOpenSnackbar('error', 'Error al obtener tipos de propiedades.');
+    } else {
+      setTypeProperties(response.data?.data || []);
+    }
+  };
+
+  const fetchSectors = async () => {
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_PROPERTY_SERVICE_URL}/sector`,
+      method: 'GET'
+    });
+    handleLoading(false);
+
+    if (response.error) {
+      handleOpenSnackbar('error', 'Error al obtener sectores.');
+    } else {
+      setSectors(response.data?.data || []);
+    }
+  };
+
+  useEffect(() => {
+    fetchSectors();
+    fetchTypeProperties();
+  }, []);
 
   useEffect(() => {
     // reset form with user data
