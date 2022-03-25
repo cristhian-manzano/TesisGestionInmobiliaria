@@ -57,7 +57,9 @@ export const Update = () => {
     }
   };
 
-  useEffect(() => fetchProperty(), []);
+  useEffect(() => {
+    if (sectors.length > 0 && typeProperties.length > 0) fetchProperty();
+  }, [sectors, typeProperties]);
 
   const fetchTypeProperties = async () => {
     handleLoading(true);
