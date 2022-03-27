@@ -13,10 +13,12 @@ import {
   InputLabel,
   MenuItem,
   Button,
-  FormHelperText
+  FormHelperText,
+  Link,
+  IconButton
 } from '@mui/material';
 
-import { ArrowBack } from '@mui/icons-material/';
+import { ArrowBack, Add, Delete } from '@mui/icons-material/';
 import { sendRequest } from '../../../helpers/utils';
 import { AuthContext } from '../../../store/context/authContext';
 import { LoadingContext } from '../../../store/context/LoadingGlobal';
@@ -28,6 +30,8 @@ export const Create = () => {
   const { handleOpenSnackbar } = useContext(SnackbarContext);
   const [tenantsRent, setTenantsRent] = useState([]);
   const { register, handleSubmit, control, reset, formState } = useForm();
+
+  const [imageObservation, setImageObservation] = useState(null);
 
   const fetchTenantsRent = async () => {
     handleLoading(true);
@@ -82,6 +86,24 @@ export const Create = () => {
       handleOpenSnackbar('success', 'Observación creada exitosamente!');
       reset();
     }
+  };
+
+  const uploadFile = (e) => {
+    const file = e.target.files[0];
+
+    if (parseFloat(file.size / 1024 ** 2) > 5) return;
+
+    setImageObservation({
+      id: `${file.name}-${Date.now()}`,
+      url: URL.createObjectURL(file),
+      file
+    });
+
+    e.target.value = null;
+  };
+
+  const onDeleteImageObservation = () => {
+    setImageObservation(null);
   };
 
   return (
@@ -150,6 +172,58 @@ export const Create = () => {
                 />
                 <FormHelperText error>{formState.errors.description?.message}</FormHelperText>
               </FormControl>
+            </Grid>
+
+            <Grid item xs={12} sm={12}>
+              <Box sx={{ p: 2, border: '1px solid #DDDDDD' }}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    my: 1
+                  }}>
+                  <Typography variant="h5">Imagen</Typography>
+
+                  <label htmlFor="btn-upload">
+                    <input
+                      type="file"
+                      id="btn-upload"
+                      style={{ display: 'none' }}
+                      accept=".jpg, .jpeg, .png"
+                      onChange={uploadFile}
+                    />
+                    <Button variant="outlined" component="span">
+                      <Add />
+                      {/* Agregar */}
+                    </Button>
+                  </label>
+                </Box>
+
+                {imageObservation && (
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      p: 1
+                    }}>
+                    <Link href={imageObservation?.url} target="_blank" rel="noopener">
+                      {imageObservation?.file.name}
+                    </Link>
+                    <IconButton
+                      color="error"
+                      aria-label="delete"
+                      onClick={onDeleteImageObservation}>
+                      <Delete />
+                    </IconButton>
+                  </Box>
+                )}
+              </Box>
+              <FormHelperText>
+                Formatos permitidos: .jpg, .jpeg, .png - Tamaño máximo de documento permitido: 5MB
+              </FormHelperText>
             </Grid>
 
             <Grid item xs={12} sm={12}>

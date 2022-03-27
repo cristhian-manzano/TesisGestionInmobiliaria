@@ -1,7 +1,25 @@
 import { useState, useEffect, useContext } from 'react';
 import { Link as RouterLink, useParams } from 'react-router-dom';
-import { Box, Typography, Card, Button, Grid, Chip } from '@mui/material';
-import { ArrowBack } from '@mui/icons-material/';
+import {
+  Box,
+  Typography,
+  Card,
+  Button,
+  Grid,
+  Chip,
+  CardContent,
+  CardHeader,
+  Avatar,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  FormControl,
+  TextField,
+  FormHelperText,
+  DialogActions
+} from '@mui/material';
+import { ArrowBack, Clear } from '@mui/icons-material/';
 
 import { AuthContext } from '../../../store/context/authContext';
 import { LoadingContext } from '../../../store/context/LoadingGlobal';
@@ -15,6 +33,8 @@ export const Details = () => {
   const { id } = useParams();
   const [payment, setPayment] = useState(null);
 
+  const [openCommentDialog, setOpenCommentDialog] = useState(false);
+
   const { authSession } = useContext(AuthContext);
   const { handleLoading } = useContext(LoadingContext);
   const { handleOpenSnackbar } = useContext(SnackbarContext);
@@ -25,6 +45,11 @@ export const Details = () => {
     open: false,
     url: ''
   });
+
+  const handleOpenCommentDialog = (condition) => {
+    setOpenCommentDialog(condition);
+    // reset(); // Clear Form
+  };
 
   const openValidatePaymentAlert = () => {
     setAlert({
@@ -159,32 +184,113 @@ export const Details = () => {
                 </Grid>
 
                 <Grid item xs={12} sm={12}>
-                  <Button
-                    fullWidth
-                    sx={{ my: 1 }}
-                    variant="contained"
-                    onClick={() => openModalFile(payment?.paymentFile.url)}>
-                    ver comprobante
-                  </Button>
-
-                  {authSession.user?.roles.includes('Arrendador') && !payment.validated && (
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexWrap: 'wrap',
+                      rowGap: '10px',
+                      columnGap: '10px'
+                    }}>
                     <Button
-                      fullWidth
-                      color="secondary"
+                      // fullWidth
                       sx={{ my: 1 }}
                       variant="contained"
-                      onClick={openValidatePaymentAlert}
-                      // onClick={() => validatePayment()}
-                    >
-                      Validar pago
+                      onClick={() => openModalFile(payment?.paymentFile.url)}>
+                      ver comprobante
                     </Button>
-                  )}
+
+                    {authSession.user?.roles.includes('Arrendador') && !payment.validated && (
+                      <Button
+                        // fullWidth
+                        color="secondary"
+                        sx={{ my: 1 }}
+                        variant="contained"
+                        onClick={openValidatePaymentAlert}
+                        // onClick={() => validatePayment()}
+                      >
+                        Validar pago
+                      </Button>
+                    )}
+
+                    {authSession.user?.roles.includes('Arrendador') && !payment.validated && (
+                      <Button
+                        // fullWidth
+                        color="inherit"
+                        sx={{ my: 1 }}
+                        variant="contained"
+                        onClick={() => handleOpenCommentDialog(true)}
+                        // onClick={openValidatePaymentAlert}
+                        // onClick={() => validatePayment()}
+                      >
+                        Agregar observación
+                      </Button>
+                    )}
+                  </Box>
                 </Grid>
               </Grid>
             </Box>
           )}
         </Card>
+
+        <Card sx={{ p: 3, my: 1 }}>
+          <CardHeader
+            avatar={<Avatar aria-label="recipe">R</Avatar>}
+            title="Cristhian"
+            subheader={new Date().toLocaleString('es-ES')}
+            // title={
+            //   observation.user?.email === authSession.user?.email
+            //     ? 'Yo'
+            //     : `${observation?.user?.firstName ?? ''} ${observation?.user?.lastName ?? ''}`
+            // }
+            // subheader={new Date(observation?.date).toLocaleString('es-ES')}
+            action={
+              <IconButton aria-label="delete" onClick={() => console.log('')}>
+                <Clear color="error" />
+              </IconButton>
+            }
+          />
+          <CardContent>
+            <Box sx={{ maxWidth: '100vw', overflow: 'hidden' }}>
+              {/* <Typography variant="" sx={{ mb: 2 }}>
+                Observación
+              </Typography> */}
+              <Typography variant="body1" sx={{ mb: 1 }}>
+                Por favor, realice el pago correctamente.
+              </Typography>
+            </Box>
+          </CardContent>
+        </Card>
       </Box>
+
+      <Dialog open={openCommentDialog} onClose={() => handleOpenCommentDialog(false)} fullWidth>
+        <Box component="form">
+          <DialogTitle>Observación</DialogTitle>
+          <DialogContent>
+            <FormControl fullWidth>
+              <TextField
+                // {...register('description', {
+                //   required: { value: true, message: 'Comentario requerido' },
+                //   maxLength: {
+                //     value: 200,
+                //     message: 'Longitud máxima de caracteres: 200'
+                //   }
+                // })}
+                placeholder="Agregar observación..."
+                multiline
+                maxRows={20}
+                minRows={7}
+              />
+              {/* <FormHelperText error>{formState.errors.description?.message}</FormHelperText> */}
+            </FormControl>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => handleOpenCommentDialog(false)}>Cancelar</Button>
+            <Button type="submit">Enviar</Button>
+          </DialogActions>
+        </Box>
+      </Dialog>
 
       {modalFile.open && (
         <ModalIframe opened={modalFile.open} url={modalFile.url} onCloseModal={closeModalFile} />
