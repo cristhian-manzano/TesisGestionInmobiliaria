@@ -1,5 +1,8 @@
 import { useState, useEffect, useContext } from 'react';
 import { Link as RouterLink, useParams } from 'react-router-dom';
+
+import { useForm } from 'react-hook-form';
+
 import {
   Box,
   Typography,
@@ -26,7 +29,6 @@ import { LoadingContext } from '../../../store/context/LoadingGlobal';
 import { SnackbarContext } from '../../../store/context/SnackbarGlobal';
 import { sendRequest } from '../../../helpers/utils';
 import { ModalIframe } from '../../../components/ModalIframe';
-
 import { Alert } from '../../../components/Alert';
 
 export const Details = () => {
@@ -40,6 +42,8 @@ export const Details = () => {
   const { handleOpenSnackbar } = useContext(SnackbarContext);
 
   const [alert, setAlert] = useState({ open: false, title: '', description: '' });
+
+  const { register, handleSubmit, reset, formState } = useForm();
 
   const [modalFile, setModalFile] = useState({
     open: false,
@@ -96,6 +100,26 @@ export const Details = () => {
     } else {
       handleOpenSnackbar('success', 'Validado');
       fetchPayment();
+    }
+  };
+
+  const handleSubmitObservation = async (dataForm) => {
+    console.log('DATA: ', dataForm);
+    const dataToSend = { ...dataForm, idPayment: payment?.id };
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/payment/observation`,
+      method: 'POST',
+      token: authSession.user?.token,
+      data: dataToSend
+    });
+    handleLoading(false);
+    if (response.error) {
+      handleOpenSnackbar('error', 'No se pudo crear la observación!');
+    } else {
+      handleOpenSnackbar('success', 'Observación creada exitosamente!');
+      handleOpenCommentDialog(false);
+      await fetchPayment();
     }
   };
 
@@ -214,19 +238,18 @@ export const Details = () => {
                       </Button>
                     )}
 
-                    {authSession.user?.roles.includes('Arrendador') && !payment.validated && (
-                      <Button
-                        // fullWidth
-                        color="inherit"
-                        sx={{ my: 1 }}
-                        variant="contained"
-                        onClick={() => handleOpenCommentDialog(true)}
-                        // onClick={openValidatePaymentAlert}
-                        // onClick={() => validatePayment()}
-                      >
-                        Agregar observación
-                      </Button>
-                    )}
+                    {authSession.user?.roles.includes('Arrendador') &&
+                      !payment.validated &&
+                      payment?.observations.length === 0 && (
+                        <Button
+                          // fullWidth
+                          color="inherit"
+                          sx={{ my: 1 }}
+                          variant="contained"
+                          onClick={() => handleOpenCommentDialog(true)}>
+                          Agregar observación
+                        </Button>
+                      )}
                   </Box>
                 </Grid>
               </Grid>
@@ -234,55 +257,58 @@ export const Details = () => {
           )}
         </Card>
 
-        <Card sx={{ p: 3, my: 1 }}>
-          <CardHeader
-            avatar={<Avatar aria-label="recipe">R</Avatar>}
-            title="Cristhian"
-            subheader={new Date().toLocaleString('es-ES')}
-            // title={
-            //   observation.user?.email === authSession.user?.email
-            //     ? 'Yo'
-            //     : `${observation?.user?.firstName ?? ''} ${observation?.user?.lastName ?? ''}`
-            // }
-            // subheader={new Date(observation?.date).toLocaleString('es-ES')}
-            action={
-              <IconButton aria-label="delete" onClick={() => console.log('')}>
-                <Clear color="error" />
-              </IconButton>
-            }
-          />
-          <CardContent>
-            <Box sx={{ maxWidth: '100vw', overflow: 'hidden' }}>
-              {/* <Typography variant="" sx={{ mb: 2 }}>
-                Observación
-              </Typography> */}
-              <Typography variant="body1" sx={{ mb: 1 }}>
-                Por favor, realice el pago correctamente.
-              </Typography>
-            </Box>
-          </CardContent>
-        </Card>
+        {payment?.observations.length > 0 && (
+          <Card sx={{ p: 3, my: 1 }}>
+            <CardHeader
+              avatar={
+                <Avatar aria-label="recipe">
+                  {payment?.owner?.firstName?.split(' ')[0].charAt(0)}
+                </Avatar>
+              }
+              title={`${payment?.owner?.firstName?.split(' ')[0]} ${
+                payment?.owner?.lastName.split(' ')[0]
+              }`}
+              subheader={new Date(payment.observations[0].date).toLocaleString('es-ES')}
+              action={
+                authSession.user?.roles.includes('Arrendador') && (
+                  <IconButton
+                    aria-label="delete"
+                    onClick={() => console.log(payment.observations[0].id)}>
+                    <Clear color="error" />
+                  </IconButton>
+                )
+              }
+            />
+            <CardContent>
+              <Box sx={{ maxWidth: '100vw', overflow: 'hidden' }}>
+                <Typography variant="body1" sx={{ mb: 1 }}>
+                  {payment.observations[0].description}
+                </Typography>
+              </Box>
+            </CardContent>
+          </Card>
+        )}
       </Box>
 
       <Dialog open={openCommentDialog} onClose={() => handleOpenCommentDialog(false)} fullWidth>
-        <Box component="form">
+        <Box component="form" onSubmit={handleSubmit(handleSubmitObservation)}>
           <DialogTitle>Observación</DialogTitle>
           <DialogContent>
             <FormControl fullWidth>
               <TextField
-                // {...register('description', {
-                //   required: { value: true, message: 'Comentario requerido' },
-                //   maxLength: {
-                //     value: 200,
-                //     message: 'Longitud máxima de caracteres: 200'
-                //   }
-                // })}
+                {...register('description', {
+                  required: { value: true, message: 'Comentario requerido' },
+                  maxLength: {
+                    value: 200,
+                    message: 'Longitud máxima de caracteres: 200'
+                  }
+                })}
                 placeholder="Agregar observación..."
                 multiline
                 maxRows={20}
                 minRows={7}
               />
-              {/* <FormHelperText error>{formState.errors.description?.message}</FormHelperText> */}
+              <FormHelperText error>{formState.errors.description?.message}</FormHelperText>
             </FormControl>
           </DialogContent>
           <DialogActions>

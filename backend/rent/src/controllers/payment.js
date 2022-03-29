@@ -13,9 +13,12 @@ const Payment = require('../models/payment');
 const PaymentFile = require('../models/PaymentFile');
 const PendingPayment = require('../models/pendingPaymentRent');
 const Rent = require('../models/rent');
+const PaymentObservation = require('../models/paymentObservation');
 const sequelize = require('../models/index');
 const { uploadFile, deleteFiles } = require('../services/awsService');
-const { paymentCreateValidation } = require('../validation/payment');
+const { paymentCreateValidation, paymentObservationValidation } = require('../validation/payment');
+
+const Notification = require('../models/notification');
 
 const create = async (req, res) => {
   try {
@@ -298,6 +301,11 @@ const get = async (req, res) => {
         {
           model: PaymentFile,
           as: 'paymentFile'
+        },
+        {
+          model: PaymentObservation,
+          as: 'observations',
+          required: false
         }
       ]
     });
@@ -439,6 +447,62 @@ const validatePayment = async (req, res) => {
   }
 };
 
+const addObservationPayment = async (req, res) => {
+  const { error, value } = paymentObservationValidation(req.body);
+
+  if (error)
+    return res
+      .status(responseStatusCodes.UNPROCESSABLE_ENTITY)
+      .json(validationResponse(res.statusCode, error.message));
+
+  try {
+    const idUser = req.user?.id;
+
+    const payment = await Payment.findByPk(value.idPayment, {
+      include: [
+        {
+          model: Rent,
+          as: 'rent',
+          where: { idOwner: idUser }
+        }
+      ]
+    });
+
+    if (!payment)
+      return res
+        .status(responseStatusCodes.NOT_FOUND)
+        .json(errorResponse(res.statusCode, 'payment not found!'));
+
+    const createdObservation = await PaymentObservation.create({
+      description: value.description,
+      date: new Date(),
+      idPayment: value.idPayment,
+      idUser
+    });
+
+    if (createdObservation) {
+      await Notification.create({
+        description: `El pago con código "${payment?.code}" tiene una observación.`,
+        entity: 'Payment',
+        idEntity: payment?.id,
+        idSender: payment.rent?.idOwner,
+        idReceiver: payment.rent?.idTenant
+      }).catch((e) => {
+        Logger.error(`${e.message}`);
+      });
+    }
+
+    return res
+      .status(responseStatusCodes.OK)
+      .json(successResponse(res.statusCode, 'Pago creado!', createdObservation));
+  } catch (e) {
+    Logger.error(e.message);
+    return res
+      .status(responseStatusCodes.INTERNAL_SERVER_ERROR)
+      .json(errorResponse(res.statusCode, e.message));
+  }
+};
+
 const getPendingRents = async (req, res) => {
   try {
     const idUser = req.user.id;
@@ -538,5 +602,6 @@ module.exports = {
   destroy,
   validatePayment,
   getIncomeByFilter,
-  getPendingRents
+  getPendingRents,
+  addObservationPayment
 };

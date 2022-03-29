@@ -56,6 +56,15 @@ CREATE TABLE "Payment"(
 	CONSTRAINT "Payment_idPaymentFile_fkey" FOREIGN KEY ("idPaymentFile") REFERENCES "PaymentFile"("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+CREATE TABLE "PaymentObservation"(
+	"id" BIGSERIAL NOT NULL,
+	"description" TEXT NOT NULL,
+	"date" TIMESTAMPTZ NOT NULL,
+	"idPayment" BIGINT NOT NULL,
+	"idUser" BIGINT NOT NULL,
+	CONSTRAINT "PaymentObservation_pkey" PRIMARY KEY ("id"),
+	CONSTRAINT "PaymentObservation_Payment_fkey" FOREIGN KEY ("idPayment") REFERENCES "Payment"("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
 
 CREATE TABLE "Observation"(
 	"id" BIGSERIAL NOT NULL,

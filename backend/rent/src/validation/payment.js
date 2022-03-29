@@ -12,4 +12,13 @@ const paymentCreateValidation = (data) => {
   return scheme.validate(data);
 };
 
-module.exports = { paymentCreateValidation };
+const paymentObservationValidation = (data) => {
+  const scheme = Joi.object({
+    idPayment: Joi.number().required(),
+    description: Joi.string().max(255).required()
+  });
+
+  return scheme.validate(data);
+};
+
+module.exports = { paymentCreateValidation, paymentObservationValidation };
