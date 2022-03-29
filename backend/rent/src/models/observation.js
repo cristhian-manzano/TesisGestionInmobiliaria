@@ -1,6 +1,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('./index');
 const Rent = require('./rent');
+const ObservationImage = require('./ObservationImage');
 
 const Observation = sequelize.define(
   'Observation',
@@ -37,6 +38,15 @@ const Observation = sequelize.define(
       }
     },
 
+    idObservationImage: {
+      type: DataTypes.BIGINT,
+      allowNull: false,
+      references: {
+        model: ObservationImage,
+        key: 'id'
+      }
+    },
+
     idUser: {
       type: DataTypes.BIGINT,
       allowNull: false
@@ -55,6 +65,16 @@ Rent.hasMany(Observation, {
 Observation.belongsTo(Rent, {
   foreignKey: 'idRent',
   as: 'rent'
+});
+
+Observation.belongsTo(ObservationImage, {
+  as: 'observationImage',
+  foreignKey: 'idObservationImage'
+});
+
+ObservationImage.hasOne(Observation, {
+  as: 'Observation',
+  foreignKey: 'idObservationImage'
 });
 
 module.exports = Observation;

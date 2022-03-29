@@ -66,6 +66,17 @@ CREATE TABLE "PaymentObservation"(
 	CONSTRAINT "PaymentObservation_Payment_fkey" FOREIGN KEY ("idPayment") REFERENCES "Payment"("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+
+CREATE TABLE "ObservationImage"(
+	"id" BIGSERIAL NOT NULL,
+	"key" VARCHAR(255) NOT NULL,
+	"url" TEXT NOT NULL,
+	CONSTRAINT "ObservationImage_pkey" PRIMARY KEY ("id")
+);
+
+
+
+
 CREATE TABLE "Observation"(
 	"id" BIGSERIAL NOT NULL,
 	"description" TEXT NOT NULL,
@@ -73,8 +84,10 @@ CREATE TABLE "Observation"(
 	"read" BOOLEAN NOT NULL,
 	"idRent" BIGINT NOT NULL,
 	"idUser" BIGINT NOT NULL,
+	"idObservationImage" BIGINT NULL,
 	CONSTRAINT "Observation_pkey" PRIMARY KEY ("id"),
-	CONSTRAINT "Observation_idRent_fkey" FOREIGN KEY ("idRent") REFERENCES "Rent"("id") ON DELETE CASCADE ON UPDATE CASCADE
+	CONSTRAINT "Observation_idRent_fkey" FOREIGN KEY ("idRent") REFERENCES "Rent"("id") ON DELETE CASCADE ON UPDATE CASCADE,
+	CONSTRAINT "Observation_observationImage_fkey" FOREIGN KEY ("idObservationImage") REFERENCES "ObservationImage"("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 
