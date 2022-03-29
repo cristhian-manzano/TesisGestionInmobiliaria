@@ -10,7 +10,8 @@ const {
   validatePayment,
   getIncomeByFilter,
   getPendingRents,
-  addObservationPayment
+  addObservationPayment,
+  deleteObservationPayment
 } = require('../controllers/payment');
 
 routes.use(validateToken);
@@ -26,5 +27,6 @@ routes.post('/validate/:id', validatePayment);
 routes.post('/', multerMiddleware('paymentFile'), create);
 
 routes.post('/observation', addObservationPayment);
+routes.delete('/observation/:id', deleteObservationPayment);
 
 module.exports = routes;

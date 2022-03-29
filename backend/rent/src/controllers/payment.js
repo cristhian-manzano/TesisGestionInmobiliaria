@@ -503,6 +503,36 @@ const addObservationPayment = async (req, res) => {
   }
 };
 
+const deleteObservationPayment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const idUser = req.user?.id;
+
+    const paymentObservation = await PaymentObservation.findOne({
+      where: {
+        id,
+        idUser
+      }
+    });
+
+    if (!paymentObservation)
+      return res
+        .status(responseStatusCodes.NOT_FOUND)
+        .json(errorResponse(res.statusCode, 'No se pudo borrar la observación.'));
+
+    await paymentObservation.destroy();
+
+    return res
+      .status(responseStatusCodes.OK)
+      .json(successResponse(res.statusCode, 'Observación eliminada!', {}));
+  } catch (e) {
+    Logger.error(e.message);
+    return res
+      .status(responseStatusCodes.INTERNAL_SERVER_ERROR)
+      .json(errorResponse(res.statusCode, e.message));
+  }
+};
+
 const getPendingRents = async (req, res) => {
   try {
     const idUser = req.user.id;
@@ -603,5 +633,6 @@ module.exports = {
   validatePayment,
   getIncomeByFilter,
   getPendingRents,
-  addObservationPayment
+  addObservationPayment,
+  deleteObservationPayment
 };

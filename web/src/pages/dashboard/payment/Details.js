@@ -43,6 +43,12 @@ export const Details = () => {
 
   const [alert, setAlert] = useState({ open: false, title: '', description: '' });
 
+  const [deleteObservationAlert, setDeleteObservationAlert] = useState({
+    open: false,
+    title: '',
+    description: ''
+  });
+
   const { register, handleSubmit, reset, formState } = useForm();
 
   const [modalFile, setModalFile] = useState({
@@ -64,8 +70,24 @@ export const Details = () => {
     });
   };
 
-  const closeValidatePaymenDeleteAlert = () => {
+  const openDeleteObservationAlert = () => {
+    setDeleteObservationAlert({
+      open: true,
+      title: `¿Está seguro que desea eliminar la observación?`,
+      description:
+        'Al aceptar se validará el pago de manera permanente y no podrá deshacer los cambios.'
+    });
+  };
+
+  const closeValidatePaymentAlert = () => {
     setAlert((previous) => ({
+      ...previous,
+      open: false
+    }));
+  };
+
+  const closeDeleteObservationAlert = () => {
+    setDeleteObservationAlert((previous) => ({
       ...previous,
       open: false
     }));
@@ -132,6 +154,22 @@ export const Details = () => {
   };
 
   const closeModalFile = () => setModalFile({ open: false, url: '' });
+
+  const deleteObservation = async () => {
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/payment/observation/${payment.observations[0].id}`,
+      token: authSession.user?.token,
+      method: 'DELETE'
+    });
+    handleLoading(false);
+    if (response.error) {
+      handleOpenSnackbar('error', 'No se pudo elimnar la observación!');
+    } else {
+      await fetchPayment();
+      handleOpenSnackbar('success', 'Observación eliminada exitosamente!');
+    }
+  };
 
   return (
     <>
@@ -271,9 +309,7 @@ export const Details = () => {
               subheader={new Date(payment.observations[0].date).toLocaleString('es-ES')}
               action={
                 authSession.user?.roles.includes('Arrendador') && (
-                  <IconButton
-                    aria-label="delete"
-                    onClick={() => console.log(payment.observations[0].id)}>
+                  <IconButton aria-label="delete" onClick={() => openDeleteObservationAlert(true)}>
                     <Clear color="error" />
                   </IconButton>
                 )
@@ -324,8 +360,14 @@ export const Details = () => {
 
       <Alert
         state={alert}
-        closeAlert={closeValidatePaymenDeleteAlert}
+        closeAlert={closeValidatePaymentAlert}
         onConfirm={() => validatePayment()}
+      />
+
+      <Alert
+        state={deleteObservationAlert}
+        closeAlert={closeDeleteObservationAlert}
+        onConfirm={() => deleteObservation()}
       />
     </>
   );
