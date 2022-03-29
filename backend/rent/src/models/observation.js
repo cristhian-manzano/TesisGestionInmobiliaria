@@ -40,7 +40,7 @@ const Observation = sequelize.define(
 
     idObservationImage: {
       type: DataTypes.BIGINT,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: ObservationImage,
         key: 'id'

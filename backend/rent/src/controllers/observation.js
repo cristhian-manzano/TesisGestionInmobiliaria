@@ -11,6 +11,7 @@ const {
 const Observation = require('../models/observation');
 const Comment = require('../models/comment');
 const Rent = require('../models/rent');
+const sequelizeModel = require('../models');
 
 // Experimental
 const Notification = require('../models/notification');
@@ -21,6 +22,8 @@ const {
 } = require('../validation/observation');
 
 const { getPagination, getPagingData } = require('../helpers/pagination');
+const { uploadFile } = require('../services/awsService');
+const ObservationImage = require('../models/ObservationImage');
 
 const getAll = async (req, res) => {
   try {
@@ -182,10 +185,30 @@ const create = async (req, res) => {
         .status(responseStatusCodes.UNPROCESSABLE_ENTITY)
         .json(validationResponse(res.statusCode, error.message));
 
-    const createdObservation = await Observation.create({
-      ...value,
-      idUser: idOwner,
-      date: new Date()
+    const createdObservation = await sequelizeModel.transaction(async (t) => {
+      const imageUploaded = req.file && (await uploadFile(req.file, 'ObservationsImage'));
+
+      let observationImageUploaded;
+
+      if (imageUploaded) {
+        observationImageUploaded = await ObservationImage.create(
+          {
+            url: imageUploaded.Location,
+            key: imageUploaded.Key || imageUploaded.key
+          },
+          { transaction: t }
+        );
+      }
+
+      return Observation.create(
+        {
+          ...value,
+          idUser: idOwner,
+          idObservationImage: observationImageUploaded?.id ?? null,
+          date: new Date()
+        },
+        { transaction: t }
+      );
     });
 
     try {

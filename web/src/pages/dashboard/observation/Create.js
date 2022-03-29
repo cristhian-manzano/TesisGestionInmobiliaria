@@ -72,12 +72,19 @@ export const Create = () => {
   }, []);
 
   const onSubmitForm = async (dataForm) => {
+    const dataToSend = {
+      ...dataForm,
+      ...(imageObservation && { observationImage: imageObservation.file })
+    };
+    const formData = new FormData();
+    Object.keys(dataToSend).forEach((key) => formData.append(key, dataToSend[key]));
     handleLoading(true);
     const response = await sendRequest({
       urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/observation`,
       method: 'POST',
       token: authSession.user?.token,
-      data: dataForm
+      data: formData,
+      isFormData: true
     });
     handleLoading(false);
     if (response.error) {
@@ -85,6 +92,7 @@ export const Create = () => {
     } else {
       handleOpenSnackbar('success', 'Observación creada exitosamente!');
       reset();
+      setImageObservation(null);
     }
   };
 
