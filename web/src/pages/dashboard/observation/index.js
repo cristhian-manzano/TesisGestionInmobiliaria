@@ -54,7 +54,7 @@ export const Observation = () => {
       `${process.env.REACT_APP_RENT_SERVICE_URL}/observation?page=${page}&size=${rowsPerPage}`
     );
     if (searchInput) {
-      url.searchParams.append('search', searchInput);
+      url.searchParams.append('search', searchInput.trim());
     }
     handleLoading(true);
     const response = await sendRequest({

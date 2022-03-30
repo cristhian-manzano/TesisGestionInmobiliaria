@@ -56,7 +56,7 @@ export const User = () => {
   };
 
   const fetchUsers = async () => {
-    const condition = searchInput ? `&search=${searchInput}` : '';
+    const condition = searchInput ? `&search=${searchInput.trim()}` : '';
 
     handleLoading(true);
     const response = await sendRequest({

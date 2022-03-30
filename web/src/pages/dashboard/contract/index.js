@@ -64,7 +64,7 @@ export const Contract = () => {
     );
 
     if (searchInput) {
-      url.searchParams.append('search', searchInput);
+      url.searchParams.append('search', searchInput.trim());
     }
 
     handleLoading(true);

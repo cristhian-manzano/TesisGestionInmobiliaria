@@ -73,7 +73,7 @@ export const Property = () => {
     );
 
     if (searchInput) {
-      url.searchParams.append('search', searchInput);
+      url.searchParams.append('search', searchInput.trim());
     }
 
     handleLoading(true);
