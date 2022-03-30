@@ -134,6 +134,11 @@ const get = async (req, res) => {
             [sequelize.Op.or]: [{ idOwner: idUser }, { idTenant: idUser }]
           },
           attributes: ['id', 'idOwner', 'idProperty', 'idTenant']
+        },
+        {
+          model: ObservationImage,
+          as: 'observationImage',
+          required: false
         }
       ],
       attributes: {

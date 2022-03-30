@@ -66,7 +66,7 @@ export const Details = () => {
         <Box>
           <Card sx={{ p: 3, my: 1 }}>
             <CardHeader
-              avatar={<Avatar aria-label="recipe">R</Avatar>}
+              avatar={<Avatar aria-label="recipe">{observation?.user?.firstName.charAt(0)}</Avatar>}
               title={
                 observation.user?.email === authSession.user?.email
                   ? 'Yo'
@@ -82,6 +82,13 @@ export const Details = () => {
                 <Typography variant="body1" sx={{ mb: 2 }}>
                   {observation?.description}
                 </Typography>
+
+                {observation.observationImage && (
+                  <Box
+                    sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mt: 4 }}>
+                    <img height={350} alt="Is bad" src={observation.observationImage?.url} />
+                  </Box>
+                )}
               </Box>
             </CardContent>
           </Card>
