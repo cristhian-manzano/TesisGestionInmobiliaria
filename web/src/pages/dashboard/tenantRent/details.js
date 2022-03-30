@@ -94,6 +94,10 @@ export const Details = () => {
                 <Typography variant="body1">{tenantRent?.paymentDay || '-'}</Typography>
               </Grid>
               <Grid item xs={12} sm={6}>
+                <Typography variant="subtitle1">Valor mensual</Typography>
+                <Typography variant="body1">${tenantRent.property?.price || '-'}</Typography>
+              </Grid>
+              <Grid item xs={12} sm={6}>
                 <Typography variant="subtitle1">Garantía pagada</Typography>
                 <Typography variant="body1">
                   {(tenantRent?.securityDeposit && `$${tenantRent?.securityDeposit}`) || '-'}

@@ -38,7 +38,8 @@ const routesLink = {
   PendingPayment: '/dashboard/payments',
   FinishContract: '/dashboard/contracts',
   Observation: '/dashboard/observations',
-  Comment: '/dashboard/observations'
+  Comment: '/dashboard/observations',
+  PaymentObservation: '/dashboard/payments'
 };
 
 export const NotificationMenu = () => {

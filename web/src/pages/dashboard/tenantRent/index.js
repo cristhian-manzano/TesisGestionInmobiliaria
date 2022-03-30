@@ -109,6 +109,7 @@ export const TenantRent = () => {
               <TableRow>
                 <TableCell>Inmueble</TableCell>
                 <TableCell>Día de pago</TableCell>
+                <TableCell>Valor mensual</TableCell>
                 <TableCell>Nombre (Propietario)</TableCell>
                 <TableCell>Email</TableCell>
                 <TableCell>Teléfono</TableCell>
@@ -125,6 +126,7 @@ export const TenantRent = () => {
                     sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                     <TableCell>{rent?.property?.tagName}</TableCell>
                     <TableCell>{rent.paymentDay}</TableCell>
+                    <TableCell>${rent?.property?.price}</TableCell>
                     <TableCell>{`${rent.owner?.firstName ?? ''} ${
                       rent.owner?.lastName ?? ''
                     }`}</TableCell>

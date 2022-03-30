@@ -47,33 +47,33 @@ const create = async (req, res) => {
 
     // Validate if payed before
 
-    const datePaid = new Date(value.datePaid);
-    const month = datePaid.getMonth() + 1;
-    const year = datePaid.getFullYear();
+    // const datePaid = new Date(value.datePaid);
+    // const month = datePaid.getMonth() + 1;
+    // const year = datePaid.getFullYear();
 
-    const paymentExist = await Payment.findOne({
-      where: {
-        [Op.and]: [
-          sequelize.where(sequelize.literal(`extract(MONTH FROM "datePaid")`), month),
-          sequelize.where(sequelize.literal(`extract(YEAR FROM "datePaid")`), year),
-          { idRent: value.idRent },
-          { validated: true }
-        ]
-      }
-    });
+    // const paymentExist = await Payment.findOne({
+    //   where: {
+    //     [Op.and]: [
+    //       sequelize.where(sequelize.literal(`extract(MONTH FROM "datePaid")`), month),
+    //       sequelize.where(sequelize.literal(`extract(YEAR FROM "datePaid")`), year),
+    //       { idRent: value.idRent },
+    //       { validated: true }
+    //     ]
+    //   }
+    // });
 
-    if (paymentExist) {
-      return res
-        .status(responseStatusCodes.CONFLICT)
-        .json(errorResponse(res.statusCode, 'Ya ha realizado el pago del mes seleccionado.'));
-    }
+    // if (paymentExist) {
+    //   return res
+    //     .status(responseStatusCodes.CONFLICT)
+    //     .json(errorResponse(res.statusCode, 'Ya ha realizado el pago del mes seleccionado.'));
+    // }
 
     // Validate if payed before
 
     if (!req.file)
       return res
         .status(responseStatusCodes.UNPROCESSABLE_ENTITY)
-        .json(validationResponse(res.statusCode, 'File required'));
+        .json(validationResponse(res.statusCode, 'Archivo de comprobante es requerido.'));
 
     const imageUploaded = await uploadFile(req.file, 'payments');
 

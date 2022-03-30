@@ -123,7 +123,7 @@ export const Create = () => {
     const rent = tenantsRent.find((r) => r.id === target.value);
 
     if (rent) {
-      setValue('amount', rent.property?.price);
+      // setValue('amount', rent.property?.price);
       // if (rent.startDate) setMinDatePaid(new Date(rent.startDate));
       setSelectedRent(rent);
     }
@@ -186,10 +186,15 @@ export const Create = () => {
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
                 <TextField
+                  disabled={!selectedRent}
                   label="Código de comprobante"
                   {...register('code', {
                     required: { value: true, message: 'Código de comprobante requerido' },
-                    maxLength: { value: 50, message: 'Longitud máxima de caracteres: 50' }
+                    maxLength: { value: 25, message: 'Longitud máxima de caracteres: 25' },
+                    pattern: {
+                      value: /^[A-Za-z0-9]*$/,
+                      message: 'Caracteres especiales o espacios no son permitidos.'
+                    }
                   })}
                 />
                 <FormHelperText error>{errors.code?.message}</FormHelperText>
@@ -199,14 +204,30 @@ export const Create = () => {
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
                 <TextField
-                  disabled
+                  // disabled
+                  disabled={!selectedRent}
                   label="Cantidad"
-                  {...register('amount', { required: true })}
+                  {...register('amount', {
+                    required: { value: true, message: 'Precio requerido' },
+                    pattern: {
+                      value: /^\d+\.?\d{0,2}$/,
+                      message: 'Solo se aceptan números enteros o con 2 decimales.'
+                    },
+                    min: {
+                      value: 1,
+                      message: 'Solo puede ingresar montos mayores o iguales a $1.'
+                    },
+                    max: {
+                      value: selectedRent?.property?.price,
+                      message: `El valor máximo del alquiler es $${selectedRent?.property?.price}.`
+                    }
+                  })}
                   InputProps={{
                     startAdornment: <InputAdornment position="start">$</InputAdornment>
                   }}
                 />
-                <FormHelperText error>{errors.amount && 'Precio requerido'}</FormHelperText>
+                {console.log(errors.amount)}
+                <FormHelperText error>{errors.amount?.message}</FormHelperText>
               </FormControl>
             </Grid>
 
@@ -258,7 +279,7 @@ export const Create = () => {
                         value={field.value}
                         onChange={field.onChange}
                         minDate={selectedRent?.startDate ? new Date(selectedRent.startDate) : null}
-                        maxDate={new Date(moment().add(3, 'M').calendar())}
+                        maxDate={new Date(moment().add(12, 'M').calendar())}
                         renderInput={(params) => <TextField {...params} />}
                         // minDate={minDatePaid ? new Date(minDatePaid) : null}
                         // maxDate={new Date('2023-06-01')}
