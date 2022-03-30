@@ -483,7 +483,7 @@ const addObservationPayment = async (req, res) => {
     if (createdObservation) {
       await Notification.create({
         description: `El pago con código "${payment?.code}" tiene una observación.`,
-        entity: 'Payment',
+        entity: 'PaymentObservation',
         idEntity: payment?.id,
         idSender: payment.rent?.idOwner,
         idReceiver: payment.rent?.idTenant

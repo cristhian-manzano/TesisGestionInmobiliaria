@@ -200,6 +200,7 @@ export const NotificationMenu = () => {
                     {notification.entity === 'Comment' && <Chat />}
                     {notification.entity === 'PendingPayment' && <CreditCardOff />}
                     {notification.entity === 'FinishContract' && <Article />}
+                    {notification.entity === 'PaymentObservation' && <RateReview />}
                   </Avatar>
                 </ListItemAvatar>
                 <ListItemText
@@ -209,6 +210,7 @@ export const NotificationMenu = () => {
                       {notification.entity === 'Comment' && 'Nuevo comentario'}
                       {notification.entity === 'PendingPayment' && 'Pago pendiente'}
                       {notification.entity === 'FinishContract' && 'Contrato finalizado'}
+                      {notification.entity === 'PaymentObservation' && 'Observación de pago'}
                       <Typography component="span" variant="body1" sx={{ color: 'text.secondary' }}>
                         &nbsp; {notification.description}
                       </Typography>
