@@ -119,6 +119,7 @@ CREATE TABLE "Notification"(
 CREATE TABLE "PendingPayment"(
 	"id" BIGSERIAL NOT NULL,
 	"pendingDate" TIMESTAMPTZ NOT NULL,
+	"amount" NUMERIC(8,2) NULL,
 	"idRent" BIGINT NOT NULL,
 	CONSTRAINT "PendingPayment_pkey" PRIMARY KEY ("id"),
 	CONSTRAINT "PendingPayment_idRent_fkey" FOREIGN KEY ("idRent") REFERENCES "Rent"("id") ON DELETE CASCADE ON UPDATE CASCADE

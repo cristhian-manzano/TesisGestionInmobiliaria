@@ -17,6 +17,11 @@ const PendingPayment = sequelize.define(
       allowNull: false
     },
 
+    amount: {
+      type: DataTypes.NUMBER({ length: 8, decimals: 2 }),
+      allowNull: true
+    },
+
     idRent: {
       type: DataTypes.BIGINT,
       allowNull: false,

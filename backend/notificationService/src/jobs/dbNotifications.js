@@ -34,7 +34,7 @@ const getPaymentsRent = async () =>
     ],
   });
 
-const pendingPaymentNotificaion = async (data = {}) => {
+const pendingPaymentNotification = async (data = {}) => {
   const userData = await axios.post(`${process.env.API_USER_URL}/user/list`, {
     users: [data.rent?.idTenant],
   });
@@ -151,13 +151,19 @@ const setPendingPayments = async () => {
       });
 
       if (!exists) {
+        const property = await axios.post(
+          `${process.env.API_PROPERTY_URL}/property/list`,
+          { properties: [data.rent?.idProperty] }
+        );
+
         await PendingPayment.create({
           pendingDate: data.pendingDate,
           idRent: data.rent.id,
+          amount: property.data.data[0]?.price ?? null,
         });
 
         // Create notification
-        await pendingPaymentNotificaion(data);
+        await pendingPaymentNotification(data);
       }
     })
   );

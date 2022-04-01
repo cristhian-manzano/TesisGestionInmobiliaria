@@ -1,20 +1,25 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('./index');
-const Rent = require('./rent');
+const { DataTypes } = require("sequelize");
+const sequelize = require("./index");
+const Rent = require("./rent");
 
 const PendingPayment = sequelize.define(
-  'PendingPayment',
+  "PendingPayment",
   {
     id: {
       type: DataTypes.BIGINT,
       primaryKey: true,
       autoIncrement: true,
-      allowNull: false
+      allowNull: false,
     },
 
     pendingDate: {
       type: DataTypes.DATE,
-      allowNull: false
+      allowNull: false,
+    },
+
+    amount: {
+      type: DataTypes.NUMBER({ length: 8, decimals: 2 }),
+      allowNull: true,
     },
 
     idRent: {
@@ -22,23 +27,23 @@ const PendingPayment = sequelize.define(
       allowNull: false,
       references: {
         model: Rent,
-        key: 'id'
-      }
-    }
+        key: "id",
+      },
+    },
   },
   {
-    timestamps: false
+    timestamps: false,
   }
 );
 
 PendingPayment.belongsTo(Rent, {
-  as: 'rent',
-  foreignKey: 'idRent'
+  as: "rent",
+  foreignKey: "idRent",
 });
 
 Rent.hasMany(PendingPayment, {
-  as: 'pendingPayments',
-  foreignKey: 'idRent'
+  as: "pendingPayments",
+  foreignKey: "idRent",
 });
 
 module.exports = PendingPayment;
