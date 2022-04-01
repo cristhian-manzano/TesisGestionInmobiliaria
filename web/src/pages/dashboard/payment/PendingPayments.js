@@ -108,7 +108,9 @@ export const PendingPayment = () => {
                 <TableCell>Día de pago</TableCell>
                 <TableCell>Pendiente</TableCell>
                 <TableCell>Departamento</TableCell>
-                {authSession.user?.roles.includes('Arrendador') && <TableCell>Inquilino</TableCell>}
+                {authSession.user?.roles.includes('Arrendador') && (
+                  <TableCell>Inquilino (arrendatario)</TableCell>
+                )}
               </TableRow>
             </TableHead>
             <TableBody>

@@ -230,7 +230,7 @@ export const Income = () => {
             <TableHead sx={{ backgroundColor: '#e9e9e9' }}>
               <TableRow>
                 <TableCell>Departamento</TableCell>
-                <TableCell>Inquilino</TableCell>
+                <TableCell>Inquilino (arrendatario)</TableCell>
                 <TableCell>Fecha de pago</TableCell>
                 <TableCell>Mes pagado</TableCell>
                 <TableCell>Cantidad</TableCell>

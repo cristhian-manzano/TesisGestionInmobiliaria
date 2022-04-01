@@ -171,7 +171,7 @@ export const Payment = () => {
                   <TableCell>Departamento</TableCell>
 
                   {authSession.user?.roles.includes('Arrendador') && (
-                    <TableCell>Inquilino</TableCell>
+                    <TableCell>Inquilino (arrendatario)</TableCell>
                   )}
 
                   <TableCell>Estado</TableCell>

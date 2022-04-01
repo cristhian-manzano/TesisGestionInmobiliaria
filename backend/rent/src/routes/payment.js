@@ -11,7 +11,8 @@ const {
   getIncomeByFilter,
   getPendingRents,
   addObservationPayment,
-  deleteObservationPayment
+  deleteObservationPayment,
+  getPendingPayment
 } = require('../controllers/payment');
 
 routes.use(validateToken);
@@ -25,6 +26,8 @@ routes.delete('/:id', destroy);
 routes.get('/', getAll);
 routes.post('/validate/:id', validatePayment);
 routes.post('/', multerMiddleware('paymentFile'), create);
+
+routes.post('/pending', getPendingPayment);
 
 routes.post('/observation', addObservationPayment);
 routes.delete('/observation/:id', deleteObservationPayment);

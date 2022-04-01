@@ -168,7 +168,7 @@ export const Contract = () => {
                   <TableCell>Fecha de fin</TableCell>
                   {/* <TableCell>Archivo</TableCell> */}
                   <TableCell>Propiedad</TableCell>
-                  <TableCell>Inquilino</TableCell>
+                  <TableCell>Inquilino (arrendatario)</TableCell>
                   <TableCell>Estado</TableCell>
                   <TableCell />
                 </TableRow>

@@ -21,4 +21,17 @@ const paymentObservationValidation = (data) => {
   return scheme.validate(data);
 };
 
-module.exports = { paymentCreateValidation, paymentObservationValidation };
+const pendingPaymentValidation = (data) => {
+  const scheme = Joi.object({
+    idRent: Joi.number().required(),
+    date: Joi.date().required()
+  });
+
+  return scheme.validate(data);
+};
+
+module.exports = {
+  paymentCreateValidation,
+  paymentObservationValidation,
+  pendingPaymentValidation
+};

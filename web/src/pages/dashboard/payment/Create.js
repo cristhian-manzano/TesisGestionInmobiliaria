@@ -40,6 +40,9 @@ export const Create = () => {
 
   // const [minDatePaid, setMinDatePaid] = useState(null);
   const [selectedRent, setSelectedRent] = useState(null);
+  const [selectedMonthPayment, setSelectedMonthPayment] = useState(null);
+
+  const [monthPendingPayment, setMonthPendingPayment] = useState(null);
 
   const {
     register,
@@ -72,6 +75,33 @@ export const Create = () => {
   useEffect(() => {
     fetchRents();
   }, []);
+
+  const getPendingPayment = async () => {
+    handleLoading(true);
+    const response = await sendRequest({
+      urlPath: `${process.env.REACT_APP_RENT_SERVICE_URL}/payment/pending`,
+      token: authSession.user?.token,
+      method: 'POST',
+      data: {
+        idRent: selectedRent.id,
+        date: selectedMonthPayment
+      }
+    });
+    handleLoading(false);
+
+    if (response.error) {
+      handleOpenSnackbar('warning', response.message);
+      setMonthPendingPayment(null);
+    } else {
+      setMonthPendingPayment(response.data?.data);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedMonthPayment) {
+      getPendingPayment();
+    }
+  }, [selectedMonthPayment]);
 
   const onSubmit = async (dataForm) => {
     if (!paymentFile) return handleOpenSnackbar('error', 'Archivo requerido!');
@@ -121,11 +151,16 @@ export const Create = () => {
 
   const onChangeRent = ({ target }) => {
     const rent = tenantsRent.find((r) => r.id === target.value);
-
     if (rent) {
-      // setValue('amount', rent.property?.price);
-      // if (rent.startDate) setMinDatePaid(new Date(rent.startDate));
       setSelectedRent(rent);
+    }
+  };
+
+  const onChangeMonthPayment = (valueDate) => {
+    if (!valueDate || !moment(valueDate).isValid()) {
+      setSelectedMonthPayment(null);
+    } else {
+      setSelectedMonthPayment(valueDate);
     }
   };
 
@@ -195,10 +230,14 @@ export const Create = () => {
                         views={['year', 'month']}
                         openTo="month"
                         value={field.value}
-                        onChange={field.onChange}
+                        onChange={(e) => {
+                          field.onChange(e);
+                          onChangeMonthPayment(e);
+                        }}
                         minDate={selectedRent?.startDate ? new Date(selectedRent.startDate) : null}
                         maxDate={new Date(moment().add(12, 'M').calendar())}
                         renderInput={(params) => <TextField {...params} />}
+
                         // minDate={minDatePaid ? new Date(minDatePaid) : null}
                         // maxDate={new Date('2023-06-01')}
                       />
@@ -215,7 +254,20 @@ export const Create = () => {
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
                 <TextField
-                  disabled={!selectedRent}
+                  disabled
+                  label="Valor a pagar"
+                  value={monthPendingPayment?.amount ?? selectedRent?.property?.price ?? 0}
+                  InputProps={{
+                    startAdornment: <InputAdornment position="start">$</InputAdornment>
+                  }}
+                />
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                <TextField
+                  disabled={!selectedRent || !selectedMonthPayment}
                   label="Código de comprobante"
                   {...register('code', {
                     required: { value: true, message: 'Código de comprobante requerido' },
@@ -234,8 +286,8 @@ export const Create = () => {
               <FormControl fullWidth>
                 <TextField
                   // disabled
-                  disabled={!selectedRent}
-                  label="Cantidad"
+                  disabled={!selectedRent || !selectedMonthPayment}
+                  label="Cantidad pagada"
                   {...register('amount', {
                     required: { value: true, message: 'Precio requerido' },
                     pattern: {
@@ -247,8 +299,12 @@ export const Create = () => {
                       message: 'Solo puede ingresar montos mayores o iguales a $1.'
                     },
                     max: {
-                      value: selectedRent?.property?.price,
-                      message: `El valor máximo del alquiler es $${selectedRent?.property?.price}.`
+                      value: monthPendingPayment?.amount || selectedRent?.property?.price,
+                      message: `El valor máximo es $${
+                        monthPendingPayment?.amount
+                          ? monthPendingPayment?.amount
+                          : selectedRent?.property?.price
+                      }.`
                     }
                   })}
                   InputProps={{
@@ -270,7 +326,7 @@ export const Create = () => {
                     render={({ field }) => (
                       <DatePicker
                         disableFuture
-                        disabled={!selectedRent}
+                        disabled={!selectedRent || !selectedMonthPayment}
                         label="Fecha de pago"
                         openTo="day"
                         views={['year', 'month', 'day']}

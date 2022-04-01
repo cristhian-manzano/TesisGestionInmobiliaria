@@ -16,7 +16,11 @@ const Rent = require('../models/rent');
 const PaymentObservation = require('../models/paymentObservation');
 const sequelize = require('../models/index');
 const { uploadFile, deleteFiles } = require('../services/awsService');
-const { paymentCreateValidation, paymentObservationValidation } = require('../validation/payment');
+const {
+  paymentCreateValidation,
+  paymentObservationValidation,
+  pendingPaymentValidation
+} = require('../validation/payment');
 
 const Notification = require('../models/notification');
 
@@ -636,6 +640,47 @@ const getPendingRents = async (req, res) => {
   }
 };
 
+const getPendingPayment = async (req, res) => {
+  try {
+    const { error, value } = pendingPaymentValidation(req.body);
+
+    // Validate correct tenant
+
+    if (error)
+      return res
+        .status(responseStatusCodes.UNPROCESSABLE_ENTITY)
+        .json(validationResponse(res.statusCode, error.message));
+
+    const month = new Date(value.date).getMonth() + 1;
+    const year = new Date(value.date).getFullYear();
+
+    const pendingPaymentData = await PendingPayment.findOne({
+      where: {
+        [Op.and]: [
+          sequelize.where(sequelize.literal(`extract(MONTH FROM "pendingDate")`), month),
+          sequelize.where(sequelize.literal(`extract(YEAR FROM "pendingDate")`), year),
+          { idRent: value.idRent }
+        ]
+      }
+    });
+
+    if (!pendingPaymentData) {
+      return res
+        .status(responseStatusCodes.NOT_FOUND)
+        .json(errorResponse(res.statusCode, `No se encontró un pago pendiente en ese mes.`));
+    }
+
+    return res
+      .status(responseStatusCodes.OK)
+      .json(successResponse(res.statusCode, 'Obtenido exitosamente!', pendingPaymentData));
+  } catch (e) {
+    Logger.error(e.message);
+    return res
+      .status(responseStatusCodes.INTERNAL_SERVER_ERROR)
+      .json(errorResponse(res.statusCode, 'Error de servidor, intente más tarde.'));
+  }
+};
+
 module.exports = {
   getAll,
   create,
@@ -645,5 +690,6 @@ module.exports = {
   getIncomeByFilter,
   getPendingRents,
   addObservationPayment,
-  deleteObservationPayment
+  deleteObservationPayment,
+  getPendingPayment
 };

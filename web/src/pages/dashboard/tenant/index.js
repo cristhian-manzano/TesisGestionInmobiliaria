@@ -162,7 +162,7 @@ export const Tenant = () => {
     <>
       <Box>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', p: 2 }}>
-          <Typography variant="h4">Inquilinos</Typography>
+          <Typography variant="h4">Inquilinos (arrendatarios)</Typography>
           <Button component={RouterLink} to="create" variant="contained">
             Agregar
           </Button>
@@ -190,7 +190,7 @@ export const Tenant = () => {
                 <TableRow>
                   <TableCell>Inmueble</TableCell>
                   <TableCell>Fecha de inicio</TableCell>
-                  <TableCell>Inquilino</TableCell>
+                  <TableCell>Inquilino (arrendatario)</TableCell>
                   <TableCell>Email</TableCell>
                   <TableCell>Teléfono</TableCell>
                   <TableCell>Estado</TableCell>
