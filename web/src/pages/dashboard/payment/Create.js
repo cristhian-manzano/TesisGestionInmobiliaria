@@ -146,41 +146,70 @@ export const Create = () => {
           </Typography>
 
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={12}>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6}>
-                  <FormControl fullWidth>
-                    <InputLabel id="rent-select">Alquileres</InputLabel>
-                    <Controller
-                      name="idRent"
-                      control={control}
-                      rules={{ required: { value: true, message: 'Alquiler requerido.' } }}
-                      defaultValue=""
-                      render={({ field }) => (
-                        <Select
-                          labelId="rent-select"
-                          label="Alquileres"
-                          {...field}
-                          onChange={(e) => {
-                            field.onChange(e);
-                            onChangeRent(e);
-                          }}>
-                          <MenuItem value={0} disabled>
-                            Seleccionar
-                          </MenuItem>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                <InputLabel id="rent-select">Alquileres</InputLabel>
+                <Controller
+                  name="idRent"
+                  control={control}
+                  rules={{ required: { value: true, message: 'Alquiler requerido.' } }}
+                  defaultValue=""
+                  render={({ field }) => (
+                    <Select
+                      labelId="rent-select"
+                      label="Alquileres"
+                      {...field}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        onChangeRent(e);
+                      }}>
+                      <MenuItem value={0} disabled>
+                        Seleccionar
+                      </MenuItem>
 
-                          {tenantsRent?.map((rent) => (
-                            <MenuItem key={rent.id} value={rent.id}>
-                              {`${rent.property?.tagName ?? ''} - ${rent.property?.address ?? ''}`}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      )}
-                    />
-                    <FormHelperText error>{errors?.idRent?.message}</FormHelperText>
-                  </FormControl>
-                </Grid>
-              </Grid>
+                      {tenantsRent?.map((rent) => (
+                        <MenuItem key={rent.id} value={rent.id}>
+                          {`${rent.property?.tagName ?? ''} - ${rent.property?.address ?? ''}`}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  )}
+                />
+                <FormHelperText error>{errors?.idRent?.message}</FormHelperText>
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                <LocalizationProvider dateAdapter={AdapterDateFns} locale={es}>
+                  <Controller
+                    name="datePaid"
+                    control={control}
+                    rules={{ required: true }}
+                    defaultValue={null}
+                    render={({ field }) => (
+                      <DatePicker
+                        // disableFuture
+                        disabled={!selectedRent}
+                        label="Mes a pagar"
+                        views={['year', 'month']}
+                        openTo="month"
+                        value={field.value}
+                        onChange={field.onChange}
+                        minDate={selectedRent?.startDate ? new Date(selectedRent.startDate) : null}
+                        maxDate={new Date(moment().add(12, 'M').calendar())}
+                        renderInput={(params) => <TextField {...params} />}
+                        // minDate={minDatePaid ? new Date(minDatePaid) : null}
+                        // maxDate={new Date('2023-06-01')}
+                      />
+                    )}
+                  />
+                </LocalizationProvider>
+
+                <FormHelperText error>
+                  {errors.datePaid?.type === 'required' && 'Mes de pago requerido'}
+                </FormHelperText>
+              </FormControl>
             </Grid>
 
             <Grid item xs={12} sm={6}>
@@ -226,7 +255,6 @@ export const Create = () => {
                     startAdornment: <InputAdornment position="start">$</InputAdornment>
                   }}
                 />
-                {console.log(errors.amount)}
                 <FormHelperText error>{errors.amount?.message}</FormHelperText>
               </FormControl>
             </Grid>
@@ -257,39 +285,6 @@ export const Create = () => {
 
                 <FormHelperText error>
                   {errors.paymentDate?.type === 'required' && 'Fecha de pago requerida'}
-                </FormHelperText>
-              </FormControl>
-            </Grid>
-
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth>
-                <LocalizationProvider dateAdapter={AdapterDateFns} locale={es}>
-                  <Controller
-                    name="datePaid"
-                    control={control}
-                    rules={{ required: true }}
-                    defaultValue={null}
-                    render={({ field }) => (
-                      <DatePicker
-                        // disableFuture
-                        disabled={!selectedRent}
-                        label="Mes pagado"
-                        views={['year', 'month']}
-                        openTo="month"
-                        value={field.value}
-                        onChange={field.onChange}
-                        minDate={selectedRent?.startDate ? new Date(selectedRent.startDate) : null}
-                        maxDate={new Date(moment().add(12, 'M').calendar())}
-                        renderInput={(params) => <TextField {...params} />}
-                        // minDate={minDatePaid ? new Date(minDatePaid) : null}
-                        // maxDate={new Date('2023-06-01')}
-                      />
-                    )}
-                  />
-                </LocalizationProvider>
-
-                <FormHelperText error>
-                  {errors.datePaid?.type === 'required' && 'Mes de pago requerido'}
                 </FormHelperText>
               </FormControl>
             </Grid>

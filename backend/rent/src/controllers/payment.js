@@ -415,16 +415,12 @@ const validatePayment = async (req, res) => {
     if (!payment)
       return res
         .status(responseStatusCodes.NOT_FOUND)
-        .json(errorResponse(res.statusCode, 'payment not found!'));
+        .json(errorResponse(res.statusCode, 'Pago no encontrado!'));
 
-    // Valida en caso que update falle
-    await payment.update({ validated: true });
-
-    // Remove from pending
+    // Get pending payment
     const month = new Date(payment.datePaid).getMonth() + 1;
     const year = new Date(payment.datePaid).getFullYear();
-
-    await PendingPayment.destroy({
+    const pendingPayment = await PendingPayment.findOne({
       where: {
         [Op.and]: [
           sequelize.where(sequelize.literal(`extract(MONTH FROM "pendingDate")`), month),
@@ -434,11 +430,26 @@ const validatePayment = async (req, res) => {
       }
     });
 
-    // Endd remove
+    if (!pendingPayment) {
+      throw new Error('Error al validar pago.');
+    }
+
+    await sequelize.transaction(async (t) => {
+      // Update payment to valid
+      await payment.update({ validated: true }, { transaction: t });
+
+      const pendingAmount = +pendingPayment.amount - +payment.amount;
+
+      if (pendingAmount > 0) {
+        await pendingPayment.update({ amount: pendingAmount }, { transaction: t });
+      } else {
+        await pendingPayment.destroy({ transaction: t });
+      }
+    });
 
     return res
       .status(responseStatusCodes.OK)
-      .json(successResponse(res.statusCode, 'Payment validated!', null));
+      .json(successResponse(res.statusCode, 'Pago validado exitosamente!', null));
   } catch (e) {
     Logger.error(e.message);
     return res

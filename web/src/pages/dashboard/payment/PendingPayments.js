@@ -128,7 +128,7 @@ export const PendingPayment = () => {
 
                     <TableCell> {payment.rent?.paymentDay ?? '-'}</TableCell>
 
-                    <TableCell>$ {payment.property?.price ?? '-'}</TableCell>
+                    <TableCell>$ {payment.amount ?? '-'}</TableCell>
 
                     <TableCell>{payment.property?.tagName ?? ''}</TableCell>
 
