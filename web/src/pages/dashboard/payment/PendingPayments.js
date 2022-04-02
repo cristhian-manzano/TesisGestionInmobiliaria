@@ -15,7 +15,8 @@ import {
   TablePagination,
   TextField,
   InputAdornment,
-  IconButton
+  IconButton,
+  Divider
 } from '@mui/material';
 
 import { Search } from '@mui/icons-material';
@@ -80,9 +81,11 @@ export const PendingPayment = () => {
 
   return (
     <Box>
-      <Typography variant="h4">Pagos pendientes</Typography>
-
       <Card sx={{ p: 3 }}>
+        <Typography sx={{ p: 1 }} variant="h4">
+          Pagos pendientes
+        </Typography>
+        <Divider />
         <Box sx={{ py: 2 }}>
           <TextField
             placeholder="Departamento o inquilino"

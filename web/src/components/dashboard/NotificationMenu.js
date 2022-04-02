@@ -35,7 +35,7 @@ import { LoadingContext } from '../../store/context/LoadingGlobal';
 import { SnackbarContext } from '../../store/context/SnackbarGlobal';
 
 const routesLink = {
-  PendingPayment: '/dashboard/payments',
+  PendingPayment: '/dashboard/payments?show=pending',
   FinishContract: '/dashboard/contracts',
   Observation: '/dashboard/observations',
   Comment: '/dashboard/observations',

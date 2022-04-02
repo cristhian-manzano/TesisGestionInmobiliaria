@@ -79,12 +79,14 @@ export const Create = () => {
 
   const onSearchTenant = async () => {
     const searchParams = new URLSearchParams();
+    const searchInput = searchTenant.inputSearch.trim(); // Remove spaces
 
-    if (!Number.isNaN(+searchTenant.inputSearch))
-      searchParams.append('idCard', `${searchTenant.inputSearch}`);
+    if (!Number.isNaN(+searchInput)) {
+      searchParams.append('idCard', `${searchInput}`);
+    }
 
-    if (/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(searchTenant.inputSearch))
-      searchParams.append('email', `${searchTenant.inputSearch}`);
+    if (/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(searchInput))
+      searchParams.append('email', `${searchInput}`);
 
     handleLoading(true);
     const response = await sendRequest({
